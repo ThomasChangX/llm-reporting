@@ -1,0 +1,81 @@
+graph TB
+%% C4 Container Diagram — llm-reporting Four-Layer Architecture
+%% See docs/03-architecture.md §2-§3 for full textual description
+    subgraph External["External"]
+        User["👤 Business User"]
+        LLM["🤖 LLM Providers<br/>(DeepSeek / Claude)"]
+        DS["🗄️ Data Sources<br/>(ERP, DB, Files)"]
+        Auth["🔐 Auth Gateway<br/>(OAuth, SAML, LDAP)"]
+    end
+
+    Auth --> API
+
+    subgraph Platform["llm-reporting Platform"]
+        API["🌐 API Gateway<br/>Rate Limit | Auth | Route | Tenant"]
+
+        subgraph DP["DESIGN PLANE (AI-Assisted)"]
+            Conv["💬 Conversation UI<br/>NL → Spec"]
+            Vis["🎨 Visual Designer<br/>Report/ETL/Adjustment"]
+            WB["🛠️ Workbench<br/>Code Graph | Data Catalog"]
+            Copilot["🧠 AI Copilot Engine<br/>LLM SDK | Skill | MCP"]
+            KB["📚 Knowledge Base<br/>7 Domains | 4 Engines"]
+            CG["🕸️ Code Graph<br/>System Knowledge Graph"]
+        end
+
+        subgraph FB["FREEZE BRIDGE (AI → Deterministic)"]
+            SRA["🔍 Spec Refinement Assistant<br/>Scan → Propose → Sign-off"]
+            VE["✅ Validation Engine<br/>Schema | DQ Gate"]
+            TR["🧪 Test Runner<br/>Sandbox Snapshot Compare"]
+            RM["🚀 Release Manager<br/>Canary 1%→10%→50%→100%"]
+        end
+
+        subgraph RP["RUNTIME PLANE (Zero AI Side Effects)"]
+            WE["⚙️ Workflow Executor<br/>Compute Spec → Execution"]
+            DC["🔌 Data Connectors<br/>5-Level Integration"]
+            OR["📄 Output Renderer<br/>PDF, Excel, Dashboard"]
+            SCH["⏰ Scheduler<br/>Cron | Event | Dependency"]
+            QR["🛡️ Query Rewriter<br/>Permission Predicates | Data Masking"]
+        end
+
+        subgraph IP["INTELLIGENCE PLANE (AI Read-Only, Does Not Cross Bridge)"]
+            KA["🤖 AI Knowledge Agent<br/>NL→Answer | Attribution Analysis"]
+            LA["📊 Log Analysis<br/>Anomaly Detection"]
+            OB["📈 Observability<br/>SLO | Cost | Usage"]
+        end
+    end
+
+    User --> Conv
+    User --> WB
+    Conv --> Copilot
+    Vis --> Copilot
+    WB --> Copilot
+    Copilot --> KB
+    Copilot --> CG
+    Copilot --> LLM
+
+    DP -->|"Freeze validated workflow"| SRA
+    SRA --> VE
+    VE --> TR
+    TR --> RM
+    RM -->|"Deploy deterministic spec"| WE
+
+    WE --> DC
+    DC --> DS
+    WE --> OR
+    SCH --> WE
+    QR --> WE
+
+    WE -.->|"Logs & metrics (read-only)"| OB
+    DP -.->|"Logs & metrics (read-only)"| LA
+    LA -.-> KA
+    OB -.-> KA
+    CG -.-> KA
+    KB -.-> KA
+
+    classDef plane fill:#1168bd,color:#fff,stroke:none
+    classDef component fill:#438dd5,color:#fff,stroke:none
+    classDef external fill:#999,color:#fff,stroke:none
+
+    class DP,FB,RP,IP plane
+    class Conv,Vis,WB,Copilot,KB,CG,SRA,VE,TR,RM,WE,DC,OR,SCH,QR,KA,LA,OB component
+    class User,LLM,DS,Auth,API external

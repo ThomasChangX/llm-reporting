@@ -1,0 +1,46 @@
+graph TB
+%% C4 System Context Diagram — llm-reporting
+%% See docs/architecture/c4-model.md (§15) for full textual description
+    User["👤 Business User<br/>(Analyst, Accountant, Manager)"]
+    Admin["🔧 IT Admin<br/>(Data Source Config, User Mgmt)"]
+    Developer["💻 Developer<br/>(Custom Skills, Plugins)"]
+
+    subgraph System["llm-reporting System"]
+        direction TB
+        DP["Design Plane<br/>AI-Assisted Exploration"]
+        FB["Freeze Bridge<br/>AI → Deterministic"]
+        RP["Runtime Plane<br/>Deterministic Execution"]
+    end
+
+    ERP["🏢 ERP Systems<br/>(SAP, Oracle, NetSuite)"]
+    DB["🗄️ Databases<br/>(PostgreSQL, MySQL, BigQuery)"]
+    FS["📁 File Systems<br/>(S3, HDFS, SharePoint)"]
+    LLM["🤖 LLM Providers<br/>(DeepSeek V4 Pro, Claude Sonnet 5)"]
+    Jira["📋 Jira / Rally<br/>(Project Tracking)"]
+    Email["📧 Email<br/>(kb@ tenant inbox)"]
+    Auth["🔐 Identity Provider<br/>(OAuth, SAML, LDAP, Kerberos)"]
+
+    User -->|"NL queries, report design"| DP
+    Admin -->|"Register data sources,<br/>declare relationships"| DP
+    Developer -->|"Custom skills, plugins"| DP
+
+    DP -->|"Freeze validated workflow"| FB
+    FB -->|"Deploy deterministic spec"| RP
+
+    RP -->|"Read/write data"| ERP
+    RP -->|"Query/ingest"| DB
+    RP -->|"Read/write files"| FS
+
+    DP -->|"AI-assisted generation"| LLM
+    FB -->|"BI-directional sync"| Jira
+    FB -->|"Ingest business facts"| Email
+
+    System -->|"Authenticate"| Auth
+
+    classDef person fill:#08427b,color:#fff,stroke:none
+    classDef system fill:#1168bd,color:#fff,stroke:none
+    classDef external fill:#999,color:#fff,stroke:none
+
+    class User,Admin,Developer person
+    class System system
+    class ERP,DB,FS,LLM,Jira,Email,Auth external

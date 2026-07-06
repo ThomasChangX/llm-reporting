@@ -1,0 +1,57 @@
+graph TB
+%% C4 Component Diagram — llm-reporting Design Plane Detail
+%% See docs/architecture/c4-model.md (§15) for System Context and Container levels
+    subgraph DP["DESIGN PLANE"]
+        direction TB
+        
+        subgraph UI["User Interfaces"]
+            Conv["Conversation UI<br/>NL → Spec<br/>React SPA"]
+            Vis["Visual Designer<br/>Report/ETL/Adjustment<br/>Drag-and-Drop Canvas"]
+            WB["Workbench<br/>Code Graph Explorer<br/>Data Catalog Browser<br/>KB Editor"]
+        end
+
+        subgraph Core["AI Copilot Engine"]
+            SDK["LLM SDK<br/>Model Router<br/>Streaming Response"]
+            Skill["Skill Engine<br/>14 Skills<br/>Skill Chaining"]
+            MCP["MCP Gateway<br/>16 MCP Servers<br/>Protocol Adapter"]
+            Guard["Input/Output Guard<br/>5-Layer Defense"]
+        end
+
+        subgraph Store["Design Artifact Store"]
+            Artifact["Design Artifact DB<br/>PostgreSQL<br/>YAML Specs, Drafts"]
+            Format["Format Registry<br/>Report/Excel/Dashboard<br/>Template Definitions"]
+        end
+    end
+
+    subgraph External["External Services"]
+        LLM["LLM Providers<br/>DeepSeek V4 Pro<br/>Claude Sonnet 5"]
+        KB["Knowledge Base API<br/>gRPC (Vector/Graph/Relational)"]
+        CG["Code Graph API<br/>GraphQL/gRPC<br/>Neo4j Backend"]
+        Git["Git Platform<br/>GitHub/GitLab<br/>Spec Versioning"]
+    end
+
+    Conv -->|"gRPC Streaming"| SDK
+    Vis -->|"gRPC"| Skill
+    WB -->|"REST"| Artifact
+
+    SDK -->|"HTTPS"| LLM
+    SDK --> Skill
+    Skill --> MCP
+    Skill --> Guard
+    MCP --> KB
+    MCP --> CG
+    MCP --> Git
+
+    Artifact -->|"YAML Serialization"| Format
+    Guard -->|"Sanitized Output"| Conv
+    Guard -->|"Sanitized Output"| Vis
+
+    classDef ui fill:#08427b,color:#fff
+    classDef core fill:#1168bd,color:#fff
+    classDef store fill:#438dd5,color:#fff
+    classDef external fill:#999,color:#fff
+
+    class Conv,Vis,WB ui
+    class SDK,Skill,MCP,Guard core
+    class Artifact,Format store
+    class LLM,KB,CG,Git external

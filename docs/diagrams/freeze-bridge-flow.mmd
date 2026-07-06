@@ -1,0 +1,59 @@
+sequenceDiagram
+%% Freeze Bridge Sequence Diagram
+%% See docs/03-architecture.md §4 for full textual description
+    actor User as 👤 Business User
+    participant DP as Design Plane
+    participant SRA as Spec Refinement Assistant
+    participant VE as Validation Engine
+    participant TR as Test Runner (Sandbox)
+    participant RM as Release Manager
+    participant RP as Runtime Plane
+    participant KB as Knowledge Base
+
+    Note over User,DP: EXPLORATION PHASE (Design Plane)
+    User->>DP: NL query: "Monthly revenue by region"
+    DP->>KB: Retrieve data catalog, business glossary
+    DP->>User: AI-generated report preview
+    User->>DP: Adjust filters, approve design
+    User->>DP: Click "Freeze Workflow"
+
+    Note over SRA,RM: FREEZE BRIDGE PHASE
+    DP->>SRA: Submit AI-generated Compute Spec (YAML)
+    SRA->>SRA: Scan for ambiguous nodes<br/>(inferred JOINs, fuzzy aggregations, implicit filters)
+    
+    alt Ambiguity found
+        SRA->>User: Propose 1-3 deterministic alternatives<br/>+ confidence scores + impact analysis
+        User->>SRA: Select alternative #2, confirm
+    else No ambiguity
+        SRA->>SRA: All nodes deterministic — fast path
+    end
+
+    SRA->>VE: Submit refined spec
+    VE->>VE: Schema validation (column existence, type compatibility)
+    VE->>VE: DQ Gate (data quality rules applied)
+    
+    alt Validation fails
+        VE-->>User: Error: column mismatch, DQ threshold exceeded
+        User->>DP: Return to Design Plane, fix issues
+    else Validation passes
+        VE->>TR: Run in Sandbox
+    end
+
+    TR->>TR: Execute with sampled data<br/>Compare output snapshot vs expected
+    TR->>User: Impact Report + Test Results + Diff
+
+    User->>RM: Approve deployment
+
+    alt Canary enabled (Post-MVP)
+        RM->>RP: Deploy 1% → monitor
+        RM->>RP: Deploy 10% → monitor
+        RM->>RP: Deploy 50% → monitor
+        RM->>RP: Deploy 100%
+    else MVP simplified flow
+        RM->>RP: Deploy directly (Light Engine, deterministic)
+    end
+
+    RP->>User: Workflow live — scheduled execution begins
+    RM->>User: Post-Change Summary (actual vs designed, cost profile)
+
+    Note over User,RP: All decisions immutably recorded in audit log
