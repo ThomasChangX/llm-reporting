@@ -1,6 +1,6 @@
 # GDPR & CCPA Compliance Architecture
 
-> Extracted from [docs/03-architecture.md §25](../03-architecture.md) | Sync Date: 2026-07-05
+> Extracted from [docs/03-architecture.md §25](../03-architecture.md) | Sync Date: 2026-07-04
 >
 > Designed based on GDPR (EU 2016/679), CCPA (AB-375), HIPAA (45 CFR §164) compliance requirements.
 

@@ -13,14 +13,14 @@
 | 0002 | [LLM Role Positioning](./0002-llm-role-positioning.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0003 | [Design Order](./0003-design-order.md) | Process | ✅ Accepted | 2026-07-04 |
 | 0004 | [Document Structure](./0004-document-structure.md) | Process | ⬜ Superseded by [0012](./0012-document-structure-v2.md) | 2026-07-04 |
-| 0005 | [Four-Layer Architecture](./0005-dual-plane-architecture.md) | Architecture | ✅ Accepted (Refined 2026-07-05) | 2026-07-04 |
+| 0005 | [Four-Layer Architecture](./0005-four-layer-architecture.md) | Architecture | ✅ Accepted (Refined 2026-07-04) | 2026-07-04 |
 | 0006 | [Freeze Bridge Independence](./0006-freeze-bridge-independence.md) | Architecture | ✅ Accepted | 2026-07-04 |
-| 0007 | [Query Service Component](./0007-query-service-component.md) | Architecture | ✅ Accepted | 2026-07-05 |
-| 0008 | [Large-Scale Data Strategy](./0008-large-scale-data-strategy.md) | Data | ✅ Accepted | 2026-07-05 |
-| 0009 | [Dual-Model Pricing](./0009-dual-model-pricing.md) | Operations | ✅ Accepted | 2026-07-05 |
-| 0010 | [BRD/ADR as First-Class Entities](./0010-brd-adr-first-class.md) | Product | ✅ Accepted | 2026-07-05 |
-| 0011 | [Materialize Job Type](./0011-materialize-job-type.md) | Architecture | ✅ Accepted | 2026-07-05 |
-| 0012 | [Document Structure v2](./0012-document-structure-v2.md) | Process | ✅ Accepted | 2026-07-05 |
+| 0007 | [Query Service Component](./0007-query-service-component.md) | Architecture | ✅ Accepted | 2026-07-04 |
+| 0008 | [Large-Scale Data Strategy](./0008-large-scale-data-strategy.md) | Data | ✅ Accepted | 2026-07-04 |
+| 0009 | [Dual-Model Pricing](./0009-dual-model-pricing.md) | Operations | ✅ Accepted | 2026-07-04 |
+| 0010 | [BRD/ADR as First-Class Entities](./0010-brd-adr-first-class.md) | Product | ✅ Accepted | 2026-07-04 |
+| 0011 | [Materialize Job Type](./0011-materialize-job-type.md) | Architecture | ✅ Accepted | 2026-07-04 |
+| 0012 | [Document Structure v2](./0012-document-structure-v2.md) | Process | ✅ Accepted | 2026-07-04 |
 | 0013 | [KB Storage Strategy](./0013-kb-storage-strategy.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0014 | [Data Health Check Framework](./0014-data-health-check-framework.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0015 | [Agent Triage & Remediation Gateway](./0015-agent-triage-remediation-gateway.md) | Architecture | ✅ Accepted | 2026-07-04 |

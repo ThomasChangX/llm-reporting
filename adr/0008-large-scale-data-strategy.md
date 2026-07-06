@@ -1,7 +1,7 @@
 # ADR-0008: Large-Scale Data Strategy
 
 - **Status**: Accepted
-- **Date**: 2026-07-05
+- **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
 
 ## Context

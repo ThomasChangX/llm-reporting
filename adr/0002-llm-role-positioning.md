@@ -47,4 +47,4 @@ Adopt **Option C** (Hybrid Mode): Daily operations completed automatically by Ag
 
 - `docs/02-requirement.md` → FR2 (Workflow Freeze), FR29 (AI Agent Architecture)
 - `docs/03-architecture.md` → §1 (Core Design Philosophy)
-- `adr/0005-dual-plane-architecture.md` → Decision #5 (Dual-Plane Architecture)
+- `adr/0005-four-layer-architecture.md` → Decision #2 (Four-Layer Architecture / Separation of Concerns)

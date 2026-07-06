@@ -1,6 +1,6 @@
 # STRIDE Threat Model & OWASP LLM Top 10 Assessment
 
-> Extracted from [docs/03-architecture.md §16](../03-architecture.md) | Sync Date: 2026-07-05
+> Extracted from [docs/03-architecture.md §16](../03-architecture.md) | Sync Date: 2026-07-04
 >
 > STRIDE threat matrix (10 components × 6 dimensions) + OWASP Top 10 for LLM Applications (v1.1, 2025) item-by-item assessment.
 > All bare `§N` references have been rewritten as `docs/03-architecture.md §N` for standalone file resolvability.

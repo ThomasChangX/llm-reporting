@@ -147,5 +147,5 @@ User Request → S01 IntentParser Classification → intent matches Verified Pat
 - `docs/03-architecture.md` → §22A (Agent SDK — Dual-Mode Orchestration Architecture)
 - `docs/03-architecture.md` → §22B (Skill Catalog — Metadata Enhancement)
 - `docs/03-architecture.md` → §22G (Verified Path Catalog)
-- `adr/0005-dual-plane-architecture.md` → Four-Layer Architecture (this ADR refines it at the Agent orchestration level)
+- `adr/0005-four-layer-architecture.md` → Four-Layer Architecture (this ADR refines it at the Agent orchestration level)
 - `adr/0015-agent-triage-remediation-gateway.md` → L0-L3 Remediation Gateway (Verified Path Gate step integration)

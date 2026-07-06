@@ -32,7 +32,7 @@ graph TB
     RP -->|"Read/write files"| FS
 
     DP -->|"AI-assisted generation"| LLM
-    FB -->|"BI-directional sync"| Jira
+    FB -->|"Unidirectional sync (push-only)"| Jira
     FB -->|"Ingest business facts"| Email
 
     System -->|"Authenticate"| Auth

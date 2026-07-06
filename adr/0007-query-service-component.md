@@ -1,7 +1,7 @@
 # ADR-0007: Query Service Component
 
 - **Status**: Accepted
-- **Date**: 2026-07-05
+- **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
 
 ## Context

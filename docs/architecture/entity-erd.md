@@ -1,6 +1,6 @@
 # Core Entity ERD
 
-> Extracted from [docs/03-architecture.md §18](../03-architecture.md) | Sync Date: 2026-07-05
+> Extracted from [docs/03-architecture.md §18](../03-architecture.md) | Sync Date: 2026-07-04
 >
 > Core entity relationship model with complete DDL-level definitions for 9 entities (7 core entities: tenant/workflow/job/data_source/kb_entry/audit_log/user_session + workflow_version support entity + incident operations entity), relationship diagrams, and partitioning strategies.
 

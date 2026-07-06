@@ -1,6 +1,6 @@
 # SLO / SLI Definitions with Error Budgets
 
-> Extracted from [docs/03-architecture.md §19](../03-architecture.md) | Sync Date: 2026-07-05
+> Extracted from [docs/03-architecture.md §19](../03-architecture.md) | Sync Date: 2026-07-04
 >
 > SLO/SLI definitions and error budget strategies for 5 critical user journeys.
 

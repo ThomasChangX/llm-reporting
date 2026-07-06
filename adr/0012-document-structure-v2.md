@@ -1,7 +1,7 @@
 # ADR-0012: Document Structure v2 (Supersedes ADR-0004)
 
 - **Status**: Accepted
-- **Date**: 2026-07-05
+- **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
 - **Supersedes**: [ADR-0004: Document Structure](./0004-document-structure.md)
 
@@ -11,7 +11,7 @@ ADR-0004 established the original document structure: `facts → requirement →
 
 Since then, the project has evolved significantly:
 1. The architecture doc grew to 5000+ lines, making standalone extraction of key sections necessary
-2. Industry best practice audit (2026-07-05) identified gaps: no root README, no LICENSE, no SECURITY.md, numbered docs at root level violate conventions
+2. Industry best practice audit (2026-07-04) identified gaps: no root README, no LICENSE, no SECURITY.md, numbered docs at root level violate conventions
 3. The `components/` directory was referenced but empty, conflicting with the new `docs/` directory structure
 4. The project needs diagrams-as-code, expanded glossary, and a cross-reference verification checklist
 
@@ -107,7 +107,7 @@ All cross-document references use fully-qualified paths:
 ## Linked Modules
 
 - `adr/0004-document-structure.md` — Superseded by this ADR
-- `adr/0005-dual-plane-architecture.md` — Architecture design
+- `adr/0005-four-layer-architecture.md` — Architecture design
 - `docs/01-facts.md` — Updated header banner
 - `docs/03-architecture.md` — Architecture doc with extracted sections
 - `docs/cross-reference-checklist.md` — Verification checklist

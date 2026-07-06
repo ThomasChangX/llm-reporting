@@ -51,4 +51,4 @@ Freezing is reversible: at any time one can "unfreeze" to return to exploration 
 
 - `docs/03-architecture.md` → §4 (Freeze Bridge)
 - `docs/02-requirement.md` → FR2 (Workflow Freeze), FR28 (Change Intelligence)
-- `adr/0005-dual-plane-architecture.md` → Decision #5 (Dual-Plane Architecture)
+- `adr/0005-four-layer-architecture.md` → Decision #2 (Four-Layer Architecture / Separation of Concerns)

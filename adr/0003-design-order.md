@@ -43,4 +43,4 @@ Adopt **Option A**: Architectural Blueprint → Core Engine → **Thin KB + Basi
 
 - `docs/03-architecture.md` (Architecture design follows this order)
 - `docs/04-timeline.md` → Phase 0-3
-- `adr/0005-dual-plane-architecture.md` → Decision #5
+- `adr/0005-four-layer-architecture.md` → Decision #2 (Four-Layer Architecture / Separation of Concerns)

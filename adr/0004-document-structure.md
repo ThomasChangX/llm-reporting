@@ -1,9 +1,9 @@
 # ADR-0004: Document Structure
 
-> ⚠️ **This ADR has been superseded by [ADR-0012: Document Structure v2](./0012-document-structure-v2.md).** The document structure was reorganized on 2026-07-05. See ADR-0012 for the current structure.
+> ⚠️ **This ADR has been superseded by [ADR-0012: Document Structure v2](./0012-document-structure-v2.md).** The document structure was reorganized on 2026-07-04. See ADR-0012 for the current structure.
 
 - **Status**: Superseded by [ADR-0012](./0012-document-structure-v2.md)
-- **Date**: 2026-07-04 (Superseded: 2026-07-05)
+- **Date**: 2026-07-04 (Superseded: 2026-07-04)
 - **Deciders**: Project Sponsor
 
 ## Context

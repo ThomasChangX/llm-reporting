@@ -237,7 +237,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 
 ## Glossary
 
-> The complete glossary (75+ core concepts covering architecture concepts, KB, Jobs, AI Agent, BRD/ADR, data compliance, development operations, regulatory standards) has been moved to [glossary.md](glossary.md). Below is a quick reference for core terms.
+> The complete glossary (102 core concepts covering architecture concepts, KB, Jobs, AI Agent, BRD/ADR, data compliance, development operations, regulatory standards) has been moved to [glossary.md](glossary.md). Below is a quick reference for core terms.
 
 ### Core Terms Quick Reference
 
@@ -251,7 +251,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | Knowledge Base (KB) | 7 knowledge domains. PG-First storage strategy: PostgreSQL + pgvector unified + S3/MinIO. Dedicated engines introduced on-demand. |
 | ADR (Architecture Decision Record) | MADR format. 12 lifecycle states, first-class entity in the system. |
 
-> See [glossary.md](glossary.md) for the complete glossary (75+ terms).
+> See [glossary.md](glossary.md) for the complete glossary (102 terms).
 
 ---
 
@@ -490,8 +490,8 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | FR32.4 | Workflow Template Library: template definitions, categorization, prerequisite KB requirements, parameters, usage statistics | P1 |
 | FR32.5 | Adjustment History: anomaly details, root cause analysis (primary+secondary+residual), adjustment entries, approval chain, immutable at point-in-time | P1 |
 | FR32.6 | User Behavior Pattern Store: operation sequences, temporal patterns, derived suggestions, confidence scores | P2 |
-| FR32.6a | Report/Metric Catalog: report definitions, metric formulas, calculation granularity, certification status, relationships with data sources and Workflows | P1 |
-| FR32.7 | Email Record: sender/recipient/date/subject, body hash + original storage, extracted fact list, attachment parsing, tags | P2 |
+| FR32.7 | Report/Metric Catalog: report definitions, metric formulas, calculation granularity, certification status, relationships with data sources and Workflows | P1 |
+| FR32.8 | Email Record: sender/recipient/date/subject, body hash + original storage, extracted fact list, attachment parsing, tags | P2 |
 
 > FR32.6 → FR3: User Behavior Pattern Store provides persistent data support for system observation. FR32.6a: Report/Metric Catalog elevates reports and metrics to KB first-class citizens, enabling traceability queries. FR32.7 → FR17: Email Record provides persistent storage for email ingestion.
 

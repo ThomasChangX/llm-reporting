@@ -4,7 +4,7 @@
 >
 > ⚠️ **Note**: There is a timeliness risk between the main body of this document and supplementary sections added later. The main body should be treated as the authoritative source and periodically reviewed; supplementary sections may become outdated as the design iterates. If contradictions arise, the main body takes precedence.
 >
-> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (75+ terms) | ADR → [adr/](../adr/) (22 records)
+> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (102 terms) | ADR → [adr/](../adr/) (22 records)
 
 ---
 
@@ -101,6 +101,14 @@
 - **Decision**: MVP uses PostgreSQL + pgvector for all three roles (Vector/Graph/Relational) + S3/MinIO for Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when three gating conditions are met.
 - **Consequences**: Unified operational model; pgvector may have ceiling on vector recall at 100M+ scale; design includes clean migration path
 - **References**: → 03-architecture §11
+
+### Decision #7: Design Order — Architecture First, KB Co-Evolution
+- **Status**: Accepted (2026-07-04)
+- **Background**: Designing a complex system requires clear priorities and dependency relationships to avoid "draw the UI first, patch the architecture later." The timing of building the Knowledge Base has significant impact on design quality.
+- **Decision**: Architectural Blueprint → Core Engine → Thin KB + Basic Design Plane evolving in parallel (KB starts from PG+pgvector, Design Plane user interactions drive organic KB growth) → Full KB. This explicitly rejects UI-first and full-parallel approaches.
+- **Alternatives Considered**: UI First → Engine Later (Rejected: castles in the air); Full Parallel (Rejected: strong inter-module dependencies)
+- **Consequences**: Phase 0-3 roadmap follows this order; KB starts thin and grows organically; Design Plane exploration directly feeds KB enrichment
+- **References**: → adr/0003-design-order.md, 04-timeline §Phases 0-3
 
 ## Three Core Concepts
 
@@ -457,7 +465,7 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 
 ## 2026-07-04 Supplemental Decisions (ADR #7-#21)
 
-### Decision #7: Query Service Independent Component
+### ADR-0007: Query Service Independent Component
 - **Status**: Accepted (2026-07-04)
 - **Background**: Natural language queries over databases require NL→SQL conversion + query optimization + caching. Existing architecture lacked a dedicated component.
 - **Decision**: Four-component Query Service — Metadata Manager, Query Generator, Pushdown Optimizer, Query Cache. Generation and execution are separated — Design Plane assists with NL→SQL, Runtime Plane executes deterministic query plans.

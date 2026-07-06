@@ -732,7 +732,7 @@ workflow:
 │  │ watermark_column: posting_date                  │ │
 │  │ last_high_watermark: 2026-07-04T06:00:00Z     │ │
 │  │ last_low_watermark: 2026-07-04T00:00:00Z      │ │
-│  │ last_execution: 2026-07-05T02:15:00Z            │ │
+│  │ last_execution: 2026-07-04T02:15:00Z            │ │
 │  │ watermarks_processed: 182 (successful sequences)│ │
 │  └────────────────────────────────────────────────┘ │
 │                                                      │
@@ -1783,7 +1783,7 @@ For teams that want to start small and grow into the full architecture, the foll
 
 Six user roles (Viewer/Analyst/Developer/Admin/Data Owner/External Auditor) connect via HTTPS/WSS to API Gateway. Core four planes: Design Plane Svc (Python/FastAPI, AI-assisted exploration), Freeze Bridge Svc (Python/FastAPI, AI→deterministic conversion), Runtime Executor Svc (Go/Rust, zero AI side effects), Intelligence Plane Svc (Python/FastAPI, AI read-only analysis, does not cross the bridge). Intelligence Plane queries across planes but does not write to any Plane state.
 
-Knowledge Base data layer: PostgreSQL (Source of Truth), Milvus/pgvector (Vector Embeddings), Neo4j Cluster (Graph Relations), Elasticsearch (Hot Logs 7d), Redis Sentinel (Cache+Session), S3/MinIO (Object Store). Code Graph Svc provides impact analysis and lineage tracking based on Neo4j. Kafka/Redpanda serves as the unified message bus.
+Knowledge Base data layer: PostgreSQL (Source of Truth), Milvus/pgvector (Vector Embeddings), Neo4j Cluster (Graph Relations), Elasticsearch (Hot Logs 7d), Redis Sentinel (Cache+Session), S3/MinIO (Object Store) (MVP: pgvector + PG only; Neo4j/Milvus post-MVP per ADR-0013). Code Graph Svc provides impact analysis and lineage tracking based on Neo4j. Kafka/Redpanda serves as the unified message bus.
 
 External systems: Enterprise ERP, Data Warehouse, Email Server, Identity Provider, Git Platform, Jira/ServiceNow, Cloud KMS, Object Store, Slack/Teams.
 
@@ -4028,7 +4028,7 @@ For highly regulated industries (finance, healthcare, government), optional phys
 
 > Core design decisions of this section, recorded in ADR format.
 
-### ADR-007: Agent SDK Architecture
+### ADR-A1: Agent SDK Architecture
 
 | Attribute | Description |
 | --------- | ----------- |
@@ -4037,7 +4037,7 @@ For highly regulated industries (finance, healthcare, government), optional phys
 | **Rationale** | Clear phase separation makes security boundaries verifiable; MCP provides standardized tool abstraction; Permission Gate pre-checking avoids the lag of post-hoc auditing |
 | **Consequences** | Requires development of Agent Runtime (Go/Rust implementation for performance); MCP Gateway becomes critical infrastructure; each step adds ~50-200ms latency (acceptable, as LLM reasoning already takes 1-30s) |
 
-### ADR-008: Skill + MCP Two-Layer Composition Pattern
+### ADR-A2: Skill + MCP Two-Layer Composition Pattern
 
 | Attribute | Description |
 | --------- | ----------- |
@@ -4046,7 +4046,7 @@ For highly regulated industries (finance, healthcare, government), optional phys
 | **Rationale** | Two-layer abstraction allows reuse at different granularities: Skill-level reuse (e.g., ImpactAnalyzer shared by CodeReviewer and DocGenerator) and MCP-level reuse (e.g., vector-search shared by KBRetriever and TemplateSearch) |
 | **Consequences** | Skill registry requires maintenance; inter-Skill dependencies must be explicitly declared; Skill versions must coordinate with MCP versions |
 
-### ADR-009: Pre-Execution Permission Gate
+### ADR-A3: Pre-Execution Permission Gate
 
 | Attribute | Description |
 | --------- | ----------- |

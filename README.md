@@ -18,7 +18,7 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 |---|----------|----------|
 | 01 | [docs/01-facts.md](docs/01-facts.md) | Project background, design philosophy, 22 Architecture Decision Records (summarized in facts doc) |
 | 02 | [docs/02-requirement.md](docs/02-requirement.md) | 44 functional requirement groups + 9 NFR groups (ISO 25010) |
-| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Full architecture design (~5000 lines): dual-plane, Compute Spec, KB, Agents, BRD/ADR, and more |
+| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Full architecture design (~6200 lines): dual-plane, Compute Spec, KB, Agents, BRD/ADR, and more |
 | 04 | [docs/04-timeline.md](docs/04-timeline.md) | Development roadmap with Token-Speed estimation methodology |
 | 05 | [docs/05-cost.md](docs/05-cost.md) | Full lifecycle cost analysis: development, infrastructure, LLM, pricing model |
 
@@ -32,7 +32,7 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 
 | Document | Contents |
 |----------|----------|
-| [docs/glossary.md](docs/glossary.md) | 75+ domain and technical terms |
+| [docs/glossary.md](docs/glossary.md) | 102 domain and technical terms |
 | [docs/security/threat-model.md](docs/security/threat-model.md) | STRIDE threat matrix + OWASP Top 10 for LLM Applications assessment |
 | [docs/operations/slo-sli.md](docs/operations/slo-sli.md) | Service Level Objectives for 5 critical user journeys with error budgets |
 | [docs/architecture/c4-model.md](docs/architecture/c4-model.md) | C4 Model diagrams (System Context, Container, Component) |

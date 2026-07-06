@@ -1,7 +1,7 @@
 # ADR-0010: BRD/ADR as First-Class Entities
 
 - **Status**: Accepted
-- **Date**: 2026-07-05
+- **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
 
 ## Context

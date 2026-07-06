@@ -1,6 +1,6 @@
 # C4 Model Diagrams
 
-> Extracted from [docs/03-architecture.md §15](../03-architecture.md) | Sync Date: 2026-07-05
+> Extracted from [docs/03-architecture.md §15](../03-architecture.md) | Sync Date: 2026-07-04
 >
 > C4 Model is a layered approach to software architecture visualization. This section contains System Context, Container, and Component three-level architecture diagrams.
 
@@ -113,7 +113,7 @@
 │              ┌──────────────────────────────────────────────────────────────┐        │
 │              │              KNOWLEDGE BASE (Data Tier)                       │        │
 │              │                                                               │        │
-│              │  [PostgreSQL]        [Milvus/pgvector]     [Neo4j Cluster]   │        │
+│              │  [PostgreSQL]        [Milvus/pgvector]     [Neo4j (Post-MVP)]│        │
 │              │  Source of Truth     Vector Embeddings      Graph Relations   │        │
 │              │  ACID, Versioned     ▶ CDC sync (30s lag)   ▶ CDC sync (30s)  │        │
 │              │                                                               │        │
@@ -133,7 +133,7 @@
 │  │ │RBAC Filter     │ │  │ │Suppression Engine        │ │                            │
 │  │ │Cross-graph Link│ │  │ │Channel Dispatcher        │ │                            │
 │  │ └────────────────┘ │  │ │(Email/Slack/Teams/SMS)   │ │                            │
-│  │ [Neo4j Cluster]    │  │ └──────────────────────────┘ │                            │
+│  │ [Neo4j (Post-MVP)] │  │ └──────────────────────────┘ │                            │
 │  └────────────────────┘  └──────────────────────────────┘                            │
 │                                                                                       │
 │  ┌────────────────────────────────────────────────────────────────┐                   │
@@ -158,7 +158,7 @@
 | Design Plane ↔ Freeze Bridge | gRPC (mTLS) | Request/Response | Design Artifact handoff; Freeze status streaming |
 | Design Plane → KB (Vector) | gRPC (mTLS) | Request/Response | Milvus SDK for semantic search |
 | Freeze Bridge → KB (Relational) | PostgreSQL wire protocol (TLS) | Request/Response | SQL via parameterized queries |
-| Runtime Executor → KB (Graph) | Bolt protocol (TLS) | Request/Response | Cypher queries via Neo4j driver |
+| Runtime Executor → KB (Graph) | Bolt protocol (TLS) | Request/Response | Cypher queries via Neo4j driver (Post-MVP; MVP uses PG-only per ADR-0013) |
 | All Services → Kafka | Kafka native protocol (mTLS) | Publish/Async | Schema Registry enforces Avro schemas |
 | Kafka → Log Ingestion Svc | Kafka Consumer Group | Stream Processing | Fluentd/Fluent Bit consumers |
 | Kafka → Notification Svc | Kafka Consumer Group | Stream Processing | At-least-once delivery; DLQ for failures |

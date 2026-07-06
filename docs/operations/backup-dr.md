@@ -1,6 +1,6 @@
 # Backup & Disaster Recovery Strategy
 
-> Extracted from [docs/03-architecture.md §24.1-§24.2](../03-architecture.md) | Sync Date: 2026-07-05
+> Extracted from [docs/03-architecture.md §24.1-§24.2](../03-architecture.md) | Sync Date: 2026-07-04
 >
 > Defined based on industry standards (NIST SP 800-34, AWS Well-Architected Framework — Reliability Pillar, Google SRE Workbook).
 
@@ -40,10 +40,11 @@
 │  │ (Same AZ)│                       └──────────────┘        │
 │  └──────────┘                                               │
 │                                                              │
-│  ┌──────────┐   neo4j-admin      ┌──────────────┐           │
-│  │  Neo4j   │───────────────────►│  S3 Backup    │           │
-│  │ Cluster  │   (daily full)     │              │           │
-│  └──────────┘                    └──────────────┘           │
+│  │  ┌──────────┐   neo4j-admin      ┌──────────────┐           │
+│  │  │  Neo4j   │───────────────────►│  S3 Backup    │           │
+│  │  │ Cluster  │   (daily full)     │              │           │
+│  │  │(Post-MVP)│                    │              │           │
+│  │  └──────────┘                    └──────────────┘           │
 │                                                              │
 │  ┌──────────┐   S3 Sync          ┌──────────────┐           │
 │  │ Milvus   │───────────────────►│  S3 (Vector   │           │
@@ -67,7 +68,7 @@
 | Component | Method | Frequency | Retention | Encryption |
 |-----------|--------|-----------|-----------|------------|
 | PostgreSQL | WAL-G (PITR) | Continuous WAL + Daily Full | 30 days rolling | AES-256 (S3 SSE-KMS) |
-| Neo4j | neo4j-admin backup | Daily (off-peak) | 30 days | AES-256 |
+| Neo4j (Post-MVP; MVP uses PG-only per ADR-0013) | neo4j-admin backup | Daily (off-peak) | 30 days | AES-256 |
 | Milvus | Snapshot to S3 | Daily | 14 days | AES-256 |
 | Elasticsearch | Snapshot Repository (S3) | Daily | 7 days (hot data only) | AES-256 |
 | Redis | BGSAVE → S3 | Hourly | 7 days | AES-256 |
@@ -87,7 +88,7 @@ Primary Region (us-east-1 / cn-north-1)     DR Region (us-west-2 / cn-east-2)
 │  └────────────────────┘  │          │  └────────────────────┘  │
 │                          │          │                          │
 │  PostgreSQL (Primary)    │  Async   │  PostgreSQL (Standby)    │
-│  Neo4j (Cluster)         │  Stream  │  Neo4j (Read Replica)   │
+│  Neo4j (Cluster, Post-MVP)│ Stream  │  Neo4j (Read Replica)   │
 │  Redis (Sentinel)        │          │  Redis (Standalone)     │
 │                          │          │                          │
 │  S3 (Primary Bucket)     │  CRR     │  S3 (DR Bucket)         │

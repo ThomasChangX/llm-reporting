@@ -1,6 +1,6 @@
 # ADR-0005: Four-Layer Architecture (Zero AI Side Effects)
 
-- **Status**: Accepted (Refined 2026-07-05)
+- **Status**: Accepted (Refined 2026-07-04)
 - **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
 
@@ -12,7 +12,7 @@ Specific challenges:
 1. If AI and deterministic execution are mixed in the same plane, it is impossible to prove to auditors that "AI did not participate in production decisions."
 2. If LLMs are invoked for every execution, costs are uncontrollable (even at $0.50/M input tokens, terabyte-scale data processing scenarios are infeasible).
 3. The exploration phase requires AI's flexibility and breadth; the production phase requires determinism and reliability — the two have fundamentally different infrastructure requirements.
-4. **(Added 2026-07-05)** Ad-hoc analysis needs (e.g., "Why did East China gross margin drop by 2 percentage points?") inherently require AI assistance to understand the data, but such AI invocations must not enter the production execution path. The correct boundary between "zero AI" and "AI-assisted analysis" must be found.
+4. **(Added 2026-07-04)** Ad-hoc analysis needs (e.g., "Why did East China gross margin drop by 2 percentage points?") inherently require AI assistance to understand the data, but such AI invocations must not enter the production execution path. The correct boundary between "zero AI" and "AI-assisted analysis" must be found.
 
 ## Options Considered
 

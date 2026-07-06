@@ -1,7 +1,7 @@
 # ADR-0011: Materialize Job Type
 
 - **Status**: Accepted
-- **Date**: 2026-07-05
+- **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
 
 ## Context
