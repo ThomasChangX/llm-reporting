@@ -2,8 +2,8 @@
 
 > Extracted from [docs/03-architecture.md §16](../03-architecture.md) | Sync Date: 2026-07-04
 >
-> STRIDE threat matrix (10 components × 6 dimensions) + OWASP Top 10 for LLM Applications (v1.1, 2025) item-by-item assessment.
-> All bare `§N` references have been rewritten as `docs/03-architecture.md §N` for standalone file resolvability.
+> STRIDE threat matrix (10 components × 6 dimensions) + OWASP Top 10 for LLM Applications (v1.0, 2023) item-by-item assessment.
+> Bare `§N` references below point to [docs/03-architecture.md](../03-architecture.md); consult that document for full context.
 
 
 ### 16.1 Threat Matrix
@@ -68,21 +68,22 @@ Priority items sorted by residual risk level:
 
 ### 16.3 OWASP Top 10 for LLM Applications Assessment
 
-STRIDE covers traditional security threats but does not fully cover LLM-specific attack surfaces. Item-by-item assessment per OWASP Top 10 for LLM Applications (v1.1, 2025):
+STRIDE covers traditional security threats but does not fully cover LLM-specific attack surfaces. Item-by-item assessment per OWASP Top 10 for LLM Applications (v1.0, 2023):
 
 | OWASP LLM Threat | Risk Level | Existing Defense | Residual Risk | Recommendation |
 |----------------|---------|---------|---------|------|
-| **LLM01: Prompt Injection** | 🔴 Critical | §3.1 Five-Layer Defense (Input Sanitization + Instruction Boundary + RBAC Context + Output Guard + Audit) + §3.1 KB Content Sanitization | Medium | Add Lakera Guard or equivalent dedicated injection detection; require explicit secondary confirmation for high-sensitivity operations |
-| **LLM02: Insecure Output Handling** | 🟡 High | §22D Layer 4 Response Guard + Layer 5 Action Authorization (L0-L4 five-level classification) | Low | ✅ Adequately defended |
-| **LLM03: Training Data Poisoning** | 🟡 High | KB three-path write (user explicit > AI confirmed > system auto) + human confirmation gate; FR34 five-gate write | Medium | Add §3.1 KB Content Sanitization (already supplemented); periodically audit instruction patterns in KB entries |
-| **LLM04: Model Denial of Service** | 🟡 High | §22D Layer 7 Sandbox (5min timeout, 4GB/instance, 3 concurrent/tenant); §5.1 Rate Limiting | Low | ✅ Adequately defended |
-| **LLM05: Supply Chain Vulnerabilities** | 🟡 High | §22A Model Registry only supports pre-approved Provider plugins; Python import whitelist (§7.2) | Medium-High | **Needs Enhancement**: Add signature verification for MCP Servers/Skills; regular CVE scanning of AI/ML dependencies; record SBOM for all models/Skills/MCPs |
-| **LLM06: Sensitive Information Disclosure** | 🔴 Critical | §5.2 Data Classification T0-T3 + §11.1 Encryption + §22D Layer 3 Output Sanitization + Query Rewriter RLS/CLS | Low-Medium | ⚠️ LLM Interaction Log stores complete prompt/response (§8) → ensure Cold storage encryption + access auditing; consider auto-redacting T3 data before LLM |
-| **LLM07: Insecure Plugin Design** | 🟡 High | §22D Layer 2 Permission Gate (four-dimensional check) + Layer 5 Action Authorization + Sandbox isolation | Medium | **Needs Enhancement**: Add input parameter schema validation for MCP calls; sanitize inter-Skill data passing |
-| **LLM08: Excessive Agency** | 🟡 High | §22D Layer 5 Five-Level Classification (Read→Suggest→Draft→Execute→Admin) + Pre-Execution Permission Gate | Low | ✅ Adequately defended. L3+ operations require explicit human confirmation; L4 operations require MFA |
-| **LLM09: Overreliance** | 🟡 Medium | All AI output marked with confidence score + fuzzy_nodes; human approval at key decision points | Medium | **Needs Enhancement**: Add "AI-Assisted" watermark to AI-generated reports; quarterly Accuracy Audit; FR28.3 AI Agent responses must cite sources |
-| **LLM10: Model Theft** | 🟡 Medium | Model Registry unified API Key management (Vault); Tenant-level private model deployment isolation | Medium | **Needs Enhancement**: API Key access frequency anomaly detection; encrypted storage for local model weights; periodic audit of model access logs |
-| **LLM11: Vector/Embedding Weaknesses** | 🟡 Low-Medium | KB entry version control + write conflict resolution; Embedding model configurable | Low | Periodically evaluate Embedding model adversarial robustness; cross-validate vector search with PG source data version watermark (§10.1 already implemented) |
+| **LLM01: Prompt Injection** | [CRITICAL] | §3.1 Five-Layer Defense (Input Sanitization + Instruction Boundary + RBAC Context + Output Guard + Audit) + §3.1 KB Content Sanitization | Medium | Add Lakera Guard or equivalent dedicated injection detection; require explicit secondary confirmation for high-sensitivity operations |
+| **LLM02: Insecure Output Handling** | [HIGH] | §22D Layer 4 Response Guard + Layer 5 Action Authorization (L0-L4 five-level classification) | Low | Adequately defended |
+| **LLM03: Training Data Poisoning** | [HIGH] | KB three-path write (user explicit > AI confirmed > system auto) + human confirmation gate; FR34 five-gate write | Medium | Add §3.1 KB Content Sanitization (already supplemented); periodically audit instruction patterns in KB entries |
+| **LLM04: Model Denial of Service** | [HIGH] | §22D Layer 7 Sandbox (5min timeout, 4GB/instance, 3 concurrent/tenant); §5.1 Rate Limiting | Low | Adequately defended |
+| **LLM05: Supply Chain Vulnerabilities** | [HIGH] | §22A Model Registry only supports pre-approved Provider plugins; Python import whitelist (§7.2) | Medium-High | **Needs Enhancement**: Add signature verification for MCP Servers/Skills; regular CVE scanning of AI/ML dependencies; record SBOM for all models/Skills/MCPs |
+| **LLM06: Sensitive Information Disclosure** | [CRITICAL] | §5.2 Data Classification T0-T3 + §11.1 Encryption + §22D Layer 3 Output Sanitization + Query Rewriter RLS/CLS | Low-Medium | [WARN] LLM Interaction Log stores complete prompt/response (§8) → ensure Cold storage encryption + access auditing; consider auto-redacting T3 data before LLM |
+| **LLM07: Insecure Plugin Design** | [HIGH] | §22D Layer 2 Permission Gate (four-dimensional check) + Layer 5 Action Authorization + Sandbox isolation | Medium | **Needs Enhancement**: Add input parameter schema validation for MCP calls; sanitize inter-Skill data passing |
+| **LLM08: Excessive Agency** | [HIGH] | §22D Layer 5 Five-Level Classification (Read→Suggest→Draft→Execute→Admin) + Pre-Execution Permission Gate | Low | Adequately defended. L3+ operations require explicit human confirmation; L4 operations require MFA |
+| **LLM09: Overreliance** | [MEDIUM] | All AI output marked with confidence score + fuzzy_nodes; human approval at key decision points | Medium | **Needs Enhancement**: Add "AI-Assisted" watermark to AI-generated reports; quarterly Accuracy Audit; FR28.3 AI Agent responses must cite sources |
+| **LLM10: Model Theft** | [MEDIUM] | Model Registry unified API Key management (Vault); Tenant-level private model deployment isolation | Medium | **Needs Enhancement**: API Key access frequency anomaly detection; encrypted storage for local model weights; periodic audit of model access logs |
+
+> **Note**: The OWASP LLM Top 10 (v1.0, 2023) list has exactly 10 items (LLM01-LLM10). Vector/Embedding Weaknesses is covered under the 2025 list as a separate item but is not part of the v1.0 standard used here; it is addressed in the architecture via KB entry version control and embedding model configurability (§10.1).
 
 > **Comprehensive Conclusion**: This architecture provides adequate defense on LLM01/02/04/08. LLM05 (Supply Chain), LLM07 (Insecure Plugins), LLM09 (Overreliance), LLM10 (Model Theft) have residual risks requiring enhancement in Phase 6-7. All enhancement items have been added to the Phase 6-7 development roadmap.
 

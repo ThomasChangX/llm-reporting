@@ -49,7 +49,7 @@
 
 ### Knowledge Base as System Foundation
 - Storage: business semantics, data dictionary, historical adjustment reasons, workflow templates.
-- Compute layer: LLM (reasoning/generation); Storage layer: PostgreSQL + pgvector (Vector + Graph + Relational unified) + S3/MinIO (Object Store). Dedicated engines (Milvus/Neo4j) are reserved via interface abstraction and introduced only when three gating conditions are met.
+- Compute layer: LLM (reasoning/generation); Storage layer: PostgreSQL + pgvector (Vector + Graph + Relational unified) + S3/MinIO (Object Store). Dedicated engines (Milvus/Neo4j) are reserved via interface abstraction and introduced only when four gating conditions are met.
 - New requests first retrieve relevant knowledge before reasoning, significantly improving accuracy.
 
 ## Key Design Decisions
@@ -93,12 +93,12 @@
 - **Decision**: Python is the logic script language (not Java): dominates the data ecosystem, LLM-generated Python quality is higher, analysts can read and write it. Runtime Plane execution engine can be implemented in Go/Rust for performance and isolation. Hybrid mode: Python (logic) + SQL (queries) + YAML (orchestration definition).
 - **Alternatives Considered**: Java (Rejected: data ecosystem not dominant, verbose); SQL only (Rejected: can't express complex transform logic; still use SQL for data queries)
 - **Consequences**: Multi-language hybrid architecture; Compute Engine needs embedded Python runtime; Runtime Plane may need transpile/compilation
-- **References**: → 03-architecture §6.1
+- **References**: → 03-architecture §6, §7.2
 
 ### Decision #6: PG-First Knowledge Base Storage
 - **Status**: Accepted (2026-07-04)
 - **Background**: KB covers 7 domains with different retrieval patterns, but introducing dedicated engines too early adds operational complexity.
-- **Decision**: MVP uses PostgreSQL + pgvector for all three roles (Vector/Graph/Relational) + S3/MinIO for Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when three gating conditions are met.
+- **Decision**: MVP uses PostgreSQL + pgvector for all three roles (Vector/Graph/Relational) + S3/MinIO for Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when four gating conditions are met.
 - **Consequences**: Unified operational model; pgvector may have ceiling on vector recall at 100M+ scale; design includes clean migration path
 - **References**: → 03-architecture §11
 
@@ -292,8 +292,8 @@ Write conflict resolution: (a) User explicit input is highest priority, overwrit
 ### AI Agent Technical Architecture → FR29
 - Agent uses LLM SDK + Skill + MCP three-layer architecture.
 - **LLM SDK**: Pluggable layer with unified interface for switching between OpenAI/Anthropic/open-source/private models.
-- **Skill Module**: Intent Parsing / KB Retrieval / Code Graph Query / Impact Analysis / Doc Generation — 14 Skills planned, composable.
-- **MCP**: Model Context Protocol — standard protocol for Agent interaction with external systems. 17 MCP Servers planned.
+- **Skill Module**: Intent Parsing / KB Retrieval / Code Graph Query / Impact Analysis / Doc Generation — 17 Skills (S01-S17) planned, composable.
+- **MCP**: Model Context Protocol — standard protocol for Agent interaction with external systems. 19 MCP Servers planned.
 - Skills can be composed into Agent Workflows (templated Skill combinations + System Prompt).
 
 ### Agent Customization
@@ -490,7 +490,7 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 - **Status**: Accepted (2026-07-04)
 - **Background**: BRDs/ADRs are traditionally standalone documents disconnected from the system. They need to be elevated to first-class citizen entities at parity with Workflows for bidirectional traceability, AI-assisted generation, and complete lifecycle management.
 - **Decision**: BRD 16 lifecycle states, ADR 12 lifecycle states; AI-assisted generation + 6-round LLM deep verification; multi-layer mapping with Jira/Rally/ServiceNow (via MCP-17 external-ticketing unified adapter); BRD↔ADR↔Workflow triangle traceability; 3 new Skills (S15 BRDGenerator internally refined by ADR-0022 into 6 Agents, S16 ADRGenerator, S17 TraceabilityAnalyzer).
-- **References**: → FR24-27, → 03-architecture §23
+- **References**: → FR23, → 03-architecture §23
 
 ### Decision #11: materialize as 9th Job Type
 - **Status**: Accepted (2026-07-04)
@@ -515,7 +515,7 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 ### Decision #14: Agent Triage & Layered Remediation Gateway
 - **Status**: Accepted (2026-07-04)
 - **Background**: There's a gap between Data Health Check Framework output and user action — high alert volume (tens to hundreds daily), inconsistent Agent intervention (only Recon has auto-analysis), uniform approval granularity (all operations follow the same approval chain). Industry best practice (Monte Carlo 2025-2026) adds an Agent Triage Layer above the detection layer.
-- **Decision**: (a) Agent Triage Layer (Intelligence Plane): auto-classification, false positive prediction, dedup-merge, proactive Health Summary push. severity=error auto-triggers S07 parallel diagnosis; severity=warning proactively pushes summary with predicted confidence. (b) L0-L3 four-tier Remediation Gateway: zero-risk auto-execute (L0) → low-risk one-click confirm (L1) → medium-risk single approval (L2) → high-risk dual approval + Impact Report (L3). (c) S08 Closed-Loop Learning: auto-suggests rule optimization based on user signals. (d) Phase 7+ evolution: Hierarchical Multi-Agent (Central Reasoner + 5 Sub-Agents).
+- **Decision**: (a) Agent Triage Layer (Intelligence Plane): auto-classification, false positive prediction, dedup-merge, proactive Health Summary push. severity=error auto-triggers S07 parallel diagnosis; severity=warning proactively pushes summary with predicted confidence. (b) L0-L3 four-tier Remediation Gateway: zero-risk auto-execute (L0) → low-risk one-click confirm (L1) → medium-risk single approval (L2) → high-risk dual approval + Impact Report (L3). (c) S08 DataQualityAdvisor (Closed-Loop Learning): auto-suggests rule optimization based on user signals. (d) Phase 7+ evolution: Hierarchical Multi-Agent (Central Reasoner + 5 Sub-Agents).
 - **Core Constraint**: All Agent Triage operations are read-only. Any config or data modification must pass through the Remediation Gateway with human confirmation.
 - **References**: → adr/0015, → 03-architecture §9, §12.2, §22A.5, §22B S08
 

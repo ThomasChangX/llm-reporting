@@ -65,7 +65,7 @@ User action signals → false positive marking → S08 records pattern → cumul
 
 ### Layered Agent Reasoning Architecture (Phase 7+ Evolution Direction)
 
-MVP maintains the existing flat directory of 14 Skills. Phase 7+ evolves to Hierarchical Multi-Agent: Central "Brain" Reasoner with 5 Sub-Agents (Pipeline Change / Data Anomaly / Infrastructure / Upstream Dependency / Historical Pattern Matcher) running in parallel with consolidated judgment. Aligned with Monte Carlo 2025-2026 production architecture.
+MVP maintains the existing flat directory of 17 Skills (S01-S17). Phase 7+ evolves to Hierarchical Multi-Agent: Central "Brain" Reasoner with 5 Sub-Agents (Pipeline Change / Data Anomaly / Infrastructure / Upstream Dependency / Historical Pattern Matcher) running in parallel with consolidated judgment. Aligned with Monte Carlo 2025-2026 production architecture.
 
 ## Rationale
 

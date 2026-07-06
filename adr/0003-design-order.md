@@ -29,7 +29,7 @@ Adopt **Option A**: Architectural Blueprint → Core Engine → **Thin KB + Basi
 
 ## Rationale
 
-1. **Necessity of Architecture First**: The isolation of the three planes (Design / Freeze / Runtime) is the most critical architectural decision and must be established before any component design.
+1. **Necessity of Architecture First**: The isolation of the four layers (Design Plane / Freeze Bridge / Runtime Plane / Intelligence Plane) is the most critical architectural decision and must be established before any component design.
 2. **KB Should Not Be Built in an Ivory Tower**: Building a KB without user validation easily encodes incorrect assumptions (e.g., wrong business definitions, outdated data source mappings). User interactions in the Design Plane (defining metrics, associating data sources) naturally populate the KB, ensuring its content is validated through actual use.
 3. **Operability of the "Thin KB"**: Starting from PG+pgvector (rather than going straight to a full Vector+Graph+Relational+Object Store) reduces initial complexity and allows the KB Schema to evolve with actual usage needs.
 

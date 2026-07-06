@@ -67,6 +67,6 @@ Follow-up questions during VP execution saved as Pending Questions. VP cannot be
 
 ## Linked Modules
 
-- `docs/03-architecture.md` → §22K (VP Promotion & Multi-Agent Concurrency)
+- `docs/03-architecture.md` → §22L (VP Promotion & Multi-Agent Concurrency)
 - `adr/0016-dual-mode-agent-orchestration.md` → Verified Path Catalog
 - `adr/0017-verified-path-saga-semantics.md` → Saga & Idempotency

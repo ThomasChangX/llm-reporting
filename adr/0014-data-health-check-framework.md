@@ -149,6 +149,6 @@ Recon Break Analysis no longer includes "Auto-write-off". Resolution suggestions
 ## Linked Modules
 
 - `docs/03-architecture.md` → §12 (Data Health Check Framework detailed design)
-- `docs/02-requirement.md` → FR18 (Reconciliation), FR19 (Data Quality & Anomaly Detection)
+- `docs/02-requirement.md` → FR18 (Reconciliation), FR19 (Rules & Anomaly Detection)
 - `docs/03-architecture.md` → §22E (Agent Workflow Composition — Anomaly→BRD→Ticket scenario)
-- `docs/03-architecture.md` → §7 (Adjustment Form Builder & Workflow)
+- `docs/03-architecture.md` → §3.4 (Adjustment Form Builder & Submission Pipeline)

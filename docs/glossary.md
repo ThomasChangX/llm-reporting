@@ -21,7 +21,7 @@
 
 | Term | Definition |
 |------|------------|
-| Knowledge Base (KB) | 7 knowledge domains: Business Glossary, Data Catalog, Mapping Registry, Workflow Templates, Adjustment History, Behavior Patterns, Report/Metric Catalog. Storage: PG-First + Interface Abstraction — PostgreSQL + pgvector handles Vector/Graph/Relational roles during MVP; S3/MinIO handles Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when three gating conditions are met. |
+| Knowledge Base (KB) | 7 knowledge domains: Business Glossary, Data Catalog, Mapping Registry, Workflow Templates, Adjustment History, Behavior Patterns, Report/Metric Catalog. Storage: PG-First + Interface Abstraction — PostgreSQL + pgvector handles Vector/Graph/Relational roles during MVP; S3/MinIO handles Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when four gating conditions are met. |
 | Code Graph | System structure knowledge graph (Workflow → Job → DataSource DAG) with 15+ edge types. Powers Change Intelligence and the AI Knowledge Agent. |
 | Business Glossary | KB domain: terms, aliases, definitions, formulas, business context, data source mappings. |
 | Data Catalog | KB domain: data asset metadata (tables/APIs/files/streams), schema details, PII markers, quality scores. |
@@ -43,7 +43,7 @@
 | Term | Definition |
 |------|------------|
 | MCP (Model Context Protocol) | Standard protocol for Agent interaction with external systems. This project plans 19 MCP Servers. |
-| Skill | Pre-defined Agent capability module (e.g., Intent Parsing, KB Retrieval, Impact Analysis). This project plans 14 composable Skills. |
+| Skill | Pre-defined Agent capability module (e.g., Intent Parsing, KB Retrieval, Impact Analysis). This project plans 17 composable Skills (S01-S17). |
 | LLM SDK | Unified model invocation layer with pluggable switching between DeepSeek V4 Pro / Claude Sonnet 5 / private models. |
 | Prompt Injection | OWASP LLM01 threat. Maliciously crafted prompts that bypass system instructions or leak data. This architecture employs 5-layer defense. |
 | DeepSeek V4 Pro | Default LLM model for China region (~80 tps decode, Input $0.50/M, Output $2.00/M). |
@@ -125,7 +125,7 @@
 | Canary Deployment | 1%→10%→50%→100% progressive rollout. Simplified during MVP (direct deploy); fully enabled Post-MVP alongside Heavy Engine. |
 | Query Service | Four-component service: Metadata Manager + Query Generator + Pushdown Optimizer + Query Cache. Design Plane assists NL→SQL; Runtime Plane executes deterministic query plans. |
 | Pushdown Optimization | Pushing WHERE/JOIN/AGGREGATION operations as close to the data source as possible, reducing data transfer while ensuring correctness. |
-| CDC (Change Data Capture) | Incremental sync pipeline from PG → Vector/Graph for KB (30s latency). |
+| CDC (Change Data Capture) | Incremental sync pipeline from PG → Vector/Graph for KB (30s latency) (post-MVP only; MVP has zero CDC pipelines per ADR-0013). |
 | STRIDE | Microsoft threat modeling framework: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege. |
 
 ## Regulations & Standards
@@ -135,7 +135,7 @@
 | SOX (Sarbanes-Oxley Act) | US public company financial reporting compliance act. Requires immutable audit trails, separation of duties, documented change approvals. |
 | GDPR (General Data Protection Regulation) | EU data protection regulation. Requires data minimization, right to erasure, data portability, DPO appointment. |
 | HIPAA (Health Insurance Portability and Accountability Act) | US healthcare privacy act. Requires PHI encryption, access controls, audit logging. |
-| OWASP LLM Top 10 | Top 10 security threat categories specific to LLM applications (v1.1, 2025). This project assesses each item. |
+| OWASP LLM Top 10 | Top 10 security threat categories specific to LLM applications (v1.0, 2023). This project assesss each item. |
 | arc42 | Software architecture documentation standard (12-section template). This project's document structure aligns with it but does not enforce section-by-section mapping. |
 | MADR (Markdown Any Decision Records) | Markdown format standard for ADRs, adopted by this project. |
 | C4 Model | Software architecture visualization layered model: System Context → Container → Component → Code. |

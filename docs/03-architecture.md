@@ -122,7 +122,7 @@ Users explore, design, and test within the Design Plane; all artifacts are "desi
 | **AI Copilot Engine** | Pluggable LLM Provider + KB Retriever + Reasoning Engine; all output is advisory with confidence scores |
 | **Light Compute Engine** | DuckDB + Polars; sub-second startup, sampled data, real-time preview |
 
-### 3.1 Conversation Interface — Prompt Injection Defense
+### 3.2 Conversation Interface — Prompt Injection Defense
 
 The Conversation Interface is the primary attack surface for prompt injection. All user input passes through a multi-layer defense pipeline before reaching any LLM:
 
@@ -135,7 +135,7 @@ The Conversation Interface is the primary attack surface for prompt injection. A
 | **Output Guard**            | LLM responses are scanned for: (a) attempts to emit system prompts, (b) instruction-following language directed at the system, (c) code that would execute outside the Sandbox. Suspicious outputs are flagged, stripped, and logged. |
 | **Audit**                   | Every LLM interaction is logged to the LLM Interaction Log with prompt_hash, retrieved KB context, and guard trigger events.                                                                                                          |
 
-### 3.2 Design Artifact Schema (Handoff Contract)
+### 3.3 Design Artifact Schema (Handoff Contract)
 
 The Design Plane produces a **Design Artifact** (YAML) that serves as the formal contract between Design Plane and Freeze Bridge. It captures both the intended specification and the AI's uncertainty about each element.
 
@@ -185,7 +185,7 @@ confidence_summary:
 | `confirmed_fields`   | Nodes explicitly confirmed by a human user. Freeze Bridge treats these as authoritative, skipping AI re-evaluation.                                                                                     |
 | `confidence_summary` | Aggregate scores used by Freeze Bridge to decide required review depth. Artifacts with `overall < 0.8` mandate full peer review.                                                                        |
 
-### 3.3 Workbench — VCS Integration
+### 3.4 Workbench — VCS Integration
 
 The Workbench is the primary authoring surface — a Version Control System (VCS) integrated workspace. Every session is backed by a Git worktree:
 
@@ -197,7 +197,7 @@ The Workbench is the primary authoring surface — a Version Control System (VCS
 | **Conflict Resolution** | Concurrent edits to the same artifact are detected via Git merge conflicts. The Workbench provides a side-by-side merge editor with KB context. |
 | **History**             | Full `git log` is exposed as a timeline view: who changed what, when, and why (linked to BRD/ADR/Incident).                                     |
 
-### 3.4 Design Plane — Detailed Component Architecture
+### 3.5 Design Plane — Detailed Component Architecture
 
 #### Conversation Interface
 ```
@@ -230,7 +230,7 @@ Core Principles:
 - **Daily Manual Adjustment**: Event-driven blank form, full approval chain
 
 #### AI Copilot Engine
-- **Provider Plugin**: OpenAI / Anthropic / open-source / private — configured per tenant. All calls go through the same guard pipeline (Section 3.1).
+- **Provider Plugin**: OpenAI / Anthropic / open-source / private — configured per tenant. All calls go through the same guard pipeline (Section 3.2).
 - **KB Retriever**: Hybrid search across PostgreSQL + pgvector (semantic vector search via HNSW), PG recursive CTE (graph expansion), and native SQL (exact metadata match). Results are fused and ranked before injection. Future: dedicated engines (Milvus/Neo4j) via same VectorStore/GraphStore interfaces — no query logic changes.
 - **Reasoning Engine**: Chain-of-thought reasoning scoped to the retrieved KB context. Produces structured suggestions (Spec diffs, KB entry proposals, quality rule suggestions) with per-field confidence scores.
 - **Feedback Loop**: User corrections are captured and used to fine-tune the Intent Parser and ranking model (within tenant boundary; no cross-tenant training).
@@ -1729,7 +1729,7 @@ This architecture is designed for enterprise-scale reporting and ETL orchestrati
 | **Infrastructure**  | **High**   | 10+ distinct services (PostgreSQL, Vector DB, Graph DB, Elasticsearch, S3, Redis, Vault, Spark/Trino/Ray cluster, Sandbox runtime, KMS). Requires Kubernetes or equivalent orchestration. |
 | **Security**        | **High**   | mTLS, KMS key hierarchy, Row-Level Security via Query Rewriter, multi-layer prompt injection defense, Sandbox seccomp profiles. All mandatory from Day 1.                                 |
 | **Data Governance** | **High**   | KB consistency model (Relational source-of-truth + eventually-consistent projections), CDC pipelines, versioned everything, cross-store sync monitoring.                                  |
-| **AI Safety**       | **Medium** | Prompt injection defense, confidence scoring, mandatory human sign-off, LLM interaction audit logging. Manageable with the guard pipeline defined in Section 3.1.                         |
+| **AI Safety**       | **Medium** | Prompt injection defense, confidence scoring, mandatory human sign-off, LLM interaction audit logging. Manageable with the guard pipeline defined in Section 3.2.                         |
 | **Multi-Tenancy**   | **Medium** | Three-tier isolation model gives flexibility; L1 (process) is straightforward, L3 (cluster) is complex but only required for regulated industries.                                        |
 
 ### 13.2 Minimum Viable Stack (MVP)
@@ -1777,7 +1777,7 @@ For teams that want to start small and grow into the full architecture, the foll
 
 > 📄 Complete C4 Model content (System Context and Container two-level architecture diagrams + external relationship descriptions + inter-container communication protocol matrix) has been moved to **[docs/architecture/c4-model.md](architecture/c4-model.md)**.
 >
-> This section retains the architecture summary. For detailed diagrams, external system interface definitions, and inter-container communication protocols (14 Producer→Consumer mappings), please refer to the standalone file.
+> This section retains the architecture summary. For detailed diagrams, external system interface definitions, and inter-container communication protocols (12 Producer→Consumer mappings), please refer to the standalone file.
 
 ### 15.1 Architecture Overview
 
@@ -1795,9 +1795,9 @@ The communication matrix covers 12 Producer→Consumer paths: Web SPA→API Gate
 
 ## 16. STRIDE Threat Model
 
-> The complete STRIDE threat matrix (10 components × 6 dimensions, 40+ threat entries) + OWASP Top 10 for LLM Applications (v1.1, 2025) item-by-item assessment has been moved to **[docs/security/threat-model.md](security/threat-model.md)**.
+> The complete STRIDE threat matrix (10 components × 6 dimensions, 38 threat entries) + OWASP Top 10 for LLM Applications (v1.0, 2023) item-by-item assessment has been moved to **[docs/security/threat-model.md](security/threat-model.md)**.
 >
-> All bare `§N` references have been rewritten in the standalone file as `docs/03-architecture.md §N` to ensure standalone readability.
+> Bare `§N` references in the standalone file point to this document; consult here for full context.
 
 ### 16.1 Threat Matrix Summary
 
@@ -1807,24 +1807,24 @@ Key residual risks (P0): AI Copilot Engine provider-side log leakage of sensitiv
 
 ### 16.2 OWASP LLM Assessment Summary
 
-Item-by-item assessment per OWASP Top 10 for LLM Applications (v1.1, 2025):
+Item-by-item assessment per OWASP Top 10 for LLM Applications (v1.0, 2023):
 
 | Threat | Risk | Defense Status |
 | --------------------------------- | ------------ | ---------------------------------------- |
-| LLM01 Prompt Injection | 🔴 Critical | Five-layer defense, residual risk: Medium |
-| LLM02 Insecure Output Handling | 🟡 High | ✅ Adequately defended |
-| LLM03 Training Data Poisoning | 🟡 High | Three-path write + human confirmation, residual risk: Medium |
-| LLM04 Model DoS | 🟡 High | ✅ Adequately defended |
-| LLM05 Supply Chain | 🟡 High | ⚠️ Needs enhancement: signature verification, SBOM, CVE scanning |
-| LLM06 Sensitive Info Disclosure   | 🔴 Critical   | Data classification T0-T3 + encryption + masking, residual risk: Low-Medium |
-| LLM07 Insecure Plugin Design      | 🟡 High       | ⚠️ Needs enhancement: parameter Schema validation, inter-Skill sanitization    |
-| LLM08 Excessive Agency | 🟡 High | ✅ Adequately defended (five-level operation classification) |
-| LLM09 Overreliance | 🟡 Medium | ⚠️ Needs enhancement: AI watermark, quarterly Accuracy Audit |
-| LLM10 Model Theft | 🟡 Medium | ⚠️ Needs enhancement: access anomaly detection, weight encryption |
-| LLM11 Vector/Embedding Weaknesses | 🟡 Low-Medium | Low residual risk |
+| LLM01 Prompt Injection | [CRITICAL] | Five-layer defense, residual risk: Medium |
+| LLM02 Insecure Output Handling | [HIGH] | Adequately defended |
+| LLM03 Training Data Poisoning | [HIGH] | Three-path write + human confirmation, residual risk: Medium |
+| LLM04 Model DoS | [HIGH] | Adequately defended |
+| LLM05 Supply Chain | [HIGH] | [WARN] Needs enhancement: signature verification, SBOM, CVE scanning |
+| LLM06 Sensitive Info Disclosure   | [CRITICAL]   | Data classification T0-T3 + encryption + masking, residual risk: Low-Medium |
+| LLM07 Insecure Plugin Design      | [HIGH]       | [WARN] Needs enhancement: parameter Schema validation, inter-Skill sanitization    |
+| LLM08 Excessive Agency | [HIGH] | Adequately defended (five-level operation classification) |
+| LLM09 Overreliance | [MEDIUM] | [WARN] Needs enhancement: AI watermark, quarterly Accuracy Audit |
+| LLM10 Model Theft | [MEDIUM] | [WARN] Needs enhancement: access anomaly detection, weight encryption |
 
 > Comprehensive conclusion: This architecture provides adequate defense on LLM01/02/04/08. LLM05/07/09/10 have residual risks requiring enhancement in Phase 6-7. See standalone file for complete assessment, detailed threat entries, and risk remediation priorities.
 
+---
 
 ## 17. Deployment Architecture / Infrastructure Topology
 
@@ -2024,6 +2024,7 @@ All entities are tenant-scoped (tenant_id FK). workflow 1:N job, dependencies se
 
 For error budget exhaustion gating strategy details, see the standalone file.
 
+---
 
 ## 20. CDC Pipeline Architecture Detail
 
@@ -2413,7 +2414,7 @@ Flow:
                                           attempt_log, sandbox_id },
                                 linked_workflow_id, linked_job_id
                               })
-  36. IM       →  IM       :  Create incident record (§18.1.8)
+  36. IM       →  IM       :  Create incident record (§18.1 (incident entity))
                                → Calculate SLA deadline (P1 = 4h from now)
                                → Route to on-call: query user_session for admin role
   37. IM       →  NOTIF    :  Kafka: events.incident.created { incident_id, severity }
@@ -2443,7 +2444,7 @@ Participants:
   KB_VEC    = KB Vector Search (Milvus)
   KB_REL    = KB Relational (PostgreSQL)
   LOG       = Log Store (Elasticsearch)
-  GUARD     = Output Guard (§3.1 Layer 4)
+  GUARD     = Output Guard (§3.2 Layer 4)
   CITATION  = Citation Builder
 
 Flow:
@@ -2551,7 +2552,7 @@ Flow:
                                - Any T3 data exposed? → No (cust_name already redacted in step 9)
                                - Any cross-tenant references? → No
 
-  18. AGENT    →  GUARD    :  Pass draft answer through Output Guard (§3.1 Layer 4):
+  18. AGENT    →  GUARD    :  Pass draft answer through Output Guard (§3.2 Layer 4):
                                - Scan for system prompt leakage → None detected
                                - Scan for instruction-following language → None detected
                                - Scan for executable code → None detected
@@ -2606,7 +2607,7 @@ Flow:
 | §10     | Knowledge Base                           | Seven-Domain Knowledge Storage                                                                                                 |
 | §11     | Cross-Cutting Layer                      | Security, RBAC, VC, Observability                                                                                              |
 | §12     | Domain-Specific Components               | Email, Recon, DQ, Backup, Notification, Dependency, Observation                                                                |
-| §12b    | Data Flow Panorama                       | End-to-End Data Flow                                                                                                           |
+| §12.7   | Data Flow Panorama                       | End-to-End Data Flow                                                                                                           |
 | §13     | Technology Selection                     | Stack & MVP                                                                                                                    |
 | §14     | Design Principles Checklist              | Requirements Coverage                                                                                                          |
 | **§15** | **C4 Model Diagrams**                    | **→ [docs/architecture/c4-model.md](architecture/c4-model.md)**                                                                |
@@ -2616,7 +2617,7 @@ Flow:
 | **§19** | **SLO/SLI Definitions**                  | **→ [docs/operations/slo-sli.md](operations/slo-sli.md)**                                                                      |
 | **§20** | **CDC Pipeline Architecture**            | **Debezium + Kafka Connect Detail**                                                                                            |
 | **§21** | **Key Sequence Diagrams**                | **Freeze, Runtime Failure, AI Agent Query**                                                                                    |
-| **§22** | **AI Agent Deep Design**                 | **§22A-§22M: SDK, Skills (14), MCPs (19), 7-Layer Defense, Skill Chaining, Multi-Tenant Isolation**                            |
+| **§22** | **AI Agent Deep Design**                 | **§22A-§22M: SDK, Skills (17), MCPs (19), 7-Layer Defense, Skill Chaining, Multi-Tenant Isolation**                            |
 | **§23** | **BRD & ADR as First-Class Entities**    | **§23.1-§23.12: Entity Models, Lifecycle (16/12 States), AI Generation Pipeline (6-Agent), Traceability Web, Typology Tree, Conflict Detection** |
 | **§24** | **Operational Architecture**             | **Backup & DR, Schema Migration, Data Retention, Secrets Rotation, Platform Deploy, Capacity Planning**                        |
 | **§25** | **Compliance Architecture**              | **GDPR/CCPA/HIPAA/CSL: DSAR, Right to Erasure, Data Residency, Consent Mgmt, Breach Notification, API Versioning**             |
@@ -2627,7 +2628,7 @@ Flow:
 
 > **Positioning**: This section is the complete detailed design of Section 9.3 (AI Knowledge Agent), defining all details of the Agent runtime architecture, Skill and MCP catalog, security defense system, multi-tenant isolation, and workflow orchestration.
 >
-> **Related**: → FR29 (AI Agent Architecture), FR30 (Agent Customization), FR31 (Agent Permission Control), FR28 (Change Intelligence), Section 3.1 (Prompt Injection Defense), Section 9.3 (AI Knowledge Agent Overview)
+> **Related**: → FR29 (AI Agent Architecture), FR30 (Agent Customization), FR31 (Agent Permission Control), FR28 (Change Intelligence), Section 3.2 (Prompt Injection Defense), Section 9.3 (AI Knowledge Agent Overview)
 >
 > **Design Principles**:
 > - The Agent is a "reasoning engine with permission boundaries," not a "free-acting AI"
@@ -2891,7 +2892,7 @@ ModelInterface {
 
 ### 22A.6 Hierarchical Multi-Agent Architecture (Evolution Direction, Phase 7+)
 
-> During the MVP phase, maintain the current flat catalog of 14 Skills. Phase 7+ evolves into a Central Reasoner + Sub-Agent layered architecture, aligned with Monte Carlo's 2025-2026 production architecture.
+> During the MVP phase, maintain the current flat catalog of 17 Skills (S01-S17). Phase 7+ evolves into a Central Reasoner + Sub-Agent layered architecture, aligned with Monte Carlo's 2025-2026 production architecture.
 
 ```
                           ┌─────────────────────────────────────┐
@@ -2933,7 +2934,7 @@ ModelInterface {
   All Sub-Agents run in parallel → Central Reasoner synthesizes → outputs unified diagnosis
 ```
 
-**Relationship with MVP Flat Skill Catalog**: In Phase 7+, the MVP's 14 Skills (S01-S14) become the underlying tool library for Sub-Agents. The Central Reasoner calls Sub-Agents, and Sub-Agents call existing Skills.
+**Relationship with MVP Flat Skill Catalog**: In Phase 7+, the MVP's 17 Skills (S01-S17) become the underlying tool library for Sub-Agents. The Central Reasoner calls Sub-Agents, and Sub-Agents call existing Skills.
 
 **Introduction Criteria** (Three-Gate Condition):
 1. Alert volume reaches critical scale (daily average >50 warnings)
@@ -3247,7 +3248,7 @@ ModelInterface {
 
 ### Layer 1: Input Sanitization & Prompt Injection Defense
 
-> Inherits and strengthens Section 3.1's defense pipeline. This layer is the Agent's "immune system first line of defense."
+> Inherits and strengthens Section 3.2's defense pipeline. This layer is the Agent's "immune system first line of defense."
 
 | Mechanism | Implementation | Block Level |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
@@ -4057,10 +4058,6 @@ For highly regulated industries (finance, healthcare, government), optional phys
 
 ---
 
-*Last Updated: 2026-07-04 | Version: 1.4 | Related: docs/03-architecture.md Section 22*
-
----
-
 ## 22H. Verified Path Catalog
 
 > Verified Path = predefined fixed Skill sequences. Uses **Saga compensation transactions + idempotency + durable execution** (see [adr/0017](../adr/0017-verified-path-saga-semantics.md) for details). Each Step registers compensation before executing forward. On failure, compensation executes in reverse order. Idempotency Key ensures safe duplicate execution.
@@ -4528,7 +4525,7 @@ Recon-triggered VP-001 can preempt Ad-hoc VP-003. Preempted party receives notif
 
 ## 22M. Agent Capability Discovery → adr/0021
 
-> "Blank Canvas Problem": Non-technical users facing an empty input box don't know what the Agent can do. 19 MCPs, 14 Skills, 6 VPs — the stronger the capability, the harder the discovery.
+> "Blank Canvas Problem": Non-technical users facing an empty input box don't know what the Agent can do. 19 MCPs, 17 Skills, 6 VPs — the stronger the capability, the harder the discovery.
 
 ### 22M.1 Three-Layer Progressive Capability Reveal
 
@@ -5188,6 +5185,8 @@ ADR's core principle remains unchanged — content is immutable after `accepted`
 
 **BRD State Machine** (16 states):
 
+> **Simplified View**: The Mermaid diagram below shows the primary lifecycle path (9 core states). The full 16-state model — including intermediate states (`needs_clarification`, `in_verification`, `partially_implemented`, `blocked`, `partially_verified`, `needs_fix`, `deprecated`) — is detailed in the ASCII diagram and table above (§23.4.1).
+
 ```mermaid
 stateDiagram-v2
     [*] --> draft: BRD Created
@@ -5222,6 +5221,8 @@ stateDiagram-v2
 ```
 
 **ADR State Machine** (12 states):
+
+> **Simplified View**: The Mermaid diagram below shows the primary lifecycle path (10 core states). The full 12-state model — including `in_discussion` and `withdrawn` — is detailed in the ASCII diagram above (§23.4.2).
 
 ```mermaid
 stateDiagram-v2
@@ -5342,7 +5343,7 @@ User: "Finance says month-end reconciliation takes too long, help me automate it
 │ BRD-Verifier (6-Round Deep Verification)                              │
 │                                                                       │
 │  Round 1: Structural completeness  Round 2: KB cross-ref + compliance│
-│                                          mapping (MCP-19)             │
+│                                          mapping (MCP-22)             │
 │  Round 3: Impact analysis         Round 4: Gap analysis (historical  │
 │                                          BRDs + Incidents)            │
 │  Round 5: Approval chain validation Round 6: Testability & measurability │
@@ -5850,7 +5851,7 @@ Both BRD and ADR are specialized types of Compute Spec (just as Agent Workflow i
 │         ┌───────────────┼───────────────┬───────────────┐          │
 │         ▼               ▼               ▼               ▼          │
 │  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐  │
-│  │ MCP-17     │  │ MCP-18     │  │ MCP-19     │  │ BRD/ADR    │  │
+│  │ MCP-20     │  │ MCP-21     │  │ MCP-22     │  │ BRD/ADR    │  │
 │  │ jira-sync  │  │ confluence │  │ compliance │  │ Export     │  │
 │  │            │  │ -export    │  │ -mapper    │  │ Service    │  │
 │  └──────┬─────┘  └──────┬─────┘  └──────┬─────┘  └──────┬─────┘  │
@@ -5866,7 +5867,7 @@ Both BRD and ADR are specialized types of Compute Spec (just as Agent Workflow i
 
 ### 23.8.2 New MCP Servers
 
-#### MCP-17: jira-sync (Jira One-Way Sync)
+#### MCP-20: jira-sync (Jira One-Way Sync)
 
 | Attribute         | Description                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5877,7 +5878,7 @@ Both BRD and ADR are specialized types of Compute Spec (just as Agent Workflow i
 | **Sync Direction** | One-way: System → Jira (create/link/push_status); Jira Webhook → System (read-only query Story status, update BRD implementation_progress). BRD is the sole Source of Truth —Jira content does not write back to BRD                                                                                                                                                                                                                              |
 | **Timeout**  | 15s                                                                                                                                                                                                                                                                                                                                                                                                       |
 
-#### MCP-18: confluence-export (Confluence/Notion Export)
+#### MCP-21: confluence-export (Confluence/Notion Export)
 
 | Attribute         | Description                                                                                                                                                                                                                                                                                                                               |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5888,11 +5889,11 @@ Both BRD and ADR are specialized types of Compute Spec (just as Agent Workflow i
 | **Rate Limit** | 10 req/min per tenant                                                                                                                                                                                                                                                                                                              |
 | **Timeout**  | 30s                                                                                                                                                                                                                                                                                                                                |
 
-#### MCP-19: compliance-mapper (Compliance Mapper)
+#### MCP-22: compliance-mapper (Compliance Mapper)
 
 | Attribute           | Description                                                                                                                            |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Tools**       | `map_brd_to_framework(brd_id, framework: "SOX"                                                                                  | "HIPAA" | "GDPR" | "ASC606" | "BASEL" | …) → MappingResult` — Map BRD requirements to compliance framework controls; `validate_coverage(brd_id) → CoverageReport` — Check if BRD requirements cover all necessary compliance items; `get_control_detail(control_id) → ControlDetail` — Get compliance control detail description; `suggest_missing_controls(brd_id) → SuggestionList` — AI suggest potentially missing compliance controls |
+| **Tools**       | `map_brd_to_framework(brd_id, framework: "SOX" / "HIPAA" / "GDPR" / "ASC606" / "BASEL" / …) → MappingResult` — Map BRD requirements to compliance framework controls; `validate_coverage(brd_id) → CoverageReport` — Check if BRD requirements cover all necessary compliance items; `get_control_detail(control_id) → ControlDetail` — Get compliance control detail description; `suggest_missing_controls(brd_id) → SuggestionList` — AI suggest potentially missing compliance controls |
 | **Protocol**    | gRPC                                                                                                                            |
 | **Auth**        | API Key + `X-Tenant-ID` + mTLS                                                                                                  |
 | **Compliance Framework Library** | Pre-loaded with SOX (302/404), HIPAA (Security/Privacy Rules), GDPR (Art.5/25/32), ASC606 (5-step), Basel III, etc. Supports tenant custom framework extensions |
@@ -5945,7 +5946,7 @@ Legacy BRD (Word/Excel/PDF)
 | **Tools**    | S02 (KBRetriever), S03 (CodeGraphQuery), S04 (ImpactAnalyzer), S06 (DocGenerator), MCP-06 (git-diff), MCP-05 (log-search)                                                                                                                                       |
 | **Permissions** | `code_graph:read`, `kb:read`, `log:read`, `spec:write` (draft status only)                                                                                                                                                                                         |
 | **Reasoning Model** | Large model (needs multi-source correlation reasoning and architectural judgment)                                                                                                                                                                                                                            |
-| **Input**    | `{ trigger: "change_detected"                                                                                                                                                                                                                                   | "manual", change_source: { type: "pr_merge" | "spec_diff" | "incident", payload: { pr_id?, diff?, incident_id? } } }` |
+| **Input**    | `{ trigger: "change_detected" / "manual", change_source: { type: "pr_merge" / "spec_diff" / "incident", payload: { pr_id?, diff?, incident_id? } } }` |
 | **Output**   | `{ adr_draft: { adr YAML object }, suggested_options: [...], supersedes_candidates: [adr_id], fuzzy_decisions: [...], review_checklist: [...] }`                                                                                                                |
 | **Generation Strategy** | 1) Code Graph diff identifies architecture change type → 2) Extract rationale from PR description + commit → 3) Search similar ADRs for options templates → 4) ImpactAnalyzer generates consequences → 5) Auto-link affected components + related ADRs + trigger incidents → 6) Mark content requiring developer supplementation |
 
@@ -5957,7 +5958,7 @@ Legacy BRD (Word/Excel/PDF)
 | **Tools**    | S03 (CodeGraphQuery), S02 (KBRetriever), MCP-07 (template-render)                                                                                                                                                                                                                                                                     |
 | **Permissions** | `code_graph:read`, `kb:read`                                                                                                                                                                                                                                                                                                          |
 | **Reasoning Model** | Small model (graph traversal + rule detection)                                                                                                                                                                                                                                                                                                           |
-| **Input**    | `{ root_entity: { type: "brd"                                                                                                                                                                                                                                                                                                         | "adr" | "workflow", id: string }, direction: "downstream" | "upstream" | "both", depth?: int }` |
+| **Input**    | `{ root_entity: { type: "brd" / "adr" / "workflow", id: string }, direction: "downstream" / "upstream" / "both", depth?: int }` |
 | **Output**   | `{ trace_chain: { nodes: [...], edges: [...], visualization: { mermaid_diagram }, broken_links: [{ from, to, expected_relation, missing }], stale_links: [{ from, to, last_updated, threshold_exceeded }], coverage_report: { requirements_with_implementation, requirements_without_implementation, adrs_without_implementation } }` |
 
 ---

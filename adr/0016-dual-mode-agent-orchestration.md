@@ -11,7 +11,7 @@ Agent Skill orchestration faces two conflicting requirements:
 1. **Flexibility**: Exploration scenarios (ad-hoc Q&A, attribution analysis) require LLM dynamic Skill composition — user questions are unpredictable, fixed paths would constrain Agent reasoning capability
 2. **Auditability**: Compliance scenarios (Adjustment, metric changes, Workflow modifications) require the system to prove to auditors that "critical steps were not skipped" — LLM free orchestration cannot provide deterministic guarantees
 
-The current architecture (ADR-0005 Four-Layer Model) has established the separation of exploration and execution — "Explore with AI, Execute without AI Side Effects." But Agent orchestration itself has not yet reflected this separation.
+The current architecture (ADR-0005 Four-Layer Architecture) has established the separation of exploration and execution — "Explore with AI, Execute without AI Side Effects." But Agent orchestration itself has not yet reflected this separation.
 
 The six major industry Agent frameworks (Claude SDK, LangGraph, OpenAI Agents SDK, etc.) are converging in 2025-2026 — all supporting tool-use dynamic orchestration + MCP + sub-agents. But no framework natively solves the problem of "how a single Agent system can simultaneously satisfy flexible exploration and compliance auditing."
 

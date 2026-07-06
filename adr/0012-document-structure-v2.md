@@ -25,7 +25,7 @@ Add `docs/` alongside `components/` without resolving the conflict.
 ### Option B: Full arc42 Migration (Rejected)
 Restructure all documentation into arc42's 12-section format.
 - **Pro**: Full standards compliance
-- **Con**: Would break every cross-reference (500+ references across 11 ADRs); over-engineering for a pre-implementation design phase
+- **Con**: Would break every cross-reference (500+ references across 11 ADRs — at time of writing; currently 22); over-engineering for a pre-implementation design phase
 
 ### Option C: Document Structure v2 (Chosen)
 Evolutionary update that aligns with industry best practices while preserving all cross-references.
@@ -49,7 +49,7 @@ llm-reporting/
 │   ├── 03-architecture.md             # (moved from root; §15/§16/§18/§19 extracted)
 │   ├── 04-timeline.md                 # (moved from root)
 │   ├── 05-cost.md                     # (moved from root)
-│   ├── glossary.md                    # 50+ terms (extracted + expanded)
+│   ├── glossary.md                    # 102 terms (extracted + expanded)
 │   ├── cross-reference-checklist.md   # Manual verification checklist
 │   ├── security/
 │   │   └── threat-model.md            # STRIDE + OWASP LLM Top 10
@@ -61,7 +61,7 @@ llm-reporting/
 │   ├── diagrams/
 │   │   ├── README.md
 │   │   ├── system-context.mmd
-│   │   ├── three-plane-arch.mmd
+│   │   ├── four-plane-arch.mmd
 │   │   └── freeze-bridge-flow.mmd
 │   └── api/
 │       └── README.md
@@ -79,7 +79,7 @@ llm-reporting/
 
 1. **Numbered docs moved to `docs/`**: Root directory reserved for governance files (README, LICENSE, SECURITY, CONTRIBUTING) per GitHub/industry convention
 2. **Architecture sections extracted**: §15 (C4 Model), §16 (STRIDE), §18 (ERD), §19 (SLO/SLI) moved to standalone files under `docs/architecture/`, `docs/security/`, `docs/operations/`. Original section headers retained in 03-architecture.md with summaries + pointers — zero cross-reference breakage
-3. **Glossary expanded**: From 11 terms to 50+ terms, extracted from 02-requirement.md to `docs/glossary.md`
+3. **Glossary expanded**: From 11 terms to 102 terms, extracted from 02-requirement.md to `docs/glossary.md`
 4. **`components/` retained**: Reserved for future detailed component specifications (API specs, data model DDLs, security policies). `docs/api/` and `docs/security/` hold architecture-level documents; `components/` holds implementation-level specifications
 5. **Diagrams as code**: Mermaid (.mmd) source files version-controlled in `docs/diagrams/`
 

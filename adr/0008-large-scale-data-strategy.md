@@ -63,7 +63,7 @@ Adopt **Option C** (Six-Pronged Strategy):
 
 7. **KB Storage — PG-First Progressive Strategy**:
    - KB storage adopts PG-First + Interface Abstraction: PostgreSQL handles Vector/Graph/Relational roles during MVP
-   - Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when three gating conditions are simultaneously met: (a) PG stably exceeds p95 latency target (b) data volume consistently exceeds scale limit (c) PG-level optimizations exhausted (d) TCO cost-benefit positive
+   - Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when four gating conditions are simultaneously met: (a) PG stably exceeds p95 latency target (b) data volume consistently exceeds scale limit (c) PG-level optimizations exhausted (d) TCO cost-benefit positive
    - MVP has zero CDC pipeline — Vector and Graph queries directly go through PG, eliminating synchronization failures
    - Priority: P1 (interface abstraction P0, dedicated engine implementation P2)
    - See `adr/0013-kb-storage-strategy.md`

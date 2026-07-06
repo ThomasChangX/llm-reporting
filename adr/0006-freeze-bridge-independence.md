@@ -25,7 +25,7 @@ Freeze Bridge as a pre-processing step of the Runtime Plane.
 ### Option C: As Independent Plane (Chosen)
 Freeze Bridge as an independent plane between Design Plane and Runtime Plane.
 - **Pro**: Clear architectural boundaries; independent CI/CD process; all disambiguation decisions for fuzzy nodes are immutably recorded
-- **Con**: Adds an architectural layer — three planes rather than two
+- **Con**: Adds an architectural layer — four layers rather than three
 
 ## Decision
 
@@ -44,7 +44,7 @@ Freezing is reversible: at any time one can "unfreeze" to return to exploration 
 ## Consequences
 
 - **Positive**: Clearly defines the responsibility boundary for AI→deterministic conversion; immutable approval records support auditing; independent CI/CD process can reuse standard DevOps toolchains.
-- **Negative**: Adds an architectural layer (three planes vs. two); human approval may become a bottleneck — mitigated by parallel processing of multiple Freeze requests and automatic routing to the appropriate Approver.
+- **Negative**: Adds an architectural layer (the Freeze Bridge as a separate layer between Design and Runtime); human approval may become a bottleneck — mitigated by parallel processing of multiple Freeze requests and automatic routing to the appropriate Approver.
 - **Neutral**: Canary gradual rollout is not enabled in the MVP phase — this simplifies initial implementation but means MVP users must accept the risk of "full rollout."
 
 ## Linked Modules

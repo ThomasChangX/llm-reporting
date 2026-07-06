@@ -194,7 +194,7 @@ SOX audit value: Can prove "After Step 3 timed out, the system cleaned up Step 2
 
 ## Linked Modules
 
-- `docs/03-architecture.md` → §22G (Verified Path Catalog — Saga state machine + compensation table)
+- `docs/03-architecture.md` → §22H (Verified Path Catalog — Saga state machine + compensation table)
 - `docs/03-architecture.md` → §22A (Agent SDK — durable execution + idempotency layer)
 - `adr/0016-dual-mode-agent-orchestration.md` → Dual-Mode Orchestration (this ADR supplements its failure semantics)
 - `adr/0015-agent-triage-remediation-gateway.md` → L0-L3 Remediation Gateway (GATE compensation approval record handling)

@@ -7,7 +7,7 @@ This directory contains architecture diagram source files in [Mermaid](https://m
 | File | Type | Description |
 |------|------|-------------|
 | [`system-context.mmd`](system-context.mmd) | C4 System Context | External actors and system boundaries |
-| [`three-plane-arch.mmd`](three-plane-arch.mmd) | C4 Container | Four-Layer Architecture: Design Plane / Freeze Bridge / Runtime Plane (Zero AI Side Effects) / Intelligence Plane (AI Read-Only) |
+| [`four-plane-arch.mmd`](four-plane-arch.mmd) | C4 Container | Four-Layer Architecture: Design Plane / Freeze Bridge / Runtime Plane (Zero AI Side Effects) / Intelligence Plane (AI Read-Only) |
 | [`freeze-bridge-flow.mmd`](freeze-bridge-flow.mmd) | Sequence | Freeze Bridge workflow: AI artifact → deterministic script |
 | [`component-design-plane.mmd`](component-design-plane.mmd) | C4 Component | Design Plane detail: UI, AI Copilot Engine, Artifact Store, external integrations |
 
@@ -26,12 +26,16 @@ These `.mmd` files render natively in:
 - VS Code (with Mermaid extension)
 - Any Mermaid-compatible renderer
 
-To embed a diagram in a Markdown document, use:
+To embed a diagram in a Markdown document, copy the `.mmd` source into a ```` ```mermaid ```` fenced block:
+
 ````markdown
 ```mermaid
-%%!include docs/diagrams/system-context.mmd
+graph TB
+    A --> B
 ```
 ````
+
+Alternatively, use the [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) (`@mermaid-js/mermaid-cli`) as a preprocessor to render `.mmd` files to SVG/PNG, or a build-time preprocessor that inlines `.mmd` content into ```` ```mermaid ```` blocks at publish time. Note: `%%!include` directives are not part of the Mermaid spec and are not rendered by GitHub or standard Mermaid renderers.
 
 ## Related
 

@@ -493,7 +493,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | FR32.7 | Report/Metric Catalog: report definitions, metric formulas, calculation granularity, certification status, relationships with data sources and Workflows | P1 |
 | FR32.8 | Email Record: sender/recipient/date/subject, body hash + original storage, extracted fact list, attachment parsing, tags | P2 |
 
-> FR32.6 → FR3: User Behavior Pattern Store provides persistent data support for system observation. FR32.6a: Report/Metric Catalog elevates reports and metrics to KB first-class citizens, enabling traceability queries. FR32.7 → FR17: Email Record provides persistent storage for email ingestion.
+> FR32.6 → FR3: User Behavior Pattern Store provides persistent data support for system observation. FR32.7 → FR5: Report/Metric Catalog elevates reports and metrics to KB first-class citizens, enabling traceability queries. FR32.8 → FR17: Email Record provides persistent storage for email ingestion.
 
 ### FR33: KB Storage Architecture
 | ID | Requirement | Priority |

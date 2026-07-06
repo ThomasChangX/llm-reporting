@@ -110,6 +110,6 @@ Each fact carries valid_from / valid_to / superseded_by. Changes do not overwrit
 
 ## Linked Modules
 
-- `docs/03-architecture.md` → §22I (Agent Memory Architecture)
+- `docs/03-architecture.md` → §22J (Agent Memory Architecture)
 - `adr/0022-brd-generation-agent-pipeline.md` → Typology Tree stored in agent_semantic_memory
 - `docs/glossary.md` → Four-Layer Memory, Provenance Tag, Bitemporal Validity

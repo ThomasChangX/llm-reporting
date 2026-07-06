@@ -72,6 +72,6 @@ Model upgrade validated on Golden Dataset before deployment; blocked on any dime
 
 ## Linked Modules
 
-- `docs/03-architecture.md` → §22J (Agent Cost Governance & Model Degradation Detection)
+- `docs/03-architecture.md` → §22K (Agent Cost Governance & Model Degradation Detection)
 - `adr/0018-agent-evaluation-framework.md` → Golden Dataset used by CI Regression Gate
 - `docs/glossary.md` → Tiered Enforcement, Loop Detection, Four-Stage Rollout Funnel, Auto-Rollback

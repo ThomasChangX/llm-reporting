@@ -10,12 +10,13 @@ graph TB
         DP["Design Plane<br/>AI-Assisted Exploration"]
         FB["Freeze Bridge<br/>AI → Deterministic"]
         RP["Runtime Plane<br/>Deterministic Execution"]
+        IP["Intelligence Plane<br/>Read-Only AI Analysis"]
     end
 
     ERP["🏢 ERP Systems<br/>(SAP, Oracle, NetSuite)"]
     DB["🗄️ Databases<br/>(PostgreSQL, MySQL, BigQuery)"]
     FS["📁 File Systems<br/>(S3, HDFS, SharePoint)"]
-    LLM["🤖 LLM Providers<br/>(DeepSeek V4 Pro, Claude Sonnet 5)"]
+    LLM["🤖 LLM Providers<br/>(DeepSeek-V3, Claude Sonnet)"]
     Jira["📋 Jira / Rally<br/>(Project Tracking)"]
     Email["📧 Email<br/>(kb@ tenant inbox)"]
     Auth["🔐 Identity Provider<br/>(OAuth, SAML, LDAP, Kerberos)"]
@@ -26,6 +27,7 @@ graph TB
 
     DP -->|"Freeze validated workflow"| FB
     FB -->|"Deploy deterministic spec"| RP
+    RP -.->|"Read-Only"| IP
 
     RP -->|"Read/write data"| ERP
     RP -->|"Query/ingest"| DB

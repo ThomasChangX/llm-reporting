@@ -26,24 +26,24 @@ Core cost advantage: **Zero LLM execution cost after Freezing**. Design Plane us
 
 **Option 1: US/Global Team**
 
-| Role | Headcount | Monthly Salary (USD) | 8-Month Cost |
+| Role | FTE | Monthly Cost (USD, prorated) | 8-Month Cost |
 | ------------------------------------------ | --------- | ---------- | ------------ |
-| Senior Full-Stack Developer (AI-Assisted) | 2 | $14,000 | $224,000 |
-| Senior Backend/Data Engineer (AI-Assisted) | 1 | $13,500 | $108,000 |
+| Senior Full-Stack Developer (AI-Assisted) | 2.0 | $14,000 | $224,000 |
+| Senior Backend/Data Engineer (AI-Assisted) | 1.0 | $13,500 | $108,000 |
 | Domain Expert (Finance/BI, Part-time) | 0.5 | $6,000 | $48,000 |
 | DevOps Engineer (Part-time) | 0.5 | $6,500 | $52,000 |
-| **Subtotal** | **4 FTE** | | **$432,000** |
+| **Subtotal** | **4.0 FTE** | | **$432,000** |
 
-> **Salary Note**: Above are pre-tax base salaries. Actual enterprise employment costs must include employer burdens (US: FICA 7.65%, Health Insurance ~$500-1,200/mo/person, 401k match 3-6%, Workers' Comp, PTO etc. ≈ +25-35%; China: ~84-91% total burden — Five Insurances + Housing Fund ~35%, plus supplementary benefits, office space, equipment, management overhead, and other indirect costs). With burdens: US ~$540,000-583,000, China ~¥1,971,000-2,044,000 (~$274,000-284,000). Operations personnel costs in TCO calculations below should be proportionally adjusted upward.
+> **Salary Note**: "Monthly Cost" is the effective monthly cost for the stated FTE fraction (already prorated for part-time roles — e.g., the Domain Expert at 0.5 FTE costs $6,000/mo, equivalent to a $12,000/mo full-time rate). Figures are pre-tax. Actual enterprise employment costs must include employer burdens (US: FICA 7.65%, Health Insurance ~$500-1,200/mo/person, 401k match 3-6%, Workers' Comp, PTO etc. ≈ +25-35%; China: ~84-91% total burden — Five Insurances + Housing Fund ~35%, plus supplementary benefits, office space, equipment, management overhead, and other indirect costs). With burdens: US ~$540,000-583,000, China ~¥1,971,000-2,044,000 (~$274,000-284,000). Operations personnel costs in TCO calculations below should be proportionally adjusted upward.
 
 **Option 2: China Team**
-| Role | Headcount | Monthly Salary (CNY) | 8-Month Cost |
+| Role | FTE | Monthly Cost (CNY, prorated) | 8-Month Cost |
 | ------------------------------------------ | --------- | ---------- | ------------ |
-| Senior Full-Stack Developer (AI-Assisted) | 2 | ¥35,000 | ¥560,000 |
-| Senior Backend/Data Engineer (AI-Assisted) | 1 | ¥33,000 | ¥264,000 |
+| Senior Full-Stack Developer (AI-Assisted) | 2.0 | ¥35,000 | ¥560,000 |
+| Senior Backend/Data Engineer (AI-Assisted) | 1.0 | ¥33,000 | ¥264,000 |
 | Domain Expert (Finance/BI, Part-time) | 0.5 | ¥15,000 | ¥120,000 |
 | DevOps Engineer (Part-time) | 0.5 | ¥16,000 | ¥128,000 |
-| **Subtotal** | **4 FTE** | | **¥1,072,000 (~$149,000)** |
+| **Subtotal** | **4.0 FTE** | | **¥1,072,000 (~$149,000)** |
 
 ### 2.2 LLM API Costs (Development Phase)
 
@@ -466,11 +466,11 @@ These advantages are inherent in the architecture and require no additional impl
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Total Development Cost (one-time) | $163,754 (China) / $457,464 (US) | §2.1 + §2.2 + §2.3 |
+| Total Development Cost (one-time) | $163,854 (China) / $458,564 (US) | §2.1 + §2.2 + §2.3 |
 | Target Payback Period | 24 months | Typical: 18-24 months |
 | Monthly Revenue per Tenant (avg.) | $2,000 (Small), $1,500 (Medium), $1,000 (Large) | Per FR12.3 tiered pricing |
 | Gross Margin (after Runtime costs) | 70% (China) / 60% (US) | Revenue − (Infrastructure + LLM + Ops) |
-| Breakeven Tenant Count (China, 24mo) | ~5 tenants | $163,754 ÷ ($2,000 × 0.70 × 24) |
+| Breakeven Tenant Count (China, 24mo) | ~5 tenants | $163,854 ÷ ($2,000 × 0.70 × 24) |
 | Breakeven Tenant Count (US, 24mo) | ~16 tenants | $457,464 ÷ ($2,000 × 0.60 × 24) |
 
 ---

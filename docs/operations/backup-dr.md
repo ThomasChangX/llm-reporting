@@ -9,7 +9,7 @@
 | Data Tier | Service | RPO (Recovery Point Objective) | RTO (Recovery Time Objective) | Backup Method | Validation |
 |-----------|---------|-------------------------------|------------------------------|---------------|------------|
 | **T0 (Public)** | Config, Templates | 24h | 4h | pg_dump → S3 (daily) | Restore to staging, integration test |
-| **T1 (Internal)** | Workflow Specs, KB Metadata, Code Graph | 1h | 1h | WAL-G continuous archiving + PITR | Weekly restore drill to staging |
+| **T1 (Internal)** | Workflow Specs, KB Metadata, Code Graph (MVP: PG-resident; Neo4j Post-MVP per ADR-0013) | 1h | 1h | WAL-G continuous archiving + PITR | Weekly restore drill to staging |
 | **T2 (Confidential)** | Financial Data, Customer Lists, Payroll | 15min | 30min | WAL-G + Streaming Replication (sync to Standby) | Bi-weekly restore drill; DQ validation after restore |
 | **T3 (Restricted)** | PII, Passwords, Tokens, Medical | 5min | 15min | WAL-G + Sync Replication + Cross-Region Async Replica | Weekly restore drill; encryption verification; access audit |
 
@@ -108,6 +108,8 @@ Primary Region (us-east-1 / cn-north-1)     DR Region (us-west-2 / cn-east-2)
 | **Communication** | StatusPage update + notify tenants via email/in-app | <5min | Support |
 
 **Total RTO Target**: <60 minutes from detection to validated service restoration.
+
+> **Scope**: The 60-minute total RTO target covers critical T1-T3 services. T0 (Config, Templates) recovery follows its 4h RTO in parallel.
 
 ### 4.3 Recovery Testing
 

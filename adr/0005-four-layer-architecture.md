@@ -69,6 +69,6 @@ Adopt **Option C** (Four-Layer Architecture):
 
 ## Linked Modules
 
-- `docs/03-architecture.md` → §2 (Panoramic Architecture), §3 (Four-Layer Model Details), §9 (Change Intelligence)
+- `docs/03-architecture.md` → §2 (Panoramic Architecture), §3 (Four-Layer Model and Design Plane), §9 (Change Intelligence)
 - `docs/02-requirement.md` → FR1-2, FR15b, FR15c, NFR1-2
-- `adr/0006-freeze-bridge-independence.md` → Decision #6 (Freeze Bridge Independence)
+- `adr/0006-freeze-bridge-independence.md` → Freeze Bridge Independence

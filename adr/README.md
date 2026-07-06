@@ -13,7 +13,7 @@
 | 0002 | [LLM Role Positioning](./0002-llm-role-positioning.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0003 | [Design Order](./0003-design-order.md) | Process | ✅ Accepted | 2026-07-04 |
 | 0004 | [Document Structure](./0004-document-structure.md) | Process | ⬜ Superseded by [0012](./0012-document-structure-v2.md) | 2026-07-04 |
-| 0005 | [Four-Layer Architecture](./0005-four-layer-architecture.md) | Architecture | ✅ Accepted (Refined 2026-07-04) | 2026-07-04 |
+| 0005 | [Four-Layer Architecture](./0005-four-layer-architecture.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0006 | [Freeze Bridge Independence](./0006-freeze-bridge-independence.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0007 | [Query Service Component](./0007-query-service-component.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0008 | [Large-Scale Data Strategy](./0008-large-scale-data-strategy.md) | Data | ✅ Accepted | 2026-07-04 |

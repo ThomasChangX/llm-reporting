@@ -45,4 +45,4 @@ Phase A already embeds the multi-tenant foundation (all entities include `tenant
 
 - `docs/02-requirement.md` → FR12 (Multi-Tenancy)
 - `docs/04-timeline.md` → Phase 0-8
-- `docs/03-architecture.md` → §11 (RBAC), §7 (Execution Sandbox), §22F (Agent Multi-Tenant Isolation)
+- `docs/03-architecture.md` → §11.2 (Entitlement / RBAC + ABAC), §7 (Execution Sandbox), §22F (Agent Multi-Tenant Isolation)

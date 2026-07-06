@@ -114,7 +114,7 @@ Offline Eval → Deploy → Online Monitoring → Failure Analysis → Expand Go
 
 ## Linked Modules
 
-- → docs/03-architecture.md §22H
+- → docs/03-architecture.md §22I
 - → docs/03-architecture.md §22A (Dual-Mode)
 - → docs/03-architecture.md §22B S08 (Closed-Loop Learning)
 - → adr/0016 (Dual-Mode Orchestration)

@@ -70,7 +70,7 @@ class BlobStore(Protocol):
 | `RelationalStore` | **PostgreSQL** (native) | No upper limit | — (PG is sufficient) |
 | `BlobStore` | **S3 / MinIO** | No upper limit | — (Standard solution) |
 
-### Three Gating Criteria for Introducing Dedicated Engines
+### Four Gating Criteria for Introducing Dedicated Engines
 
 Only introduce a dedicated engine when **all** of the following conditions are met:
 1. PG implementation consistently exceeds p95 latency targets under production load

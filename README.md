@@ -17,8 +17,8 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 | # | Document | Contents |
 |---|----------|----------|
 | 01 | [docs/01-facts.md](docs/01-facts.md) | Project background, design philosophy, 22 Architecture Decision Records (summarized in facts doc) |
-| 02 | [docs/02-requirement.md](docs/02-requirement.md) | 44 functional requirement groups + 9 NFR groups (ISO 25010) |
-| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Full architecture design (~6200 lines): dual-plane, Compute Spec, KB, Agents, BRD/ADR, and more |
+| 02 | [docs/02-requirement.md](docs/02-requirement.md) | 46 functional requirement groups + 9 NFR groups (ISO 25010) |
+| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Full architecture design (~6200 lines): Four-Layer Architecture, Compute Spec, KB, Agents, BRD/ADR, and more |
 | 04 | [docs/04-timeline.md](docs/04-timeline.md) | Development roadmap with Token-Speed estimation methodology |
 | 05 | [docs/05-cost.md](docs/05-cost.md) | Full lifecycle cost analysis: development, infrastructure, LLM, pricing model |
 
