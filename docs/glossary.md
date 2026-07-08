@@ -21,12 +21,20 @@
 
 | Term | Definition |
 |------|------------|
-| Knowledge Base (KB) | 7 knowledge domains: Business Glossary, Data Catalog, Mapping Registry, Workflow Templates, Adjustment History, Behavior Patterns, Report/Metric Catalog. Storage: PG-First + Interface Abstraction — PostgreSQL + pgvector handles Vector/Graph/Relational roles during MVP; S3/MinIO handles Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when four gating conditions are met. |
+| Knowledge Base (KB) | 9 knowledge domains: Business Glossary, Data Catalog, Mapping Registry, Workflow Templates, Adjustment History, Behavior Patterns, Report/Metric Catalog, Diagnostic Playbooks (ADR-0024), Code Knowledge (ADR-0024). Storage: PG-First + Interface Abstraction — PostgreSQL + pgvector handles Vector/Graph/Relational roles during MVP; S3/MinIO handles Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when four gating conditions are met. Content enters via the unified Content Processing Pipeline (ADR-0023). |
 | Code Graph | System structure knowledge graph (Workflow → Job → DataSource DAG) with 15+ edge types. Powers Change Intelligence and the AI Knowledge Agent. |
 | Business Glossary | KB domain: terms, aliases, definitions, formulas, business context, data source mappings. |
 | Data Catalog | KB domain: data asset metadata (tables/APIs/files/streams), schema details, PII markers, quality scores. |
 | Mapping Registry | KB domain: legacy-to-new field mappings, cross-currency conversion rules, transform logic. |
 | Report/Metric Catalog | KB domain (7th domain): report definitions, metric formulas, calculation granularity, certification status, relationships with data sources and Workflows. |
+| Diagnostic Playbooks | KB domain (8th domain, ADR-0024): expert-encoded IF/THEN diagnostic decision trees that guide Agent reasoning in Exploration Mode — the read-only "soft skeleton" counterpart to Verified Paths. Three sources: system-builtin (conf 1.0), incident-distilled (promoted after ≥3 recurrences), user-defined. See adr/0024. |
+| Code Knowledge | KB domain (9th domain, ADR-0024): three-layer index over code artifacts — structural (Code Graph nodes/edges), semantic (function-level embeddings), change (commits/blame/diffs). Enables semantic code search and code-logic reasoning. See adr/0024. |
+| Content Processing Pipeline | Unified 5-stage funnel (ADR-0023) through which all heterogeneous content (Email, DOCX, Excel, upload, API) is processed: Parse & Normalize → Semantic Chunking → Contextual Retrieval Enhancement → Four-index ACID write → Provenance Tagging. See adr/0023. |
+| Contextual Retrieval | Technique (Anthropic 2024) where a small model generates a short context summary prepended to each chunk before embedding, reducing retrieval failure by 35% alone (67% with reranking). Core of Content Processing Pipeline Stage 3. See adr/0023. |
+| Linkage Weaving | The layer (ADR-0023) that generates cross-content relationship edges: MENTIONS_ENTITY (entity co-reference), SIMILAR_TO (semantic similarity), DERIVED_FROM (structural lineage, L2-confirmed), CONFLICTS_WITH (contradiction). Lazy edge creation over full GraphRAG community hierarchy. See adr/0023. |
+| Entity Linking | The process of extracting named entities from content (via small-model NER) and linking them to KB GlossaryEntries, producing MENTIONS_ENTITY edges. Part of Linkage Weaving. See adr/0023. |
+| Freshness Decay | Quality-flywheel mechanism (ADR-0023) where each chunk carries a half_life by content type; beyond half_life the chunk is marked stale and down-ranked at retrieval (not deleted — bitemporal retention per ADR-0019). See adr/0023. |
+| Playbook Router (S18) | Skill that matches a user's diagnostic intent against the Diagnostic Playbooks domain and injects the matched playbook as a guided plan into the Skill Planner. Exploration-Mode counterpart to Verified Path enforcement. See adr/0024. |
 
 ## Jobs & Execution
 
@@ -42,8 +50,8 @@
 
 | Term | Definition |
 |------|------------|
-| MCP (Model Context Protocol) | Standard protocol for Agent interaction with external systems. This project plans 19 MCP Servers. |
-| Skill | Pre-defined Agent capability module (e.g., Intent Parsing, KB Retrieval, Impact Analysis). This project plans 17 composable Skills (S01-S17). |
+| MCP (Model Context Protocol) | Standard protocol for Agent interaction with external systems. This project plans 21 MCP Servers (18 in the §22C Core Catalog: MCP-01..17 + MCP-23; plus 3 BRD-pipeline MCPs defined in §23.8.2: MCP-20 jira-sync, MCP-21 confluence-export, MCP-22 compliance-mapper). |
+| Skill | Pre-defined Agent capability module (e.g., Intent Parsing, KB Retrieval, Impact Analysis). This project plans 18 composable Skills (S01-S18). |
 | LLM SDK | Unified model invocation layer with pluggable switching between DeepSeek V4 Pro / Claude Sonnet 5 / private models. |
 | Prompt Injection | OWASP LLM01 threat. Maliciously crafted prompts that bypass system instructions or leak data. This architecture employs 5-layer defense. |
 | DeepSeek V4 Pro | Default LLM model for China region (~80 tps decode, Input $0.50/M, Output $2.00/M). |
@@ -144,4 +152,4 @@
 
 ---
 
-*Last Updated: 2026-07-04 | Total Terms: 102 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022*
+*Last Updated: 2026-07-08 | Total Terms: 109 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022, adr/0023, adr/0024*

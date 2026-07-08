@@ -120,7 +120,7 @@ Effective_Parallelism = N_workers × Coupling_Penalty × Merge_Overhead × Conte
 | **Service implementation (shared schema)** | Light (shared DB) | 2.5× | 3.2× | 3.8× | 4.3× | 4.7× | 5.0× | 5–6 | Merge overhead grows with schema coupling |
 | **Test generation (per module)** | None (per-file) | 2.8× | 3.6× | 4.4× | 5.1× | 5.7× | 6.1× | 6–8 | Embarrassingly parallel; minimal merge |
 | **ETL pipeline components** | DAG (sequential stages) | 2.1× | 2.6× | 2.9× | 3.1× | 3.2× | 3.3× | 3–5 | Stage dependencies limit parallelism |
-| **KB domain entry population** | Independent domains | 2.7× | 3.5× | 4.2× | 4.8× | 5.3× | 5.7× | 6–8 | 7 KB domains map naturally to workers |
+| **KB domain entry population** | Independent domains | 2.7× | 3.5× | 4.2× | 4.8× | 5.3× | 5.7× | 6–8 | 9 KB domains map naturally to workers |
 | **Design Plane component build** | Moderate (UI+Engine) | 2.3× | 2.9× | 3.4× | 3.7× | 3.9× | 4.0× | 4–5 | Frontend/backend coupling limits parallelism |
 | **Cross-cutting concerns (auth, audit)** | High (penetrates all) | 1.5× | 1.7× | 1.8× | 1.9× | 1.9× | 2.0× | 3–4 | Cross-cutting; best done sequentially or with 2-3 workers |
 | **Architecture/ADR generation** | Sequential (depends on prior decisions) | 1.3× | 1.4× | 1.5× | 1.5× | 1.5× | 1.5× | 1–2 | Decisions cascade; parallelism limited |
@@ -157,7 +157,7 @@ Probability of merge conflicts requiring Reviewer rework, by number of workers m
 |-------|-------------------|---------------|-----------|
 | 0: Foundation | Cross-cutting + Architecture | 2–3 | High coupling; ADRs cascade |
 | 1: Core Compute | ETL + Service (moderate coupling) | 4–5 | Balance speed vs. merge cost |
-| 2: KB | Independent domain population | 5–7 | 7 domains are loosely coupled |
+| 2: KB | Independent domain population | 5–7 | 9 domains are loosely coupled |
 | 3: Design Plane | UI + Engine (moderate coupling) | 4–5 | Frontend/backend split |
 | 4: Freeze Bridge | Pipeline (sequential stages) | 3–4 | Stage dependencies |
 | 5: Runtime | Independent services | 5–6 | Runtime components loosely coupled |
@@ -359,7 +359,7 @@ Probability of merge conflicts requiring Reviewer rework, by number of workers m
 | M7.5: Agent Customization & Workflow | W35 | Agent Workflow as Compute Spec type (meta-workflow), Per-team Agent Workflow definitions, Model selection three-layer preference (Tenant/Group/Individual), Scenario-based model routing (sensitive→private, general→SaaS) | Phase 3: AI Copilot Engine, FR30, ADR-0016 |
 | M7.6: Dependency Manager | W35 | Auto-discovery of cross-Workflow data dependencies, Dependency topology visualization (DAG), Upstream change impact alerting, Version snapshots per execution, Deprecation marking + migration suggestions | Phase 5: Runtime operational, FR40 |
 | M7.7: Vendor Promotion & Concurrency | W35 | Verified Path promotion with saga semantics, Concurrency control for parallel VP execution, Compensation transactions on failure | ADR-0017 (Verified Path Saga), ADR-0021 (VP Promotion & Concurrency) |
-| M7.8: Hierarchical Multi-Agent (Evolution) | W35 | Central Reasoner + Sub-Agent layered architecture, MVP's 17 Skills (S01-S17) become Sub-Agent tool library, Monte Carlo-aligned 2025-2026 production architecture | All prior phases, ADR-0016, Architecture §22A.6 |
+| M7.8: Hierarchical Multi-Agent (Evolution) | W35 | Central Reasoner + Sub-Agent layered architecture, MVP's 18 Skills (S01-S18) become Sub-Agent tool library, Monte Carlo-aligned 2025-2026 production architecture | All prior phases, ADR-0016, Architecture §22A.6 |
 | M7.9: Heavy Engine — Trino/Ray (if demanded) | W35 | Trino for federated queries across heterogeneous sources, Ray for distributed Python/Polars transforms | M5.8 (Spark), clear customer demand signal, ADR-0008 |
 
 **Key FR Coverage**: FR3 (Observation & Suggestion), FR5b (Dashboard), FR17 (Email Ingestion), FR28 (Change Intelligence — full), FR30 (Agent Customization), FR40 (Dependency Manager), FR15.4 (Message/Stream connectors), FR15.5 (Custom Plugin SDK), FR27.4 (AI-Powered Log Analysis)
@@ -441,7 +441,7 @@ Each phase boundary is gated by a formal checkpoint review. The following criter
 |-----------|---------------|-------------------|-------------------|
 | **CP0: Foundation Complete** | (a) Architecture docs approved (ADR-0002/0005/0006), (b) Dev environment operational for all engineers, (c) Token-Speed baseline measured from Phase 0 tasks, (d) CI/CD skeleton passing, (e) Phase 1 task breakdown approved | Architecture doc sign-off, CI dashboard (green), Velocity report | Architecture Lead + Project Sponsor |
 | **CP1: Core Compute Complete** | (a) Compute Spec YAML schema stable (all 9 Job types defined), (b) Dual Engine interface validated with DuckDB MVP, (c) Integration Framework (L1-L2) operational, (d) Query Service metadata manager operational, (e) Format System (5 format types) defined | Integration test suite passing, Demo of Compute Spec → DuckDB execution, Schema review sign-off | Tech Lead + Architecture Lead |
-| **CP2: KB Complete** | (a) All 7 KB domains populated with sample data, (b) Hybrid search (semantic + keyword + graph) returning results < 200ms P95, (c) KB Write Governance (5 gates) operational, (d) KB ↔ Code Graph bridge edges functional | Search benchmark report, Write governance test suite, Demo of KB context retrieval for sample NL query | Tech Lead + Domain Expert |
+| **CP2: KB Complete** | (a) All 9 KB domains populated with sample data, (b) Hybrid search (semantic + keyword + graph) returning results < 200ms P95, (c) KB Write Governance (5 gates) operational, (d) KB ↔ Code Graph bridge edges functional | Search benchmark report, Write governance test suite, Demo of KB context retrieval for sample NL query | Tech Lead + Domain Expert |
 | **CP3: Design Plane Complete** | (a) Conversation Interface handling 50+ intents, (b) Visual Designer producing valid Design Artifact YAML, (c) AI Copilot Engine with both LLM adapters operational, (d) Prompt injection defense passing security review, (e) Design Artifact confidence ≥ 0.7 on sample workflows | Intent coverage report, Security review sign-off, UX usability test (NFR6.2: first-report < 15 min) | Product Lead + Security Lead + UX Lead |
 | **CP4: Freeze Bridge Complete** | (a) Spec Refinement Assistant resolving all 5 fuzzy node types, (b) Validation Engine passing 100% of well-formed specs, (c) CI/CD pipeline deploying to sandbox, (d) Canary gating (4-stage) operational, (e) Pre/Post-Change doc generation accurate | Canary demo (1%→100%), Fuzzy node resolution test suite, CI/CD dashboard (green) | Tech Lead + DevOps Lead |
 | **CP5: Runtime Complete** | (a) Workflow Executor running 100 concurrent workflows, (b) Scheduler handling all 4 trigger types with timezone correctness, (c) L1-L3 connectors passing integration tests, (d) Output Renderer producing all 5 formats, (e) Resilience patterns (6/6) operational, (f) Incident Manager auto-creating tickets | Load test report (100 workflows), Connector integration test suite, Chaos engineering test (circuit breaker + bulkhead), Renderer output validation | Tech Lead + SRE Lead |

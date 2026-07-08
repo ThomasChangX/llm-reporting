@@ -1135,7 +1135,7 @@ Auto-generated after merge, including:
 
 ## 10. Knowledge Base
 
-The system's long-term memory, spanning seven knowledge domains. **Semantic Layer Alignment**: Business Glossary + Report/Metric Catalog together constitute the system's semantic layer, following the dimension-metric-entity modeling paradigm of dbt Semantic Layer and MetricFlow, supporting exposure of a unified semantic interface to external analysis tools (Tableau, PowerBI, Excel) via JDBC/ODBC (Post-MVP Phase 7+).
+The system's long-term memory, spanning nine knowledge domains. **Semantic Layer Alignment**: Business Glossary + Report/Metric Catalog together constitute the system's semantic layer, following the dimension-metric-entity modeling paradigm of dbt Semantic Layer and MetricFlow, supporting exposure of a unified semantic interface to external analysis tools (Tableau, PowerBI, Excel) via JDBC/ODBC (Post-MVP Phase 7+).
 
 | Domain | Content |
 | ---------------------- | ------------------------------------------------- |
@@ -1145,6 +1145,9 @@ The system's long-term memory, spanning seven knowledge domains. **Semantic Laye
 | **Workflow Templates** | Template definitions, categorization, prerequisite KB requirements, usage statistics |
 | **Adjustment History** | Anomaly root cause analysis, adjustment entries, approval chain (immutable) |
 | **Behavior Patterns** | User action sequences, temporal patterns, derived suggestions |
+| **Report/Metric Catalog** | Report definitions, metric formulas, calculation granularity, certification status, relationships with data sources and Workflows |
+| **Diagnostic Playbooks** *(ADR-0024)* | Expert-encoded diagnostic decision trees (IF/THEN investigation paths) that act as a "soft skeleton" guiding Agent reasoning in Exploration Mode — the read-only counterpart to Verified Paths |
+| **Code Knowledge** *(ADR-0024)* | Three-layer index over code artifacts (Compute Spec YAML, Sandbox Python, Git history, external repos): structural (Code Graph nodes/edges), semantic (function-level embeddings), change (commits/blame/diffs) |
 
 ### Storage Architecture
 
@@ -1178,7 +1181,7 @@ KB storage adopts a **PG-First + Interface Abstraction** strategy. In the MVP ph
 | `RelationalStore` | **PostgreSQL** (native) | Tens of millions of rows per table | — (PG is sufficient) |
 | `BlobStore` | **S3 / MinIO** | Unlimited | — (Standard solution) |
 
-**KB Data Scale Estimate**: A typical mid-size enterprise over 5 years of operation is projected at ~670K records (Glossary ~5K + Data Catalog ~50K columns + Mapping ~10K + Templates ~1K + Adjustment ~100K + Behavior ~500K + Report/Metric ~5K), far below PG's replacement threshold. See [adr/0013-kb-storage-strategy.md](../adr/0013-kb-storage-strategy.md).
+**KB Data Scale Estimate**: A typical mid-size enterprise over 5 years of operation is projected at ~720K records (Glossary ~5K + Data Catalog ~50K columns + Mapping ~10K + Templates ~1K + Adjustment ~100K + Behavior ~500K + Report/Metric ~5K + Diagnostic Playbooks ~500 + Code Knowledge ~50K function/Spec chunks), still far below PG's replacement threshold. See [adr/0013-kb-storage-strategy.md](../adr/0013-kb-storage-strategy.md).
 
 **Three-Gate Conditions for Introducing Dedicated Engines**: Dedicated engines are introduced only when all of the following are simultaneously met: (a) PG stably exceeds p95 latency target (b) data volume consistently exceeds scale limit (c) PG-level optimizations are exhausted (d) TCO cost-benefit is positive. There is no "deploy as backup" strategy.
 
@@ -1211,6 +1214,91 @@ Knowledge Base adopts a layered consistency model, with the Relational DB (Postg
 - **Write**: User explicit → AI extraction + confirmation → system automated. All pass through Permission → Versioning → Notification → Embedding → Graph
 - **Read**: Semantic search → keyword filtering → relationship expansion → fusion ranking → inject into AI Prompt
 - **Governance**: Version history, approval workflow, expiration detection, KB↔Code Graph inconsistency alerts
+
+### 10.2 Content Processing Pipeline → adr/0023
+
+All heterogeneous content sources — enterprise email (SMTP), user uploads (DOCX/XLSX/PDF), API pushes, Excel imports, pasted text — converge into a **single five-stage processing funnel** so that retrieval quality, provenance, and linkage are uniform regardless of origin. Stage 1 dispatches to the existing parsing MCPs (MCP-11 email-parser, MCP-12 ocr, MCP-16 excel-parser); it does not duplicate them. See [adr/0023](../adr/0023-kb-content-lifecycle-pipeline.md) for full rationale.
+
+```
+Heterogeneous sources (SMTP / upload / API / paste)
+   │
+   ▼
+STAGE 1 — Parse & Normalize (deterministic, reuse MCP-11/12/16)
+   │   .docx → POI/Unstructured; .xlsx → MCP-16; .pdf → PDFBox+Camelot / MCP-12 OCR;
+   │   email → MCP-11 → EmailRecord (per §12.1)
+   │   Output: ContentUnit { type, raw_text, structure, blob_ref }  (structure preserved — anchors for §10.3)
+   ▼
+STAGE 2 — Semantic Chunking (structure-aware, not fixed-length)
+   │   Split on structural boundaries; tables stay intact; email header/body/attachment split
+   ▼
+STAGE 3 — Contextual Retrieval Enhancement (key quality uplift)
+   │   Small model generates a context summary prepended to each chunk before embedding
+   │   (Anthropic 2024: -35% retrieval failure alone, -67% with reranking)
+   │   Same summary also indexed into BM25 (keyword retrieval benefits too)
+   ▼
+STAGE 4 — Vectorize + Multi-Index Write (single ACID transaction — ADR-0013 zero-CDC advantage)
+   │   Embedding → pgvector HNSW; raw+summary → tsvector GIN; fields → native tables;
+   │   edges → edge tables (§10.3); blob → S3 (PG stores key)
+   │   All four indexes in one transaction — no sync window, no partial-write state
+   ▼
+STAGE 5 — Provenance Tagging (immutable audit chain, satisfies FR17.5 + SOX)
+   source_doc_id, source_span, ingest_time, ingest_channel, extractor, confidence
+   Provenance classes (align ADR-0019): user_uploaded / email_received / api_pushed
+```
+
+**Relationship to existing ingestion channels**: the Email Pipeline (§12.1) output flows into this funnel after its own AI fact-extraction and human-confirmation gate; Sandbox Python code and Compute Specs enter via the code-ingestion events defined in ADR-0024. No existing pipeline is bypassed — Stage 1 is a dispatch layer over existing MCPs.
+
+### 10.3 Linkage Weaving Layer → adr/0023
+
+This layer defines *how heterogeneous content gets connected* so the Agent can reason across "the email that mentioned a metric + the DOCX that defined it + the Excel that computed it". Three linkage edge types connect content; one conflict edge type freezes contradictions. All four are generated by the strategies below, mapped to the existing Remediation Gateway tiers (ADR-0015 L0-L3). (The `CONFLICTS_WITH` edge and the Quality Flywheel's Conflict Detection stage describe the same mechanism from the edge-creation and governance perspectives, respectively.)
+
+| Edge Type | Relation | Risk | Generation Strategy | Confirmation |
+|---|---|---|---|---|
+| **Entity Co-reference** | `MENTIONS_ENTITY` (chunk → GlossaryEntry) | Low | Small-model NER + KB entity matching (exact-first) + candidate disambiguation | High-conf auto-created; low-conf enters review queue |
+| **Semantic Similarity** | `SIMILAR_TO` (chunk ↔ chunk) | Low | On ingest: vector near-neighbor query (top-5); similarity > 0.85 AND passes NLI non-contradiction → edge | Auto-created; dismissable from KB Governance Dashboard |
+| **Structural Lineage** | `DERIVED_FROM` (ReportCell → ExcelRange → DataSource) | **High (audit-impacting)** | LLM proposes only — wrong lineage in financial scenarios is catastrophic | **Mandatory human confirm (L2 approval)** |
+| **Conflict** | `CONFLICTS_WITH` (fact ↔ fact) | High | NLI contradiction detection between new and existing facts | Detected → `conflict` → **frozen, human adjudication** (ADR-0022 pattern generalized) |
+
+**Why not full GraphRAG (Microsoft community hierarchy)?** The KB's projected scale (~720K records) and PG-First / zero-CDC philosophy make full community-hierarchy construction a poor fit — it is LLM-expensive, hard to update incrementally, and re-introduces the operational complexity ADR-0013 rejected. **Lazy edge creation** (on ingest + on query) delivers GraphRAG's "connect the dots" benefit at a fraction of the cost. Dedicated community detection is reserved as a future option only if a measurable retrieval-quality gap justifies it.
+
+**Bridge edges to Code Graph** (cross-graph linking, extends §2.1):
+
+```
+KB.GlossaryEntry  —DEFINED_IN→  CodeGraph.Job
+KB.DataAsset      —IS→           CodeGraph.DataSource
+KB.Chunk          —MENTIONS_ENTITY→  KB.GlossaryEntry
+KB.Chunk          —DERIVED_FROM→  CodeGraph.Spec   (lineage, L2-confirmed)
+```
+
+These bridge edges are what let the Agent in Scenario 6 (§22E) join "the email about gross margin" + "the Job that computes it" + "the report that displays it" into one causal chain.
+
+### 10.4 Quality Flywheel → adr/0023
+
+A closed-loop governance system that prevents silent KB quality drift. Four stages, each feeding the next:
+
+```
+New content ingested (Stages 1–5 of §10.2)
+   │
+   ▼
+Dedup — SimHash/MinHash near-duplicate detection; forwarded email chains → one canonical + reference list
+   │
+   ▼
+Conflict Detection — new fact vs existing KB fact → NLI contradiction → mark conflict → frozen → human adjudication (never auto-overwrite; generalizes ADR-0022 BRD conflict pattern)
+   │
+   ▼
+Freshness Decay — each chunk carries a half_life by content type:
+   • Business definitions: long (2 years; expire only on explicit change)
+   • Data snapshots / report figures: short (30 days)
+   • Email facts: medium (180 days)
+   Fusion-ranking Freshness weight (S02 already has 0.10) scales with decay;
+   beyond half_life → marked stale → triggers "still valid?" re-review
+   │
+   ▼
+Retrieval Quality Evaluation (offline) — RAGAS-family metrics (context_precision / context_recall / faithfulness);
+   uses ADR-0018 Golden Dataset for A/B evaluation; quality regression → triggers re-embedding or re-chunking of affected domain
+```
+
+**Decay is not deletion** — consistent with ADR-0019's bitemporal validity: old values are retained as historical version-chain entries (auditable), only down-ranked at retrieval time, never lost.
 
 ---
 
@@ -1996,7 +2084,7 @@ Item-by-item assessment per OWASP Top 10 for LLM Applications (v1.0, 2023):
 | **workflow** | Top-level unit of work | spec_yaml immutable after freeze, workflow_version as version chain |
 | **job** | Smallest DAG execution unit | 9 types, UUID[] dependencies, engine overridable |
 | **data_source** | Registered external data source | connector_config encrypted, schema_catalog periodically refreshed, T0-T3 classification |
-| **kb_entry** | KB entry (7 domains) | content_vector (1536-dim), partitioned by domain LIST, superseded_by version chain |
+| **kb_entry** | KB entry (9 domains) | content_vector (1536-dim), partitioned by domain LIST, superseded_by version chain |
 | **audit_log** | Immutable audit log | BIGSERIAL PK, monthly RANGE partitioning, no FK constraints, 7-year hot storage |
 | **user_session** | User identity and session | idp_subject immutable, extra_permissions time-limited authorization |
 | **incident** | Operations event | severity P0-P4, SLA auto-calculated, context JSONB with full context |
@@ -2892,7 +2980,7 @@ ModelInterface {
 
 ### 22A.6 Hierarchical Multi-Agent Architecture (Evolution Direction, Phase 7+)
 
-> During the MVP phase, maintain the current flat catalog of 17 Skills (S01-S17). Phase 7+ evolves into a Central Reasoner + Sub-Agent layered architecture, aligned with Monte Carlo's 2025-2026 production architecture.
+> During the MVP phase, maintain the current flat catalog of 18 Skills (S01-S18). Phase 7+ evolves into a Central Reasoner + Sub-Agent layered architecture, aligned with Monte Carlo's 2025-2026 production architecture.
 
 ```
                           ┌─────────────────────────────────────┐
@@ -2934,7 +3022,7 @@ ModelInterface {
   All Sub-Agents run in parallel → Central Reasoner synthesizes → outputs unified diagnosis
 ```
 
-**Relationship with MVP Flat Skill Catalog**: In Phase 7+, the MVP's 17 Skills (S01-S17) become the underlying tool library for Sub-Agents. The Central Reasoner calls Sub-Agents, and Sub-Agents call existing Skills.
+**Relationship with MVP Flat Skill Catalog**: In Phase 7+, the MVP's 18 Skills (S01-S18) become the underlying tool library for Sub-Agents. The Central Reasoner calls Sub-Agents, and Sub-Agents call existing Skills.
 
 **Introduction Criteria** (Three-Gate Condition):
 1. Alert volume reaches critical scale (daily average >50 warnings)
@@ -2978,7 +3066,7 @@ ModelInterface {
 
 | Attribute | Description |
 | --------- | ----------- |
-| **Description** | Hybrid retrieval (semantic + keyword + graph traversal) from the seven domains of the Knowledge Base, retrieving the most relevant knowledge entries |
+| **Description** | Hybrid retrieval (semantic + keyword + graph traversal) from the nine domains of the Knowledge Base, retrieving the most relevant knowledge entries |
 | **Tools** | MCP-01 (vector-search), MCP-02 (graph-traverse), MCP-04 (pg-query) |
 | **Permissions** | `kb:read` (role-filtered — Dev cannot query business data definitions in Business Glossary, only technical metadata) |
 | **Reasoning Model** | Small model (Embedding matching + result re-ranking); Embedding model: `text-embedding-3-large` or tenant-configured private model |
@@ -3131,6 +3219,19 @@ ModelInterface {
 | **Input**             | `{ artifact_type: "excel" or "powerbi", file_bytes?: bytes, connector_config?: {...} }` |
 | **Output**            | `{ proposed_spec: { workflow, jobs, formats }, migration_notes: [{ original_element, proposed_equivalent, confidence, manual_review_needed }], unmappable_elements: [...] }` |
 
+#### S18 — PlaybookRouter (Diagnostic Playbook Router) [P1] → adr/0024
+
+| Attribute | Description |
+| --------- | ----------- |
+| **Description** | Match a user's diagnostic intent against the Diagnostic Playbooks KB domain; inject the matched playbook as a guided plan into the Skill Planner. Acts as the "soft skeleton" for Exploration-Mode diagnostics — the read-only counterpart to Verified Paths (ADR-0016). |
+| **Tools** | S02 (KBRetriever — query the Diagnostic Playbooks domain), S01 (IntentParser — trigger matching) |
+| **Permissions** | `kb:read` (role-filtered — playbooks are tenant-isolated; system-builtin playbooks are shared across tenants but contain no tenant data) |
+| **Reasoning Model** | Small model (intent → playbook trigger matching); Large model (playbook step adaptation based on observations — the LLM reasons within the skeleton) |
+| **Input** | `{ intent: string, entities: {...}, session_context: {...} }` (typically the output of S01 IntentParser) |
+| **Output** | `{ matched_playbook: { id, name, steps: [...], confidence_thresholds: {...} }, routing_path: "explicit" or "implicit", fallback: "pure_react" }`. If no playbook matches, `matched_playbook: null` and `routing_path: "pure_react"` — the Agent falls back to unconstrained ReAct, preserving backward compatibility. |
+| **Playbook Sources** | Three confidence-tagged sources (align ADR-0019): system-builtin (conf 1.0, shipped patterns), incident-distilled (model_inferred, conf 0.7-0.9, promoted after ≥3 recurrences + human confirm), user-defined (user_stated, conf 1.0, team SOP) |
+| **Closed Loop** | Successful diagnostic trajectories stored in L2 Episodic Memory (ADR-0019); ≥3 recurrences → LLM proposes distillation into a new Playbook candidate → user confirms → promoted to domain (reuses S08 closed-loop pattern, ADR-0015) |
+
 ---
 
 ## 22C. MCP Server Catalog
@@ -3158,6 +3259,7 @@ ModelInterface {
 | **MCP-15** | data-source-test         | `test_connection(config: DataSourceConfig) → ConnectionTestResult` — Connection test; `discover_schema(config: DataSourceConfig) → SchemaInfo` — Schema discovery; `sample_data(config: DataSourceConfig, table: str, limit?: int) → SampleData` — Sample data                                                                             | gRPC            | API Key + `X-Tenant-ID`                                                                                           | 20 req/min per tenant   | 30s     |
 | **MCP-16** | excel-parser             | `parse(file_bytes: bytes) → ParsedWorkbook { sheets: [{ name, tables: [...], formulas: [...], charts: [...] }] }` — Excel workbook parsing; `extract_logic(file_bytes: bytes) → LogicModel` — Formula logic extraction (attempts to recover computation intent)                                                                           | gRPC            | API Key + `X-Tenant-ID`                                                                                           | 20 req/min per tenant   | 30s     |
 | **MCP-17** | external-ticketing       | `create_ticket(system: "jira"\|"rally"\|"servicenow"\|"azure_devops", project: str, issue_type: str, fields: dict) → TicketResult` — Create external ticket; `link_brd(ticket_id: str, brd_id: str) → LinkResult` — BRD↔Ticket bidirectional link; `get_status(ticket_id: str) → TicketStatus` — Query ticket status                                                                          | gRPC            | API Key + `X-Tenant-ID` + External System Credential (Vault injection)                                            | 50 req/min per tenant   | 15s     |
+| **MCP-23** | code-knowledge-search    | `semantic_search_code(query: str, language?: str, top_k?: int) → CodeResults` — Semantic search over the Code Knowledge index (find functions by meaning, not name); `get_function(function_id: str) → FunctionDetail` — Full function source + Docstring + caller/callee list; `get_call_graph(root_function: str, depth?: int) → CallGraph` — Call-graph subgraph export; `find_similar_code(function_id: str, top_k?: int) → SimilarFunctions` — Find structurally/semantically similar functions | gRPC            | API Key + `X-Tenant-ID` + RBAC (Dev→full code access; Business User→no code access, only Spec-level)              | 50 req/min per tenant   | 10s     |
 
 ### MCP Deployment Architecture
 
@@ -4525,7 +4627,7 @@ Recon-triggered VP-001 can preempt Ad-hoc VP-003. Preempted party receives notif
 
 ## 22M. Agent Capability Discovery → adr/0021
 
-> "Blank Canvas Problem": Non-technical users facing an empty input box don't know what the Agent can do. 19 MCPs, 17 Skills, 6 VPs — the stronger the capability, the harder the discovery.
+> "Blank Canvas Problem": Non-technical users facing an empty input box don't know what the Agent can do. 21 MCPs, 18 Skills, 6 VPs — the stronger the capability, the harder the discovery.
 
 ### 22M.1 Three-Layer Progressive Capability Reveal
 
