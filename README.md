@@ -2,7 +2,7 @@
 
 > An AI-assisted design and deterministic execution platform for Reporting, ETL, Adjustment, and Reconciliation — replacing Excel and PowerBI.
 
-**Status**: Design Phase (pre-implementation) | **Version**: 1.4 | **Last Updated**: 2026-07-04
+**Status**: Design Phase (pre-implementation) | **Version**: 1.5 | **Last Updated**: 2026-07-08
 
 ## Philosophy
 
@@ -16,7 +16,7 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 
 | # | Document | Contents |
 |---|----------|----------|
-| 01 | [docs/01-facts.md](docs/01-facts.md) | Project background, design philosophy, 22 Architecture Decision Records (summarized in facts doc) |
+| 01 | [docs/01-facts.md](docs/01-facts.md) | Project background, design philosophy, 24 Architecture Decision Records (summarized in facts doc) |
 | 02 | [docs/02-requirement.md](docs/02-requirement.md) | 46 functional requirement groups + 9 NFR groups (ISO 25010) |
 | 03 | [docs/03-architecture.md](docs/03-architecture.md) | Full architecture design (~6200 lines): Four-Layer Architecture, Compute Spec, KB, Agents, BRD/ADR, and more |
 | 04 | [docs/04-timeline.md](docs/04-timeline.md) | Development roadmap with Token-Speed estimation methodology |
@@ -26,13 +26,13 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 
 | Directory | Contents |
 |-----------|----------|
-| [adr/](adr/) | 22 complete ADRs in MADR format |
+| [adr/](adr/) | 24 complete ADRs in MADR format |
 
 ### Supplementary Documentation
 
 | Document | Contents |
 |----------|----------|
-| [docs/glossary.md](docs/glossary.md) | 102 domain and technical terms |
+| [docs/glossary.md](docs/glossary.md) | 109 domain and technical terms |
 | [docs/security/threat-model.md](docs/security/threat-model.md) | STRIDE threat matrix + OWASP Top 10 for LLM Applications assessment |
 | [docs/operations/slo-sli.md](docs/operations/slo-sli.md) | Service Level Objectives for 5 critical user journeys with error budgets |
 | [docs/architecture/c4-model.md](docs/architecture/c4-model.md) | C4 Model diagrams (System Context, Container, Component) |
@@ -44,7 +44,7 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 
 1. **Four-Layer Architecture**: Design Plane (AI-assisted) + Freeze Bridge + Runtime Plane (zero AI side effects) + Intelligence Plane (AI read-only, answers don't cross the bridge)
 2. **Compute Spec (YAML)**: Unified IR for Reporting/ETL/Adjustment/Reconciliation — 9 Job Types
-3. **Knowledge Base**: 7 domains, PG-First storage (PostgreSQL + pgvector + S3), dedicated engines on-demand via interface abstraction
+3. **Knowledge Base**: 9 domains, PG-First storage (PostgreSQL + pgvector + S3), unified Content Processing Pipeline (ADR-0023), Diagnostic Playbooks & Code Knowledge domains (ADR-0024), dedicated engines on-demand via interface abstraction
 4. **BRD/ADR as First-Class Entities**: Full lifecycle management with AI-assisted generation and 6-round verification
 5. **Dual-Model Strategy**: DeepSeek V4 Pro (China, cost-optimized) + Claude Sonnet 5 (US, capability-optimized)
 

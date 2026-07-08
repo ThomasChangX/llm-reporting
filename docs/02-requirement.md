@@ -248,10 +248,10 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | Runtime Plane | Deterministic, zero AI side-effect production execution layer. The Intelligence Plane provides AI read-only analysis (ad-hoc Q&A) without crossing the bridge. |
 | Intelligence Plane | Cross-plane AI read-only analysis layer (ad-hoc NL Q&A, attribution analysis). Core constraint: read-only, never writes; temporary answers do not cross the bridge. |
 | Compute Spec | Unified YAML-based computation definition. 9 Job Types. |
-| Knowledge Base (KB) | 7 knowledge domains. PG-First storage strategy: PostgreSQL + pgvector unified + S3/MinIO. Dedicated engines introduced on-demand. |
+| Knowledge Base (KB) | 9 knowledge domains. PG-First storage strategy: PostgreSQL + pgvector unified + S3/MinIO. Dedicated engines introduced on-demand. Unified Content Processing Pipeline (ADR-0023) + Diagnostic Playbooks & Code Knowledge domains (ADR-0024). |
 | ADR (Architecture Decision Record) | MADR format. 12 lifecycle states, first-class entity in the system. |
 
-> See [glossary.md](glossary.md) for the complete glossary (102 terms).
+> See [glossary.md](glossary.md) for the complete glossary (109 terms).
 
 ---
 
@@ -589,6 +589,40 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | FR42.3 | Environment Variables layered management (Global → Tenant → Group → Workflow), supporting sensitive value encrypted storage | P2 |
 | FR42.4 | All configuration changes under version control (Git), supporting change audit, Diff comparison, and rollback | P2 |
 
+### FR43: KB Content Processing Pipeline → adr/0023
+| ID | Requirement | Priority |
+|----|------------|----------|
+| FR43.1 | All heterogeneous content sources (Email, DOCX/XLSX/PDF upload, API push, paste) converge into a single unified processing funnel — no per-channel ad-hoc pipelines | P1 |
+| FR43.2 | Structure-aware semantic chunking (split on headings/paragraphs/table boundaries; tables stay intact as single chunks); not fixed-length chunking | P1 |
+| FR43.3 | Contextual Retrieval enhancement: each chunk is prepended with an LLM-generated context summary before embedding; the same summary is indexed into the BM25 keyword index | P1 |
+| FR43.4 | Four indexes (pgvector HNSW + tsvector GIN + native tables + edge tables) written in a single ACID transaction; original blob stored in S3 with PG object key | P1 |
+| FR43.5 | Immutable provenance tagging per chunk: source_doc_id, source_span, ingest_time, ingest_channel, extractor, confidence — satisfying FR17.5 traceability and SOX audit | P1 |
+
+### FR44: KB Linkage & Quality → adr/0023
+| ID | Requirement | Priority |
+|----|------------|----------|
+| FR44.1 | Linkage Weaving: automatic generation of MENTIONS_ENTITY (entity co-reference) and SIMILAR_TO (semantic similarity > 0.85 + NLI non-contradiction) edges on ingest; DERIVED_FROM (structural lineage) edges require L2 human confirmation | P1 |
+| FR44.2 | Near-duplicate detection across channels (SimHash/MinHash); forwarded email chains merge into one canonical record + reference list | P2 |
+| FR44.3 | Conflict detection: new fact vs existing KB fact → NLI contradiction → marked `conflict`, frozen, human adjudication (never auto-overwrite) | P1 |
+| FR44.4 | Freshness decay: each chunk carries a configurable half_life by content type (definitions 2yr / snapshots 30d / email 180d); stale chunks are down-ranked at retrieval, not deleted (bitemporal retention) | P2 |
+| FR44.5 | Offline retrieval-quality evaluation (RAGAS-family metrics: context_precision/recall/faithfulness) on ADR-0018 Golden Dataset; quality regression triggers re-embedding or re-chunking of affected domain | P2 |
+
+### FR45: Diagnostic Playbooks → adr/0024
+| ID | Requirement | Priority |
+|----|------------|----------|
+| FR45.1 | Diagnostic Playbooks KB domain: stores expert-encoded IF/THEN diagnostic decision trees that guide Agent reasoning in Exploration Mode (soft skeleton) | P1 |
+| FR45.2 | Three playbook sources with confidence tagging (align ADR-0019): system-builtin (conf 1.0), incident-distilled (model_inferred, promoted after ≥3 recurrences + human confirm), user-defined (user_stated, conf 1.0) | P1 |
+| FR45.3 | Two routing paths: explicit (S01 IntentParser matches playbook trigger → inject as guided plan) and implicit (S02 retrieval mid-ReAct as reference); no-match → pure ReAct fallback (backward compatible) | P1 |
+| FR45.4 | Closed-loop learning: successful diagnostic trajectories stored in L2 Episodic Memory; ≥3 recurrences → LLM proposes distillation into new playbook candidate → user confirms → promoted (reuses S08 pattern + ADR-0019 promotion rules) | P2 |
+
+### FR46: Code Knowledge Index → adr/0024
+| ID | Requirement | Priority |
+|----|------------|----------|
+| FR46.1 | Code Knowledge KB domain: three-layer index over code artifacts (Compute Spec YAML, Sandbox Python, Git history, external repos) — structural (Code Graph nodes/edges), semantic (function-level embeddings), change (commits/blame/diffs) | P1 |
+| FR46.2 | Event-driven ingestion keeps the index correlated (not batch-rebuilt): Freeze Bridge merge → re-parse Spec; Sandbox exec → static analysis → function nodes + CALLS edges; git push webhook → update changed nodes/embeddings; PR merge → LLM extracts change rationale → linked to Spec | P1 |
+| FR46.3 | Bridge edges link Code Knowledge to existing graphs: Function —IMPLEMENTS→ CodeGraph.Job; Function —REFERENCES→ KB.GlossaryEntry; Commit —MODIFIES→ CodeGraph.Spec | P1 |
+| FR46.4 | Semantic code search via MCP-23 (code-knowledge-search): find functions by meaning (not name); full function retrieval with caller/callee; call-graph subgraph export; find similar code | P1 |
+
 ---
 
 ## Requirements-Phase Traceability Matrix
@@ -642,6 +676,10 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | FR40 | Dependency Manager | — | — | — | — | — | — | — | ✅ | — |
 | FR41 | Backup & DR | — | — | — | — | — | — | ✅ | — | — |
 | FR42 | Config Management | — | — | — | — | — | — | ✅ | — | — |
+| FR43 | KB Content Processing Pipeline | — | — | ✅ | — | — | — | — | — | — |
+| FR44 | KB Linkage & Quality | — | — | ✅ | — | — | — | — | — | — |
+| FR45 | Diagnostic Playbooks | — | — | ✅ | — | — | — | — | ✅ | — |
+| FR46 | Code Knowledge Index | — | — | ✅ | — | — | — | — | ✅ | — |
 
 ---
 

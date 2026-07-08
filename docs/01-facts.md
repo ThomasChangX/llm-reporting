@@ -4,7 +4,7 @@
 >
 > ⚠️ **Note**: There is a timeliness risk between the main body of this document and supplementary sections added later. The main body should be treated as the authoritative source and periodically reviewed; supplementary sections may become outdated as the design iterates. If contradictions arise, the main body takes precedence.
 >
-> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (102 terms) | ADR → [adr/](../adr/) (22 records)
+> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (109 terms) | ADR → [adr/](../adr/) (24 records)
 
 ---
 
@@ -97,7 +97,7 @@
 
 ### Decision #6: PG-First Knowledge Base Storage
 - **Status**: Accepted (2026-07-04)
-- **Background**: KB covers 7 domains with different retrieval patterns, but introducing dedicated engines too early adds operational complexity.
+- **Background**: KB covers 9 domains with different retrieval patterns, but introducing dedicated engines too early adds operational complexity.
 - **Decision**: MVP uses PostgreSQL + pgvector for all three roles (Vector/Graph/Relational) + S3/MinIO for Blob. Dedicated engines (Milvus/Neo4j) reserved via interface abstraction, introduced only when four gating conditions are met.
 - **Consequences**: Unified operational model; pgvector may have ceiling on vector recall at 100M+ scale; design includes clean migration path
 - **References**: → 03-architecture §11
@@ -174,7 +174,7 @@
 
 ## 2026-07-04 Supplement: Knowledge Base Detailed Design
 
-### KB Seven Knowledge Domains (+ Email Records as cross-domain storage)
+### KB Nine Knowledge Domains (+ Email Records as cross-domain storage)
 
 | # | Domain | Description |
 |---|--------|-------------|
@@ -185,6 +185,8 @@
 | 5 | **Adjustment History** | Anomaly details, root cause analysis (primary + secondary + residual), adjustment entries, approval chain, immutable at point-in-time |
 | 6 | **User Behavior Pattern Store** | Operation sequences, temporal patterns, derived suggestions, confidence scores |
 | 7 | **Report/Metric Catalog** | Report definitions, metric formulas, calculation granularity, certification status, relationships with data sources and Workflows |
+| 8 | **Diagnostic Playbooks** *(ADR-0024)* | Expert-encoded diagnostic decision trees (IF/THEN investigation paths) acting as a "soft skeleton" for Agent reasoning in Exploration Mode — the read-only counterpart to Verified Paths. Three sources: system-builtin / incident-distilled / user-defined |
+| 9 | **Code Knowledge** *(ADR-0024)* | Three-layer index over code artifacts (Compute Spec YAML, Sandbox Python, Git history, external repos): structural (Code Graph nodes/edges), semantic (function-level embeddings), change (commits/blame/diffs). Enables semantic code search and code-logic reasoning |
 
 ### KB Storage Architecture
 - **Vector DB** (semantic retrieval): All entities produce Embeddings; supports hybrid search (semantic + keyword + metadata filtering).
@@ -292,7 +294,7 @@ Write conflict resolution: (a) User explicit input is highest priority, overwrit
 ### AI Agent Technical Architecture → FR29
 - Agent uses LLM SDK + Skill + MCP three-layer architecture.
 - **LLM SDK**: Pluggable layer with unified interface for switching between OpenAI/Anthropic/open-source/private models.
-- **Skill Module**: Intent Parsing / KB Retrieval / Code Graph Query / Impact Analysis / Doc Generation — 17 Skills (S01-S17) planned, composable.
+- **Skill Module**: Intent Parsing / KB Retrieval / Code Graph Query / Impact Analysis / Doc Generation — 18 Skills (S01-S18) planned, composable.
 - **MCP**: Model Context Protocol — standard protocol for Agent interaction with external systems. 19 MCP Servers planned.
 - Skills can be composed into Agent Workflows (templated Skill combinations + System Prompt).
 
@@ -562,6 +564,18 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 - **Decision**: (a) S15 refined into 6 prefix-named Agent serial pipeline — BRD-IntentDeepener (Five Whys elicitation) → BRD-ContextGatherer (three-source RAG + Schema Bootstrap cold-start fallback) → BRD-VaguenessResolver (Experience Typology Tree + Gating/Pruning precise questioning) → BRD-DraftWriter (chapter-by-chapter generation + soft lock + bounded backtracking + Inline AssumptionCheck) → BRD-Verifier (6-round verification, conflict detection without adjudication) → BRD-Assembler (three-format output + Pre-Sync Gate). All Agent outputs are independent JSON, Web UI renders progressively. (b) Inline AssumptionCheck — Atomic Claim Decomposition + NLI verification (FGL 2025: 90%+ accuracy), distinguishes directly_supported/inferred_assumption/business_assumption, unconfirmed assumptions split into Blocker/Non-blocker. (c) Jira unidirectional sync — BRD is single Source of Truth, Webhook read-only progress sync. (d) Event-driven Suspect Flag for multi-BRD conflict detection (AroTrace pattern). (e) Compliance mapping — tenant Compliance Profile (Admin config at onboarding) + MCP-19 RAG within activated frameworks. (f) BRD product quality — human reviewer four-dimension scoring (Clarity/Completeness/Feasibility/Compliance). (g) Phase 2 reservation: BRD-approved → SDD Pipeline.
 - **References**: → adr/0022, → adr/0010, → 03-architecture §23.5-§23.12
 
+### Decision #22: KB Content Lifecycle Pipeline
+- **Status**: Accepted (2026-07-08)
+- **Background**: KB storage (ADR-0013), write/read paths (FR34/FR35), and Email ingestion (§12.1) exist, but three areas spanning all heterogeneous content (DOCX/Excel/Email/upload) are not systematically defined: the content processing pipeline (chunking, Contextual Retrieval, multi-index write), linkage weaving (how heterogeneous content interconnects), and the quality flywheel (dedup/conflict/freshness/eval). Per-channel ad-hoc pipelines fragment retrieval quality and make cross-source correlation impossible.
+- **Decision**: (a) Unified five-stage Content Processing Pipeline — Parse & Normalize (reuse MCP-11/12/16) → Semantic Chunking (structure-aware, not fixed-length) → Contextual Retrieval Enhancement (small model generates context summary prepended to each chunk before embedding; Anthropic 2024: -35% retrieval failure alone, -67% with reranking) → Four-index single-ACID-transaction PG write (pgvector HNSW + tsvector GIN + native tables + edge tables; ADR-0013 zero-CDC advantage) → Provenance Tagging (immutable, aligns ADR-0019 provenance classes). (b) Linkage Weaving Layer — three edge-generation strategies: MENTIONS_ENTITY (entity co-reference, low-risk auto), SIMILAR_TO (semantic similarity >0.85 + NLI non-contradiction, low-risk auto), DERIVED_FROM (structural lineage, high-risk L2 human confirm), CONFLICTS_WITH (NLI contradiction, frozen + human adjudication). Lazy edge creation over full GraphRAG community hierarchy (respects Boring Technology + PG-First scale). (c) Quality Flywheel — Dedup (SimHash/MinHash) → Conflict Detection (NLI) → Freshness Decay (half_life by content type: definitions 2yr / snapshots 30d / email 180d; decay = down-rank not delete, aligns ADR-0019 bitemporal) → Retrieval Quality Evaluation (RAGAS metrics on ADR-0018 Golden Dataset; regression → re-embed/re-chunk).
+- **References**: → adr/0023, → adr/0013, → adr/0019, → 03-architecture §10.2-§10.4
+
+### Decision #23: KB Reasoning Support — Diagnostic Playbooks & Code Knowledge Domains
+- **Status**: Accepted (2026-07-08)
+- **Background**: Scenario 6 (§22E) proves complex cross-content diagnostics are possible, but Agent orchestration relies on S01 routing + Skill metadata + free ReAct — no explicit knowledge encodes expert investigation paths, so diagnostic quality is unstable. Also, code-repo knowledge has no ingestion/indexing path: Code Graph models structural relationships (not source code), MCP-06 does diff/blame (not semantic code search), so the Agent cannot fulfill "check the code logic for bugs". Two gaps undermine the highest-value queries ("why did this report generate this value?").
+- **Decision**: (a) KB 8th domain — Diagnostic Playbooks: IF/THEN diagnostic decision trees encoding expert investigation methodology, acting as a "soft skeleton" the LLM reasons within (Exploration-Mode counterpart to ADR-0016 Verified Paths). Three sources (system-builtin conf 1.0 / incident-distilled model_inferred 0.7-0.9 promoted after ≥3 recurrences / user-defined conf 1.0). Two routing paths (explicit via S01 trigger-match / implicit via S02 retrieval). Closed-loop learning reuses ADR-0019 promotion rules + S08 pattern. (b) KB 9th domain — Code Knowledge: three-layer index over code artifacts (Compute Spec / Sandbox Python / Git / external repos): structural (existing Code Graph nodes/edges) + semantic (function-level embeddings via ADR-0023 Stage 4) + change (existing Git/MCP-06). Event-driven ingestion (Freeze merge / Sandbox exec / git webhook / PR merge). Bridge edges link functions↔Jobs↔GlossaryEntries. (c) New Skill S18 PlaybookRouter + new MCP-23 code-knowledge-search. KB grows from 7 to 9 domains, all on existing PG-First stack. Industry basis: Devin/Monte Carlo 2025 convergence on playbook skeletons; Cursor/Cody 2025 dual-index code RAG.
+- **References**: → adr/0024, → adr/0016, → adr/0019, → adr/0023, → 03-architecture §10 (domain table), §22B (S18), §22C (MCP-23), §22E Scenario 6
+
 ---
 
 ## Version History
@@ -573,6 +587,7 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 | 1.2 | 2026-07-04 | Core philosophy refinement + four-layer model + ADR #5 rewrite + ADR #12-#16: Data Health Check Framework, Adjustment Form Builder, KB PG-First strategy, Agent Triage + L0-L3 Remediation Gateway + S08 Closed-Loop Learning, Dual-Mode Agent Orchestration + Verified Path Catalog |
 | 1.3 | 2026-07-04 | ADR #17-#20: Agent Evaluation Framework (six-dimension trajectory scoring + evaluation flywheel), Agent Memory Architecture (four-layer memory model), Agent Cost Governance (hierarchical token budgeting + tiered enforcement + four-stage model deployment funnel), VP Promotion & Multi-Agent Concurrency (risk-graded promotion + three-layer concurrency control + priority preemption). Architecture doc added §22H-§22L |
 | 1.4 | 2026-07-04 | ADR #21 + ADR-0022: BRD Generation Agent Pipeline Redesign — S15 refined from monolithic to 6-Agent serial pipeline, Inline AssumptionCheck, Experience Typology Tree, Suspect Flag, Pre-Sync Gate, Jira unidirectional sync. Architecture doc §23 major update (new §23.5.1-§23.5.8 + §23.11-§23.12). Glossary added 10 BRD generation terms |
+| 1.5 | 2026-07-08 | ADR #22 + ADR-0023: KB Content Lifecycle Pipeline — unified 5-stage Content Processing Pipeline (Contextual Retrieval), Linkage Weaving Layer (lazy edges vs full GraphRAG), Quality Flywheel (dedup/conflict/freshness/RAGAS). ADR #23 + ADR-0024: KB Reasoning Support — 8th domain Diagnostic Playbooks (soft skeleton for Exploration-Mode diagnostics), 9th domain Code Knowledge (three-layer code index). New Skill S18 PlaybookRouter, new MCP-23 code-knowledge-search. KB grows from 7 to 9 domains. Architecture doc new §10.2-§10.4. Bug-fix: §10 domain table was missing 7th domain (Report/Metric Catalog) — now consistent with rest of project. Glossary added 7 terms (102→109). New FR43-FR46 |
 
 ---
 

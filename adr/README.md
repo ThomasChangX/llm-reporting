@@ -31,6 +31,8 @@
 | 0020 | [Agent Cost Governance](./0020-agent-cost-governance.md) | Architecture / Operations | ✅ Accepted | 2026-07-04 |
 | 0021 | [VP Promotion & Concurrency](./0021-vp-promotion-concurrency.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0022 | [BRD Generation Agent Pipeline](./0022-brd-generation-agent-pipeline.md) | Architecture | ✅ Accepted | 2026-07-04 |
+| 0023 | [KB Content Lifecycle Pipeline](./0023-kb-content-lifecycle-pipeline.md) | Architecture | ✅ Accepted | 2026-07-08 |
+| 0024 | [KB Reasoning Support — Playbooks & Code Knowledge](./0024-kb-reasoning-support-playbooks-code.md) | Architecture | ✅ Accepted | 2026-07-08 |
 
 ## Status Meanings
 

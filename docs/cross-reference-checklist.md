@@ -26,10 +26,12 @@
 
 ### 1.3 ADR References
 
-- [x] `adr/README.md` → links to all 22 ADRs resolve
+- [x] `adr/README.md` → links to all 24 ADRs resolve
 - [x] `adr/0004-document-structure.md` → marked as Superseded by 0012
 - [x] `adr/0012-document-structure-v2.md` → references all new file paths
 - [x] All ADRs → `docs/01-facts.md` → `docs/03-architecture.md` path updates verified
+- [x] `adr/0023-kb-content-lifecycle-pipeline.md` → `docs/01-facts.md` Decision #22, `docs/03-architecture.md` §10.2-§10.4
+- [x] `adr/0024-kb-reasoning-support-playbooks-code.md` → `docs/01-facts.md` Decision #23, `docs/03-architecture.md` §10 (domain table), §22B (S18), §22C (MCP-23)
 
 ### 1.4 Root Governance Files
 
@@ -74,4 +76,4 @@ Section headers retained after extraction (to prevent `→ §N` inbound referenc
 | Glossary coverage | Quarterly | Domain Expert |
 | ADR status cleanup (Deprecated/Superseded) | Semi-annually | Architect |
 
-*This checklist last updated: 2026-07-04*
+*This checklist last updated: 2026-07-08*
