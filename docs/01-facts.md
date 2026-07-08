@@ -295,7 +295,7 @@ Write conflict resolution: (a) User explicit input is highest priority, overwrit
 - Agent uses LLM SDK + Skill + MCP three-layer architecture.
 - **LLM SDK**: Pluggable layer with unified interface for switching between OpenAI/Anthropic/open-source/private models.
 - **Skill Module**: Intent Parsing / KB Retrieval / Code Graph Query / Impact Analysis / Doc Generation — 18 Skills (S01-S18) planned, composable.
-- **MCP**: Model Context Protocol — standard protocol for Agent interaction with external systems. 19 MCP Servers planned.
+- **MCP**: Model Context Protocol — standard protocol for Agent interaction with external systems. 21 MCP Servers planned (18 in §22C Core Catalog: MCP-01..17 + MCP-23; plus 3 BRD-pipeline MCPs in §23.8.2: MCP-20 jira-sync, MCP-21 confluence-export, MCP-22 compliance-mapper).
 - Skills can be composed into Agent Workflows (templated Skill combinations + System Prompt).
 
 ### Agent Customization

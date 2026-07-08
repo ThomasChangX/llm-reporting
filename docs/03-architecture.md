@@ -4627,7 +4627,7 @@ Recon-triggered VP-001 can preempt Ad-hoc VP-003. Preempted party receives notif
 
 ## 22M. Agent Capability Discovery → adr/0021
 
-> "Blank Canvas Problem": Non-technical users facing an empty input box don't know what the Agent can do. 19 MCPs, 18 Skills, 6 VPs — the stronger the capability, the harder the discovery.
+> "Blank Canvas Problem": Non-technical users facing an empty input box don't know what the Agent can do. 21 MCPs, 18 Skills, 6 VPs — the stronger the capability, the harder the discovery.
 
 ### 22M.1 Three-Layer Progressive Capability Reveal
 

@@ -50,7 +50,7 @@
 
 | Term | Definition |
 |------|------------|
-| MCP (Model Context Protocol) | Standard protocol for Agent interaction with external systems. This project plans 19 MCP Servers. |
+| MCP (Model Context Protocol) | Standard protocol for Agent interaction with external systems. This project plans 21 MCP Servers (18 in the §22C Core Catalog: MCP-01..17 + MCP-23; plus 3 BRD-pipeline MCPs defined in §23.8.2: MCP-20 jira-sync, MCP-21 confluence-export, MCP-22 compliance-mapper). |
 | Skill | Pre-defined Agent capability module (e.g., Intent Parsing, KB Retrieval, Impact Analysis). This project plans 18 composable Skills (S01-S18). |
 | LLM SDK | Unified model invocation layer with pluggable switching between DeepSeek V4 Pro / Claude Sonnet 5 / private models. |
 | Prompt Injection | OWASP LLM01 threat. Maliciously crafted prompts that bypass system instructions or leak data. This architecture employs 5-layer defense. |
