@@ -1,3 +1,12 @@
+---
+id: ADR-0014
+title: "Unified Data Health Check Framework"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0014: Unified Data Health Check Framework
 
 - **Status**: Accepted

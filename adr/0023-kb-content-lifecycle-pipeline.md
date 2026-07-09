@@ -1,3 +1,12 @@
+---
+id: ADR-0023
+title: "KB Content Lifecycle Pipeline — Unified Processing, Linkage Weaving, and Quality Flywheel"
+status: accepted
+date: 2026-07-08
+deciders: "Architecture Team"
+domain: Architecture
+---
+
 # ADR-0023: KB Content Lifecycle Pipeline — Unified Processing, Linkage Weaving, and Quality Flywheel
 
 - **Status**: Accepted

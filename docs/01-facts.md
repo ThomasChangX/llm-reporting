@@ -4,7 +4,7 @@
 >
 > ⚠️ **Note**: There is a timeliness risk between the main body of this document and supplementary sections added later. The main body should be treated as the authoritative source and periodically reviewed; supplementary sections may become outdated as the design iterates. If contradictions arise, the main body takes precedence.
 >
-> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (109 terms) | ADR → [adr/](../adr/) (24 records)
+> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (101 terms) | ADR → [adr/](../adr/) (24 records)
 
 ---
 
@@ -467,13 +467,6 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 
 ## 2026-07-04 Supplemental Decisions (ADR #7-#21)
 
-### ADR-0007: Query Service Independent Component
-- **Status**: Accepted (2026-07-04)
-- **Background**: Natural language queries over databases require NL→SQL conversion + query optimization + caching. Existing architecture lacked a dedicated component.
-- **Decision**: Four-component Query Service — Metadata Manager, Query Generator, Pushdown Optimizer, Query Cache. Generation and execution are separated — Design Plane assists with NL→SQL, Runtime Plane executes deterministic query plans.
-- **Alternatives Considered**: All-in-one database solution (Rejected: vendor lock-in); LLM handles all query optimization (Rejected: cost, latency, correctness — deterministic optimization superior).
-- **References**: → FR15b, → 03-architecture §7
-
 ### Decision #8: Large-Scale Data Architecture Strategy
 - **Status**: Accepted (2026-07-04)
 - **Background**: TB-scale data volumes require Partition Pruning, Incremental Processing, Pre-Aggregation capabilities beyond simply upgrading the Compute Engine.
@@ -575,6 +568,13 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 - **Background**: Scenario 6 (§22E) proves complex cross-content diagnostics are possible, but Agent orchestration relies on S01 routing + Skill metadata + free ReAct — no explicit knowledge encodes expert investigation paths, so diagnostic quality is unstable. Also, code-repo knowledge has no ingestion/indexing path: Code Graph models structural relationships (not source code), MCP-06 does diff/blame (not semantic code search), so the Agent cannot fulfill "check the code logic for bugs". Two gaps undermine the highest-value queries ("why did this report generate this value?").
 - **Decision**: (a) KB 8th domain — Diagnostic Playbooks: IF/THEN diagnostic decision trees encoding expert investigation methodology, acting as a "soft skeleton" the LLM reasons within (Exploration-Mode counterpart to ADR-0016 Verified Paths). Three sources (system-builtin conf 1.0 / incident-distilled model_inferred 0.7-0.9 promoted after ≥3 recurrences / user-defined conf 1.0). Two routing paths (explicit via S01 trigger-match / implicit via S02 retrieval). Closed-loop learning reuses ADR-0019 promotion rules + S08 pattern. (b) KB 9th domain — Code Knowledge: three-layer index over code artifacts (Compute Spec / Sandbox Python / Git / external repos): structural (existing Code Graph nodes/edges) + semantic (function-level embeddings via ADR-0023 Stage 4) + change (existing Git/MCP-06). Event-driven ingestion (Freeze merge / Sandbox exec / git webhook / PR merge). Bridge edges link functions↔Jobs↔GlossaryEntries. (c) New Skill S18 PlaybookRouter + new MCP-23 code-knowledge-search. KB grows from 7 to 9 domains, all on existing PG-First stack. Industry basis: Devin/Monte Carlo 2025 convergence on playbook skeletons; Cursor/Cody 2025 dual-index code RAG.
 - **References**: → adr/0024, → adr/0016, → adr/0019, → adr/0023, → 03-architecture §10 (domain table), §22B (S18), §22C (MCP-23), §22E Scenario 6
+
+### Decision #24: Query Service Independent Component (ADR-0007)
+- **Status**: Accepted (2026-07-04)
+- **Background**: Natural language queries over databases require NL→SQL conversion + query optimization + caching. Existing architecture lacked a dedicated component.
+- **Decision**: Four-component Query Service — Metadata Manager, Query Generator, Pushdown Optimizer, Query Cache. Generation and execution are separated — Design Plane assists with NL→SQL, Runtime Plane executes deterministic query plans.
+- **Alternatives Considered**: All-in-one database solution (Rejected: vendor lock-in); LLM handles all query optimization (Rejected: cost, latency, correctness — deterministic optimization superior).
+- **References**: → FR15b, → 03-architecture §7
 
 ---
 

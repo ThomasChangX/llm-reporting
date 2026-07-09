@@ -1,3 +1,12 @@
+---
+id: ADR-0024
+title: "KB Reasoning Support — Diagnostic Playbooks & Code Knowledge Domains"
+status: accepted
+date: 2026-07-08
+deciders: "Architecture Team"
+domain: Architecture
+---
+
 # ADR-0024: KB Reasoning Support — Diagnostic Playbooks & Code Knowledge Domains
 
 - **Status**: Accepted

@@ -1,3 +1,12 @@
+---
+id: ADR-0022
+title: "BRD Generation Agent Pipeline Redesign"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0022: BRD Generation Agent Pipeline Redesign
 
 - **Status**: Accepted

@@ -1,3 +1,12 @@
+---
+id: ADR-0019
+title: "Agent Memory Architecture"
+status: accepted
+date: 2026-07-04
+deciders: "Architecture Team"
+domain: Architecture
+---
+
 # ADR-0019: Agent Memory Architecture
 
 - **Status**: Accepted

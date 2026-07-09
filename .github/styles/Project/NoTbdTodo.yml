@@ -1,0 +1,11 @@
+extends: existence
+message: "Remove placeholder marker '%s' before merging."
+level: error
+ignorecase: true
+tokens:
+  - TBD
+  - TODO
+  - FIXME
+# NOTE: 'XXX' and 'PLACEHOLDER' removed — they false-positive on legitimate prose
+# ("token budget placeholders", "BRD-xxx" example format). Re-enable if the repo
+# adopts a stricter convention.

@@ -1,3 +1,12 @@
+---
+id: ADR-0021
+title: "Verified Path Promotion & Multi-Agent Concurrency Control"
+status: accepted
+date: 2026-07-04
+deciders: "Architecture Team"
+domain: Architecture
+---
+
 # ADR-0021: Verified Path Promotion & Multi-Agent Concurrency Control
 
 - **Status**: Accepted

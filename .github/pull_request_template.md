@@ -12,11 +12,14 @@
 
 ## Checklist
 
-- [ ] Cross-references updated (`docs/cross-reference-checklist.md`)
-- [ ] ADR index updated (if adding/changing ADRs: `adr/README.md`)
-- [ ] Glossary updated (if new terms: `docs/glossary.md`)
-- [ ] Diagrams regenerated (if `.mmd` source changed)
+- [ ] Counts synchronized across the whole repo (run `python3 scripts/check_adr_semantics.py` — passes locally)
+- [ ] ADR index regenerated if adding/changing ADRs (`python3 scripts/gen_adr_index.py && git add docs/adr-index.md`)
+- [ ] `### Decision #N` entry added to `docs/01-facts.md` for any new ADR
+- [ ] Glossary footer count updated if terms changed (`docs/glossary.md`)
+- [ ] `§N` references verified if architecture headings changed
+- [ ] Cross-reference checklist baselines updated (`docs/cross-reference-checklist.md` §3) if extracted files changed size
 - [ ] All links resolve correctly
+- [ ] CI is green (`All Green` job passes)
 
 ## AI Disclosure
 

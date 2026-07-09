@@ -1,3 +1,12 @@
+---
+id: ADR-0007
+title: "Query Service Component"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0007: Query Service Component
 
 - **Status**: Accepted

@@ -906,8 +906,6 @@ Query involves Table A (PG), Table B (S3/Parquet), Table C (Snowflake)
               → Record query pattern → Observation Engine suggests materialization in the future
 ```
 
-
-
 ## 6. Compute Spec (Unified Compute Definition)
 
 Reporting, ETL, Adjustment, and Recon share the same set of YAML definitions.
@@ -1047,8 +1045,6 @@ SQL transform blocks in Compute Spec YAML are a potential injection vector. All 
 | **Variable Injection Sanitization** | Variables and Parameters injected into SQL are type-checked and escaped according to their declared type. String variables are automatically quoted and escaped. Table/column names from Variables are validated against an allowlist of known identifiers.     |
 | **Sandbox Enforcement**             | Even if SQL passes all above checks, the Sandbox's seccomp profile and database user permissions provide defense-in-depth: the DB user has SELECT-only on source schemas and limited INSERT/UPDATE on designated output schemas.                                |
 | **Audit**                           | All SQL blocks (both original and rewritten) are logged with the execution trace. Anomalous SQL patterns (unusual JOIN depth, cartesian products, excessive row estimates) trigger automatic review flags.                                                      |
-
-
 
 ---
 

@@ -1,3 +1,12 @@
+---
+id: ADR-0003
+title: "Design Order"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Process
+---
+
 # ADR-0003: Design Order
 
 - **Status**: Accepted

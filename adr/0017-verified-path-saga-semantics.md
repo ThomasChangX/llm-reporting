@@ -1,3 +1,12 @@
+---
+id: ADR-0017
+title: "Verified Path — Saga Semantics & Durable Execution"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0017: Verified Path — Saga Semantics & Durable Execution
 
 - **Status**: Accepted

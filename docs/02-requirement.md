@@ -251,7 +251,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | Knowledge Base (KB) | 9 knowledge domains. PG-First storage strategy: PostgreSQL + pgvector unified + S3/MinIO. Dedicated engines introduced on-demand. Unified Content Processing Pipeline (ADR-0023) + Diagnostic Playbooks & Code Knowledge domains (ADR-0024). |
 | ADR (Architecture Decision Record) | MADR format. 12 lifecycle states, first-class entity in the system. |
 
-> See [glossary.md](glossary.md) for the complete glossary (109 terms).
+> See [glossary.md](glossary.md) for the complete glossary (101 terms).
 
 ---
 

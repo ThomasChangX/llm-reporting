@@ -1,3 +1,12 @@
+---
+id: ADR-0006
+title: "Freeze Bridge Independence"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0006: Freeze Bridge Independence
 
 - **Status**: Accepted

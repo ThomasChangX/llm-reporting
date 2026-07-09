@@ -1,3 +1,12 @@
+---
+id: ADR-0005
+title: "Four-Layer Architecture (Zero AI Side Effects)"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0005: Four-Layer Architecture (Zero AI Side Effects)
 
 - **Status**: Accepted (Refined 2026-07-04)

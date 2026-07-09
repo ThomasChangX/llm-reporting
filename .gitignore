@@ -25,3 +25,6 @@ node_modules/
 
 # Backup files from doc restructuring
 *.md.bak
+
+# Vale — no third-party style packages are used (see .vale.ini); only our own
+# Project/ rules are committed. If packages are added later, gitignore them here.

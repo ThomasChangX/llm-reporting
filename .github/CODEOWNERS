@@ -1,0 +1,14 @@
+# CODEOWNERS — request review from the right people automatically.
+# Docs architecture decisions are high-stakes; route them for review.
+
+# Architecture Decision Records
+adr/                        @ThomasChangX
+
+# Core architecture doc + glossary (authoritative count source)
+docs/03-architecture.md     @ThomasChangX
+docs/glossary.md            @ThomasChangX
+docs/01-facts.md            @ThomasChangX
+
+# CI / automation gate
+.github/workflows/          @ThomasChangX
+scripts/                    @ThomasChangX

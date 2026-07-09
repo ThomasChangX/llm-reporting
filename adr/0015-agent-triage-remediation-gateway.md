@@ -1,3 +1,12 @@
+---
+id: ADR-0015
+title: "Agent Triage & Layered Remediation Gateway"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0015: Agent Triage & Layered Remediation Gateway
 
 - **Status**: Accepted

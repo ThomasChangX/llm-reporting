@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Keep GitHub Actions in CI current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+# NOTE: pre-commit hook revs (in .pre-commit-config.yaml) are not auto-updated
+# by Dependabot yet (its `pre-commit` ecosystem is not generally available).
+# To update them, run `pre-commit autoupdate` periodically, or wire up the
+# `pre-commit-ci` GitHub App which maintains hook revs automatically.

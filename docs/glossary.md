@@ -143,7 +143,7 @@
 | SOX (Sarbanes-Oxley Act) | US public company financial reporting compliance act. Requires immutable audit trails, separation of duties, documented change approvals. |
 | GDPR (General Data Protection Regulation) | EU data protection regulation. Requires data minimization, right to erasure, data portability, DPO appointment. |
 | HIPAA (Health Insurance Portability and Accountability Act) | US healthcare privacy act. Requires PHI encryption, access controls, audit logging. |
-| OWASP LLM Top 10 | Top 10 security threat categories specific to LLM applications (v1.0, 2023). This project assesss each item. |
+| OWASP LLM Top 10 | Top 10 security threat categories specific to LLM applications (v1.0, 2023). This project assesses each item. |
 | arc42 | Software architecture documentation standard (12-section template). This project's document structure aligns with it but does not enforce section-by-section mapping. |
 | MADR (Markdown Any Decision Records) | Markdown format standard for ADRs, adopted by this project. |
 | C4 Model | Software architecture visualization layered model: System Context → Container → Component → Code. |
@@ -152,4 +152,4 @@
 
 ---
 
-*Last Updated: 2026-07-08 | Total Terms: 109 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022, adr/0023, adr/0024*
+*Last Updated: 2026-07-09 | Total Terms: 101 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022, adr/0023, adr/0024*

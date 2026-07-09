@@ -1,3 +1,12 @@
+---
+id: ADR-0001
+title: "Product Evolution Path"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor (Finance/Accounting Domain Expert)"
+domain: Product
+---
+
 # ADR-0001: Product Evolution Path
 
 - **Status**: Accepted

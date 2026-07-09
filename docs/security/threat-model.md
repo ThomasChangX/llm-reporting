@@ -5,8 +5,7 @@
 > STRIDE threat matrix (10 components × 6 dimensions) + OWASP Top 10 for LLM Applications (v1.0, 2023) item-by-item assessment.
 > Bare `§N` references below point to [docs/03-architecture.md](../03-architecture.md); consult that document for full context.
 
-
-### 16.1 Threat Matrix
+## 16.1 Threat Matrix
 
 > Risk Levels: **H** = High (requires immediate mitigation), **M** = Medium (planned mitigation), **L** = Low (acceptable risk)
 >
@@ -88,6 +87,5 @@ STRIDE covers traditional security threats but does not fully cover LLM-specific
 > **Comprehensive Conclusion**: This architecture provides adequate defense on LLM01/02/04/08. LLM05 (Supply Chain), LLM07 (Insecure Plugins), LLM09 (Overreliance), LLM10 (Model Theft) have residual risks requiring enhancement in Phase 6-7. All enhancement items have been added to the Phase 6-7 development roadmap.
 
 ---
-
 
 > 📄 Original Location: [../03-architecture.md §16](../03-architecture.md)
