@@ -82,7 +82,8 @@ def render(rows):
 
 def main():
     check = "--check" in sys.argv
-    content = render(load())
+    adrs = load()  # scan once, reuse for render + count
+    content = render(adrs)
     if check:
         try:
             existing = open(OUT_PATH, encoding="utf-8").read()
@@ -96,7 +97,7 @@ def main():
         return
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         f.write(content)
-    print(f"Wrote {OUT_PATH} ({len(load())} ADRs).")
+    print(f"Wrote {OUT_PATH} ({len(adrs)} ADRs).")
 
 
 if __name__ == "__main__":

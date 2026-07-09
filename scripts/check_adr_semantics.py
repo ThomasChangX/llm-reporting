@@ -231,7 +231,6 @@ def check_section_refs(adrs):
                     continue
                 if any(v == token or v.startswith(token + ".") for v in valid):
                     continue
-                # §22X-style refs: allow if the top section exists (22) and it's a lettered sub
                 err("section-ref", f"{sf}:{i}",
                     f"§{token} does not resolve to any heading in 03-architecture.md")
 
