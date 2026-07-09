@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: errata-ai/vale-action@v2.1.1
+      - uses: errata-ai/vale-action@2.1.2
         with:
           fail_on_error: true
           reporter: github-pr-check
