@@ -146,6 +146,7 @@ def main():
             migrated += 1
             print(f"  migrated: {os.path.basename(path)}")
         else:
+            migrated += 1
             print(f"\n=== {os.path.basename(path)} (dry-run) ===")
             print(fm)
     action = "Migrated" if apply else "Would migrate"

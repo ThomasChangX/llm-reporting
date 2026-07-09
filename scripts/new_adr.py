@@ -53,10 +53,12 @@ def main():
     num = next_number()
     slug = slugify(title)
     path = os.path.join(ADR_DIR, f"{num:04d}-{slug}.md")
+    # escape any double-quotes in the title so the YAML string stays valid
+    safe_title = title.replace('"', '\\"')
 
     content = f"""---
 id: ADR-{num:04d}
-title: "{title}"
+title: "{safe_title}"
 status: {status}
 date: YYYY-MM-DD
 deciders: ""

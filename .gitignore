@@ -25,3 +25,8 @@ node_modules/
 
 # Backup files from doc restructuring
 *.md.bak
+
+# Vale — third-party style packages are synced by `vale sync` (see .vale.ini Packages).
+# Only our own rules (.github/styles/Project/) are committed.
+.github/styles/Microsoft/
+.github/styles/write-good/

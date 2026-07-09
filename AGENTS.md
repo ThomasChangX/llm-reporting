@@ -8,7 +8,7 @@ This is a **documentation-only repository** for the llm-reporting project (a des
 
 - `docs/` — design docs in a numbered pipeline: `01-facts` → `02-requirement` → `03-architecture` → `04-timeline` → `05-cost`, plus `glossary.md`, `cross-reference-checklist.md`, `adr-index.md` (generated), and subdirs (`architecture/`, `security/`, `operations/`, `diagrams/`, `api/`).
 - `adr/` — Architecture Decision Records (MADR 4.0.0 format with YAML frontmatter), numbered `NNNN-slug.md`. See `adr/README.md` and `docs/adr-index.md`.
-- `scripts/` — consistency tooling: `check_adr_semantics.py`, `gen_adr_index.py`, `new_adr.py`.
+- `scripts/` — consistency tooling: `check_adr_semantics.py`, `gen_adr_index.py`, `new_adr.py`, `migrate_adr_frontmatter.py` (one-time, already run).
 - `.github/styles/` — Vale prose-lint rules.
 
 Subdirectory-specific rules live in **nested** `AGENTS.md` files (they merge with this root file): [`adr/AGENTS.md`](adr/AGENTS.md), [`docs/AGENTS.md`](docs/AGENTS.md).
@@ -23,7 +23,9 @@ python3 scripts/gen_adr_index.py --check         # ADR index drift check
 npx markdownlint-cli2 '**/*.md'                  # Markdown structure (local, staged via pre-commit)
 ```
 
-CI (`.github/workflows/ci.yml`) is the **authoritative gate**: markdownlint + lychee (links) + Vale (prose) + ADR semantics + index drift, aggregated by an `alls-green` job.
+**Vale (prose lint) and lychee (links) run in CI only** — they are not part of the local pre-commit hook (too heavy for a docs repo) and Vale is not assumed installed locally. If you want to pre-verify them before pushing, install Vale (`brew install vale`) and run `vale docs/ adr/`; otherwise expect these two checks to run only in CI.
+
+CI (`.github/workflows/ci.yml`) is the **authoritative gate**: markdownlint + lychee (links) + Vale (prose) + ADR semantics + index drift, aggregated by an `alls-green` job. A red CI job on these is the expected feedback loop for Vale/lychee issues that local checks don't cover.
 
 ## ADR & Count Conventions
 

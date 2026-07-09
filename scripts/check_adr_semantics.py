@@ -8,10 +8,11 @@ that no generic tool (lychee, markdownlint, Vale) covers:
   2. Supersede chains are bidirectionally consistent (A superseded_by B  <=>  B supersedes A).
   3. No non-status reference points at a Superseded/Deprecated/Rejected ADR as if it were active.
   4. §N section references resolve against docs/03-architecture.md's heading tree.
-  5. Decision#N entries in docs/01-facts.md correspond to ADR files (count parity).
-  6. Derived counts (glossary terms, ADR total) are consistent across the whole repo.
-  7. Each ADR contains all MADR required sections.
-  8. Each ADR's frontmatter is valid (status enum, date format, non-empty domain).
+  5. Decision#N entries in docs/01-facts.md match ADR file count (unique plain-integer numbering).
+  6. adr/README.md index table rows match ADR files on disk.
+  7. Derived counts (glossary terms, ADR total) are consistent across the whole repo.
+  8. Each ADR contains all MADR required sections.
+  9. Each ADR's frontmatter is valid (status enum, date format, non-empty domain).
 
 Exit 0 if all pass, 1 on any failure. Each failure prints file:line + expected vs actual.
 """
@@ -129,19 +130,30 @@ def check_reverse_refs(adrs):
     retired = {a["num"]: a for a in adrs if a["fm"].get("status") in {"superseded", "deprecated", "rejected"}}
     if not retired:
         return
-    # map: which files are "involved" in each retired ADR and thus exempt
-    involved = {}  # adr_num -> set of paths allowed to reference it
+    # Map: for each retired ADR number, which file paths are allowed to reference it.
+    # Keyed by RETIRED ADR number (the queried key), value = set of exempt paths.
+    # Exemptions: (a) the retired ADR's own file, (b) its supersession partner.
+    involved = {}  # retired_adr_num -> set of paths allowed to reference it
+    by_num = {a["num"]: a for a in adrs}
     for a in adrs:
         sb = a["fm"].get("superseded_by", "")
         sp = a["fm"].get("supersedes", "")
         if a["fm"].get("status") in {"superseded", "deprecated", "rejected"}:
+            # (a) the retired ADR's own file may reference itself
             involved.setdefault(a["num"], set()).add(a["path"])
         if sb:
-            tnum = int(sb.split("-")[1])
-            involved.setdefault(tnum, set()).add(a["path"])
+            # this ADR is retired and points at its successor; the successor's
+            # file may legitimately reference this retired ADR → store successor
+            # path under THIS (retired) ADR's number.
+            successor_num = int(sb.split("-")[1])
+            successor = by_num.get(successor_num)
+            if successor:
+                involved.setdefault(a["num"], set()).add(successor["path"])
         if sp:
-            tnum = int(sp.split("-")[1])
-            involved.setdefault(tnum, set()).add(a["path"])
+            # this ADR supersedes an earlier (retired) one; THIS file may
+            # reference that retired ADR → store this path under the retired number.
+            retired_num = int(sp.split("-")[1])
+            involved.setdefault(retired_num, set()).add(a["path"])
     index_files = {
         os.path.join(ADR_DIR, "README.md"),
         os.path.join(DOCS_DIR, "adr-index.md"),
