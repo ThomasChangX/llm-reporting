@@ -17,8 +17,8 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - run: npx --yes markdownlint-cli2 '**/*.md' '#.git/**'
@@ -27,7 +27,7 @@ jobs:
     name: Link Check (lychee)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: lycheeverse/lychee-action@v2
         with:
           # §N section refs are validated by adr-semantics; exclude them here.
@@ -38,8 +38,8 @@ jobs:
     name: Prose Lint (Vale)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: errata-ai/vale-action@v2.1.1
+      - uses: actions/checkout@v7
+      - uses: errata-ai/vale-action@2.1.2
         with:
           fail_on_error: true
           reporter: github-pr-check
@@ -49,8 +49,8 @@ jobs:
     name: ADR Semantics
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
       - run: python3 scripts/check_adr_semantics.py
@@ -59,8 +59,8 @@ jobs:
     name: ADR Index Drift
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
       - run: python3 scripts/gen_adr_index.py --check
