@@ -1,0 +1,19 @@
+# Local pre-commit hooks — fast feedback on staged files only.
+# Install: pip install pre-commit && pre-commit install
+# Heavier checks (lychee, Vale, ADR semantics) run in CI as the authoritative gate.
+default_install_hook_types: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.16.0
+    hooks:
+      - id: markdownlint-cli2

@@ -1,3 +1,12 @@
+---
+id: ADR-0002
+title: "LLM Role Positioning"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0002: LLM Role Positioning
 
 - **Status**: Accepted

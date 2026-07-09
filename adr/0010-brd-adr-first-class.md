@@ -1,3 +1,12 @@
+---
+id: ADR-0010
+title: "BRD/ADR as First-Class Entities"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Product
+---
+
 # ADR-0010: BRD/ADR as First-Class Entities
 
 - **Status**: Accepted

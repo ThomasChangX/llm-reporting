@@ -1,3 +1,12 @@
+---
+id: ADR-0018
+title: "Agent Evaluation Framework"
+status: accepted
+date: 2026-07-04
+deciders: "Architecture Team"
+domain: Architecture
+---
+
 # ADR-0018: Agent Evaluation Framework
 
 - **Status**: Accepted

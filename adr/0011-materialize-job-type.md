@@ -1,3 +1,12 @@
+---
+id: ADR-0011
+title: "Materialize Job Type"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0011: Materialize Job Type
 
 - **Status**: Accepted

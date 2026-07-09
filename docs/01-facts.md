@@ -4,7 +4,7 @@
 >
 > ⚠️ **Note**: There is a timeliness risk between the main body of this document and supplementary sections added later. The main body should be treated as the authoritative source and periodically reviewed; supplementary sections may become outdated as the design iterates. If contradictions arise, the main body takes precedence.
 >
-> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (109 terms) | ADR → [adr/](../adr/) (24 records)
+> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (101 terms) | ADR → [adr/](../adr/) (24 records)
 
 ---
 
@@ -467,7 +467,7 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 
 ## 2026-07-04 Supplemental Decisions (ADR #7-#21)
 
-### ADR-0007: Query Service Independent Component
+### Decision #7b: Query Service Independent Component (ADR-0007)
 - **Status**: Accepted (2026-07-04)
 - **Background**: Natural language queries over databases require NL→SQL conversion + query optimization + caching. Existing architecture lacked a dedicated component.
 - **Decision**: Four-component Query Service — Metadata Manager, Query Generator, Pushdown Optimizer, Query Cache. Generation and execution are separated — Design Plane assists with NL→SQL, Runtime Plane executes deterministic query plans.

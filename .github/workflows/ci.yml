@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  markdownlint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npx --yes markdownlint-cli2 '**/*.md' '#.git/**'
+
+  links:
+    name: Link Check (lychee)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          # §N section refs are validated by adr-semantics; exclude them here.
+          args: --no-progress --exclude '§' --root-dir . '**/*.md'
+          fail: true
+
+  prose:
+    name: Prose Lint (Vale)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: errata-ai/vale-action@reviewdog
+        with:
+          fail_on_error: true
+          reporter: github-pr-check
+          files: docs/ adr/
+
+  adr-semantics:
+    name: ADR Semantics
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python3 scripts/check_adr_semantics.py
+
+  adr-index-drift:
+    name: ADR Index Drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python3 scripts/gen_adr_index.py --check
+
+  check:
+    name: All Green
+    if: always()
+    needs: [markdownlint, links, prose, adr-semantics, adr-index-drift]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: re-actors/alls-green@v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}

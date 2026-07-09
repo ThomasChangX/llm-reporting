@@ -152,4 +152,4 @@
 
 ---
 
-*Last Updated: 2026-07-08 | Total Terms: 109 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022, adr/0023, adr/0024*
+*Last Updated: 2026-07-09 | Total Terms: 101 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022, adr/0023, adr/0024*

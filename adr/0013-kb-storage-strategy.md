@@ -1,3 +1,12 @@
+---
+id: ADR-0013
+title: "KB Storage — PG-First with Interface Abstraction"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0013: KB Storage — PG-First with Interface Abstraction
 
 - **Status**: Accepted

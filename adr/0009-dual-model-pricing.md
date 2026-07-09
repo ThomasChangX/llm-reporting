@@ -1,3 +1,12 @@
+---
+id: ADR-0009
+title: "Dual-Model Pricing Strategy"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Operations
+---
+
 # ADR-0009: Dual-Model Pricing Strategy
 
 - **Status**: Accepted

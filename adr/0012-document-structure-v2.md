@@ -1,3 +1,13 @@
+---
+id: ADR-0012
+title: "Document Structure v2 (Supersedes ADR-0004)"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Process
+supersedes: ADR-0004
+---
+
 # ADR-0012: Document Structure v2 (Supersedes ADR-0004)
 
 - **Status**: Accepted
@@ -25,7 +35,7 @@ Add `docs/` alongside `components/` without resolving the conflict.
 ### Option B: Full arc42 Migration (Rejected)
 Restructure all documentation into arc42's 12-section format.
 - **Pro**: Full standards compliance
-- **Con**: Would break every cross-reference (500+ references across 11 ADRs — at time of writing; currently 22); over-engineering for a pre-implementation design phase
+- **Con**: Would break every cross-reference (500+ references across 11 ADRs — at time of writing; currently 24); over-engineering for a pre-implementation design phase
 
 ### Option C: Document Structure v2 (Chosen)
 Evolutionary update that aligns with industry best practices while preserving all cross-references.

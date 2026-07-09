@@ -1,3 +1,12 @@
+---
+id: ADR-0020
+title: "Agent Cost Governance & Model Degradation Detection"
+status: accepted
+date: 2026-07-04
+deciders: "Architecture Team"
+domain: Architecture / Operations
+---
+
 # ADR-0020: Agent Cost Governance & Model Degradation Detection
 
 - **Status**: Accepted

@@ -40,7 +40,7 @@
 |-----------|------------|
 | **User Journey** | Scheduler triggers Workflow at cron time → Runtime Executor acquires Sandbox → All Jobs execute in DAG order → Output rendered → Delivery to destination (email/S3/dashboard). |
 | **SLI (Indicator)** | **(a) Success Rate**: `successful_executions / total_scheduled_executions` over the window. Success = all Jobs completed with status `SUCCESS` (not `FAILED`, `TIMED_OUT`, `BLOCKED`). **(b) p95 Execution Duration**: Time from Scheduler trigger to final Output delivery, per Workflow type. |
-| **SLI Measurement** | **(a)** Prometheus counter `workflow_execution_total{status="success|failed|timeout"}`. **(b)** Histogram `workflow_execution_duration_seconds` with buckets [60, 300, 600, 1800, 3600, 7200, 14400]. Segmented by `workflow_type`. |
+| **SLI Measurement** | **(a)** Prometheus counter `workflow_execution_total{status="success\|failed\|timeout"}`. **(b)** Histogram `workflow_execution_duration_seconds` with buckets [60, 300, 600, 1800, 3600, 7200, 14400]. Segmented by `workflow_type`. |
 | **SLO Target** | **(a) Success Rate ≥ 99.5%** over 28-day window. **(b) p95 Duration ≤ 2× baseline** (baseline = 7-day moving average of p50 for that workflow). |
 | **Error Budget** | **0.5% failure allowance** = ~3.36 hours/month of failures (28d×24h×0.5%). Each failed execution counts as ~(scheduled_interval) of budget consumed. |
 | **Budget Exhaustion Action** | **Graduated Response**: 50% budget consumed → notification + voluntary slowdown; 80% budget consumed → all new deployments require additional approval; 100% budget consumed → freeze all non-critical feature releases \| Workflow (P2+) deployments (P0/P1 critical Workflows may continue deploying but require Tech Lead approval) |
@@ -84,6 +84,5 @@
 | Recon Run (1M rows) | p95 duration | ≤5min | 5% | → Heavy Engine escalation |
 
 ---
-
 
 > 📄 Original Location: [../03-architecture.md §19](../03-architecture.md)

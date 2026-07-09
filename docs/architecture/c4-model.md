@@ -4,8 +4,7 @@
 >
 > C4 Model is a layered approach to software architecture visualization. This section contains System Context, Container, and Component three-level architecture diagrams.
 
-
-### 15.1 System Context Diagram (System Context View)
+## 15.1 System Context Diagram (System Context View)
 
 ```
                                           ┌─────────────────────────────┐
@@ -166,6 +165,5 @@
 | Runtime Executor → Data Sources | JDBC/ODBC, REST, S3 API over TLS | Request/Response | Per-connector connection pooling |
 
 ---
-
 
 > 📄 Source Location:[../03-architecture.md §15](../03-architecture.md)

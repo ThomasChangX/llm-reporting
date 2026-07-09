@@ -1,3 +1,12 @@
+---
+id: ADR-0016
+title: "Dual-Mode Agent Orchestration"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Architecture
+---
+
 # ADR-0016: Dual-Mode Agent Orchestration
 
 - **Status**: Accepted

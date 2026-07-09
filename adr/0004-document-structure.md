@@ -1,3 +1,13 @@
+---
+id: ADR-0004
+title: "Document Structure"
+status: superseded
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Process
+superseded_by: ADR-0012
+---
+
 # ADR-0004: Document Structure
 
 > ⚠️ **This ADR has been superseded by [ADR-0012: Document Structure v2](./0012-document-structure-v2.md).** The document structure was reorganized on 2026-07-04. See ADR-0012 for the current structure.

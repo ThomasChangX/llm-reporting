@@ -1,3 +1,12 @@
+---
+id: ADR-0008
+title: "Large-Scale Data Strategy"
+status: accepted
+date: 2026-07-04
+deciders: "Project Sponsor"
+domain: Data
+---
+
 # ADR-0008: Large-Scale Data Strategy
 
 - **Status**: Accepted

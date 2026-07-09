@@ -3,7 +3,7 @@
 > Manual verification checklist for validating cross-reference integrity after document structure adjustments.
 > Run this checklist after every major document change.
 >
-> **Last Run**: 2026-07-04 | **Status**: ✅ All verifiable cross-references confirmed — see individual check items
+> **Last Run**: 2026-07-09 | **Status**: ✅ All verifiable cross-references confirmed — see individual check items
 
 ## 1. Path Reference Checks
 
@@ -50,11 +50,11 @@ In sections extracted to standalone files, bare `§N` references are **expected 
 
 ## 3. Extraction Completeness Checks
 
-- [x] §15 C4 Model: original 164 lines → extracted file ≥ 164 lines of content
-- [x] §16 STRIDE: original 84 lines → extracted file ≥ 84 lines of content + all §N rewritten
-- [x] §18 ERD: original 140 lines → extracted file ≥ 140 lines of content
-- [x] §19 SLO/SLI: original 81 lines → extracted file ≥ 81 lines of content
-- [x] Glossary: original 12 entries → extracted file ≥ 50 entries
+- [x] §15 C4 Model: original 164 lines → extracted file 171 lines (≥ 164 ✅)
+- [x] §16 STRIDE: original 84 lines → extracted file 93 lines (≥ 84 ✅) + all §N rewritten
+- [x] §18 ERD: original 140 lines → extracted file 148 lines (≥ 140 ✅)
+- [x] §19 SLO/SLI: original 81 lines → extracted file 89 lines (≥ 81 ✅)
+- [x] Glossary: original 12 entries → extracted file 101 entries (≥ 50 ✅)
 
 ## 4. Architecture Doc Section Header Retention Check
 
@@ -76,4 +76,4 @@ Section headers retained after extraction (to prevent `→ §N` inbound referenc
 | Glossary coverage | Quarterly | Domain Expert |
 | ADR status cleanup (Deprecated/Superseded) | Semi-annually | Architect |
 
-*This checklist last updated: 2026-07-08*
+*This checklist last updated: 2026-07-09*

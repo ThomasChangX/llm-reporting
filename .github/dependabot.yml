@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # Keep GitHub Actions in CI current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Keep pre-commit hook revisions current.
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
