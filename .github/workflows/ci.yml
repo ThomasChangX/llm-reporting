@@ -17,7 +17,7 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -27,7 +27,7 @@ jobs:
     name: Link Check (lychee)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: lycheeverse/lychee-action@v2
         with:
           # §N section refs are validated by adr-semantics; exclude them here.
@@ -38,7 +38,7 @@ jobs:
     name: Prose Lint (Vale)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: errata-ai/vale-action@v2.1.1
         with:
           fail_on_error: true
@@ -49,7 +49,7 @@ jobs:
     name: ADR Semantics
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -59,7 +59,7 @@ jobs:
     name: ADR Index Drift
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
