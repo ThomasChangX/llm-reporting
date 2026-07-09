@@ -29,7 +29,9 @@ Rules:
 
 ## Decision ↔ ADR Mapping
 
-Every ADR in `adr/` must have a corresponding `### Decision #N: <title>` entry in `01-facts.md`'s "Key Design Decisions" section. Same count. The checker enforces parity.
+The `### Decision #N` entries in `01-facts.md` form a **narrative sequence** (the order decisions were recorded for the reader), NOT a 1:1 correspondence with ADR numbers — `Decision #3` covers Compute Spec (ADR-0011), `Decision #7` covers Design Order (ADR-0003), etc. The invariant the checker enforces is **count parity**: the number of `### Decision #N` entries must equal the number of ADR files. Decision numbers must be unique plain integers (no `#7b`-style suffixes).
+
+When you add an ADR, add a `### Decision #N` entry to `01-facts.md` (next sequential `#N`) — the checker enforces the count matches.
 
 ## Cross-Reference Checklist
 

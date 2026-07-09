@@ -30,6 +30,9 @@ def slugify(title):
     return slug or "decision"
 
 
+VALID_STATUSES = {"proposed", "accepted", "deprecated", "superseded", "rejected"}
+
+
 def main():
     if len(sys.argv) < 2 or sys.argv[1].startswith("-"):
         print('Usage: python3 scripts/new_adr.py "Decision Title" [--domain X] [--status proposed]')
@@ -41,7 +44,11 @@ def main():
         if a == "--domain" and i + 1 < len(sys.argv):
             domain = sys.argv[i + 1]
         if a == "--status" and i + 1 < len(sys.argv):
-            status = sys.argv[i + 1]
+            status = sys.argv[i + 1].lower()
+    # validate status against the MADR 4.0.0 enum — fail fast at creation time
+    if status not in VALID_STATUSES:
+        print(f"ERROR: invalid status '{status}'. Must be one of: {sorted(VALID_STATUSES)}", file=sys.stderr)
+        sys.exit(2)
 
     num = next_number()
     slug = slugify(title)

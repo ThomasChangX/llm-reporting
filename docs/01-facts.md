@@ -467,7 +467,7 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 
 ## 2026-07-04 Supplemental Decisions (ADR #7-#21)
 
-### Decision #7b: Query Service Independent Component (ADR-0007)
+### Decision #24: Query Service Independent Component (ADR-0007)
 - **Status**: Accepted (2026-07-04)
 - **Background**: Natural language queries over databases require NL→SQL conversion + query optimization + caching. Existing architecture lacked a dedicated component.
 - **Decision**: Four-component Query Service — Metadata Manager, Query Generator, Pushdown Optimizer, Query Cache. Generation and execution are separated — Design Plane assists with NL→SQL, Runtime Plane executes deterministic query plans.

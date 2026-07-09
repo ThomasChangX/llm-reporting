@@ -77,9 +77,10 @@ def load_adrs():
 
 def check_numbering(adrs):
     nums = sorted(a["num"] for a in adrs)
+    # gaps (missing numbers in the 1..N sequence)
     for i, n in enumerate(nums):
         if i + 1 != n:
-            err("numbering", "adr/", f"gap/dup: expected {i+1:04d}, found {n:04d}")
+            err("numbering", "adr/", f"gap in sequence: expected ADR-{i+1:04d}, found ADR-{n:04d}")
             break
     # duplicates
     seen = set()
@@ -224,19 +225,60 @@ def check_section_refs(adrs):
 
 
 def check_decision_parity(adrs):
-    """Count Decision #N entries in 01-facts.md vs ADR file count."""
+    """Decision #N entries in 01-facts.md must match ADR file count.
+
+    Decision numbers are a narrative sequence (NOT 1:1 with ADR numbers), so we
+    enforce count parity + unique-ascending-integer numbering. A `#7b`-style
+    suffix is a legacy wart that should not recur.
+    """
     facts_path = os.path.join(DOCS_DIR, "01-facts.md")
     try:
         text = read(facts_path)
     except OSError:
         err("decision-parity", facts_path, "01-facts.md not found")
         return
-    decisions = re.findall(r"^###\s+Decision\s+#(\w+)", text, re.MULTILINE)
-    # ADR count excludes README
-    adr_count = len(adrs)
-    if len(decisions) != adr_count:
+    raw_tokens = re.findall(r"^###\s+Decision\s+#(\w+)", text, re.MULTILINE)
+    # every token must be a plain integer (no '7b', '3a', etc.)
+    for tok in raw_tokens:
+        if not re.fullmatch(r"\d+", tok):
+            err("decision-parity", facts_path,
+                f"Decision #{tok} has a non-integer suffix — use a plain integer (legacy wart); add a properly numbered entry instead")
+    int_tokens = [int(t) for t in raw_tokens if re.fullmatch(r"\d+", t)]
+    # uniqueness
+    if len(int_tokens) != len(set(int_tokens)):
+        dups = sorted({n for n in int_tokens if int_tokens.count(n) > 1})
         err("decision-parity", facts_path,
-            f"{len(decisions)} Decision entries vs {adr_count} ADRs — must match")
+            f"duplicate Decision numbers: {dups} — numbers must be unique")
+    adr_count = len(adrs)
+    if len(raw_tokens) != adr_count:
+        err("decision-parity", facts_path,
+            f"{len(raw_tokens)} Decision entries vs {adr_count} ADRs — count must match")
+
+
+def check_readme_index(adrs):
+    """adr/README.md index table rows must equal ADR files on disk.
+
+    Prevents silent drift: if someone adds an ADR and regenerates
+    docs/adr-index.md but forgets adr/README.md, this catches it.
+    """
+    readme_path = os.path.join(ADR_DIR, "README.md")
+    try:
+        text = read(readme_path)
+    except OSError:
+        return  # README absence is not itself an error
+    # table rows look like: | 0001 | [Title](./0001-...md) | ...
+    readme_nums = set()
+    for m in re.finditer(r"^\|\s*(\d{4})\s*\|", text, re.MULTILINE):
+        readme_nums.add(int(m.group(1)))
+    disk_nums = {a["num"] for a in adrs}
+    missing_in_readme = disk_nums - readme_nums
+    extra_in_readme = readme_nums - disk_nums
+    if missing_in_readme:
+        err("readme-index", readme_path,
+            f"ADRs on disk but missing from README table: {sorted(missing_in_readme)}")
+    if extra_in_readme:
+        err("readme-index", readme_path,
+            f"ADRs in README table but no file on disk: {sorted(extra_in_readme)}")
 
 
 def check_counts(adrs):
@@ -337,6 +379,7 @@ def main():
     check_reverse_refs(adrs)
     check_section_refs(adrs)
     check_decision_parity(adrs)
+    check_readme_index(adrs)
     check_counts(adrs)
     check_madr_sections(adrs)
     check_frontmatter_validity(adrs)

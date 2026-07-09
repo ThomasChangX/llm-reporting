@@ -35,7 +35,7 @@ CI (`.github/workflows/ci.yml`) is the **authoritative gate**: markdownlint + ly
   grep -rniE '(Total Terms|complete glossary|\(N terms\)|N ADRs|N records)' docs/ README.md
   ```
   Historical snapshots inside an Accepted ADR's narrative (e.g. "from 11 terms to 102 terms") are **exempt** — they record what was true at decision time.
-- **Decision ↔ ADR parity**: every ADR file must have a corresponding `### Decision #N` entry in `docs/01-facts.md` (same count). The checker enforces this.
+- **Decision ↔ ADR parity**: the `### Decision #N` entries in `docs/01-facts.md` (a narrative sequence, not 1:1 with ADR numbers) must **match the ADR file count**. The checker enforces count parity + unique plain-integer numbering.
 
 ## Git & PR
 
