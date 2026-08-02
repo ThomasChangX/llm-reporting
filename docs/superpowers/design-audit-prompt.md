@@ -1,4 +1,4 @@
-# Design Audit Prompt v3（全方位设计审核 · 单 agent 逐维度自查 + 全量追踪 + 零遗留）
+# Design Audit Prompt v4（全方位设计审核 · 单 agent 逐维度自查 + 全量追踪 + 零遗留 + run 隔离）
 
 > **用途**：在需要对 llm-reporting 设计仓库做全方位深度审核时，将本文件作为 prompt 反复调用。
 > 它不是被动运行的 skill，而是一份操作指令：定义审核维度（rubric）、执行流程、判断标准、输出格式与反偷懒守则。
@@ -6,7 +6,8 @@
 > **调用方式**：将本文件全文 + `$REPO_PATH` 喂给 AI agent，令其按本文件执行。
 >
 > **变更历史**：
-> - **v3**：产物分层 + 零遗留。临时文件（工作笔记/矩阵草稿）在审核结束时清理，仓库只留持久层（报告 + 索引 + 追踪 spec）。
+> - **v4**：修复批判性审核发现的 3 Critical + 5 Important + 3 Minor。① 矩阵完整版（含已覆盖格的正面安全证据）作为报告附录保留（C-1）② 命名简化 `audit-<RUN_ID>-<first-finding-id>-<slug>`（C-2）③ run 隔离（`$RUN_ID` 前缀）+ 产物 git 提交（C-3）④ 上下文压力应对策略（I-1）⑤ 维度执行记录段，含 0-finding 维度（I-2）⑥ 历史快照第三豁免类别 E3（I-3）⑦ 矩阵空洞转 finding 检查点（I-4）⑧ scope 与产物结构适配（I-5）⑨ 占位符统一/Status 生命周期/临时文件入 /tmp（M-1/2/3）。
+> - **v3**：产物分层 + 零遗留。临时文件在审核结束时清理，仓库只留持久层。
 > - **v2**：全量追踪。每个 finding（C/I/M 无例外）由独立 superpowers spec 追踪，零孤儿方可声称完成。
 
 ---
@@ -17,6 +18,7 @@
 |------|----|
 | `$REPO_PATH` | `<填入 llm-reporting 仓库绝对路径>` |
 | `$AUDIT_SCOPE` | `<可选：限定审核范围，如 "ADR-0025 迁移完整性" / "安全合规" / 空=全量>` |
+| `$RUN_ID` | **由 agent 在步骤 0 派生**：`YYYYMMDD-<仓库 HEAD 短 SHA 前 7 位>`（如 `20260802-a1b2c3d`）。本次审核全部产物的隔离前缀，无需调用方填入。 |
 
 ---
 
@@ -32,15 +34,10 @@
 
 机械部分由 `scripts/check_adr_semantics.py` + CI（markdownlint/lychee/Vale）部分覆盖，但本审核覆盖**语义级、架构级、可行性级**的判断，这些是机器脚本无法完成的。
 
-**审核输出（三部分，缺一不可）**：
-1. **A 直接消息**：对话中的汇总（计数/维度覆盖/Top Critical/spec 清单/孤儿检查/下一步）
-2. **B findings 报告**：`docs/superpowers/specs/audit-<run-date>-report.md`（C/I/M 分级 + 证据）
-3. **C 追踪 spec 文件集**：每个 finding 对应的 superpowers spec + 追溯索引（`audit-<run-date>-index.md`）
-
 **审核输出（三部分，缺一不可 · 详见"输出"段）**：
-1. **A 直接消息**：对话中的汇总（计数/维度覆盖/Top Critical/spec 清单/孤儿检查/零遗留确认/下一步）
-2. **B findings 报告**：`docs/superpowers/specs/audit-<run-date>-report.md`（C/I/M 分级 + 证据）
-3. **C 追踪 spec 文件集**：每个 finding 对应的 superpowers spec + 追溯索引（`audit-<run-date>-index.md`）
+1. **A 直接消息**：对话中的汇总（RUN_ID/计数/维度覆盖/Top Critical/spec 清单/孤儿检查/零遗留确认/commit SHA/下一步）
+2. **B findings 报告**：`docs/superpowers/specs/audit-<RUN_ID>-report.md`（C/I/M 分级 + 证据 + 维度执行记录 + 矩阵附录）
+3. **C 追踪 spec 文件集**：每个 finding 对应的 superpowers spec + 追溯索引（`audit-<RUN_ID>-index.md`）
 
 审核阶段**仅报告不修复被审文件**（核心原则 6）；追踪 spec 记录修复方案，修复执行是后续独立流程。审核产生的临时文件（工作笔记/矩阵草稿）在结束时清理，仓库**零遗留**（核心原则 8）。
 
@@ -69,13 +66,16 @@
 Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**，不算缺陷。只有"当前应反映的状态"不一致才算 finding。
 
 **豁免条件**（满足任一即豁免）：
-- 该论断位于某 Accepted ADR 的 Context/Options/Decision/Rationale/Consequences 正文内（不可变决策内容）。
-- 该论断显式标注了时间语境（"当时""v1.0 时""from N to M"）。
+- **E1 不可变决策正文**：该论断位于某 Accepted ADR 的 Context/Options/Decision/Rationale/Consequences 正文内（不可变决策内容）。
+- **E2 时间语境标注**：该论断显式标注了时间语境（"当时""v1.0 时""from N to M"）。
+- **E3 合法历史保留（标注的术语博物馆/废弃索引）**：该旧术语/旧编号出现在用于记录历史的语境，且**明确标注了其被取代关系**。例：glossary 条目 "Design Plane (legacy, superseded by Exploration Environment per ADR-0025)"；`adr/README.md` 状态表列出已废弃 ADR（0004）并标注 superseded_by 0012。**未标注取代关系的裸旧术语不豁免**（如正文里直接写"Design Plane"而无任何 legacy/superseded 注明）。
 
-**非豁免**：架构主文档、timeline、cost、glossary、图表中的过时数字/术语 —— 这些是"当前状态文档"，必须保持最新。
+**非豁免**：架构主文档、timeline、cost、图表中的过时数字/术语 —— 这些是"当前状态文档"，必须保持最新。glossary 中的过时术语：若满足 E3（作为 legacy 词条保留并标注取代关系）则豁免；若作为**当前定义**使用（未标注 legacy）则不豁免，必须更新为主术语。
 
-> 实例：ADR-0011 正文说"第 9 个 Job Type"（决策时是第 9 个）= 豁免；
-> 但 `component-exploration-env.mmd` 写"14 Skills"而 glossary 说 18 Skills = **finding**（图表应反映当前状态）。
+> 实例：ADR-0011 正文说"第 9 个 Job Type"（决策时是第 9 个）= 豁免（E1）；
+> `component-exploration-env.mmd` 写"14 Skills"而 glossary 说 18 Skills = **finding**（图表应反映当前状态，无豁免）；
+> glossary 同时保留 "Design Plane (legacy, superseded by Exploration Environment per ADR-0025)" 条目 = 豁免（E3，供读者查历史）；
+> glossary 把 "Design Plane" 作为当前定义而无 legacy 标注 = **finding**（应更新为 Exploration Environment）。
 
 ### 4. LLM 镜像强制（LLM Lens Mandatory）
 
@@ -100,12 +100,13 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 
 ### 6. 只报告，不修复（Report-Only · 限于审核阶段）
 
-**审核阶段**（步骤 1-6）只产出 findings 报告，不修改任何被审文件。
+**审核全过程**（步骤 0-7）不修改任何**被审设计文件**（即 `docs/` 下的设计文档 `01-facts`/`02-requirement`/`03-architecture`/`04-timeline`/`05-cost`/`glossary`/子目录、`adr/` 下的 ADR、`README`/`AGENTS` 等）。审核只**读取**这些文件、产出 findings。
 
 - 这避免了"审核者自己审、自己修、再自己审"的循环（既当裁判又当运动员）。
-- 明显的机械错误（术语残留、计数偏差）同样只报告；修复由后续单独流程（fix spec）处理。
-- 审核者可在 finding 的"建议"字段给出修复方向，但不得在审核阶段执行修复。
-- **不与原则 7 冲突**：原则 7 要求为每个 finding **创建追踪 spec 文件**（写入 `docs/superpowers/specs/`），这是"创建新文件"而非"修改被审文件" —— 追踪是审核产物，不是修复动作。
+- 明显的机械错误（术语残留、计数偏差）同样只报告；修复由后续单独流程（按 spec 的 Fix Plan 执行）处理。
+- 审核者可在 finding 的"建议"字段给出修复方向，但不得在审核阶段对被审文件执行修复。
+- **"被审文件" vs "审核产物"边界**：`docs/superpowers/specs/` 下的文件（report/index/tracking spec）是**审核产物**，创建并提交它们是审核闭环的一部分（步骤 7），不违反本原则。本原则禁止的是改 `docs/superpowers/specs/` **以外**的设计文件。
+- **不与原则 7 冲突**：原则 7 要求为每个 finding 创建追踪 spec（写入 `docs/superpowers/specs/`），这是创建审核产物，不是修复被审文件。
 
 ### 7. 全量追踪，无孤儿（Universal Tracking · No Orphan Finding）
 
@@ -113,7 +114,7 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 
 - 审核结束时，`findings → specs` 追溯索引中，**finding 总数 == 已分配 spec ID 总数 == 0 孤儿**。
 - 一个 spec 可追踪多个同源 findings（见下方分组规则），但**禁止把不同优先级混进同一 spec**（C/I/M 各自独立 spec，便于分级排期）。
-- spec 文件命名：`docs/superpowers/specs/audit-<run-date>-<severity>-<seq>-<short-slug>.md`（如 `audit-2026-08-02-I-003-glossary-term-migration.md`）。
+- spec 文件命名：`docs/superpowers/specs/audit-<RUN_ID>-<first-finding-id>-<slug>.md`（如 `audit-20260802-a1b2c3d-I-003-glossary-term-migration.md`）。`<first-finding-id>` 含字母+序号（如 `I-003`），已编码 severity，无需冗余字段。
 - 每个 spec 必须含：finding ID 引用、证据原文、问题分析、修复方案、验收标准（修复如何验证）、追溯回原 finding。
 - Minor 不例外：Minor 也要建 spec。批量性 Minor（如多处 typo）可合并为单个 Minor spec，但 ID 必须全部列出。
 
@@ -127,30 +128,37 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 
 ### 8. 零遗留，产物分层（No Residue · Tiered Artifacts）
 
-审核产生的所有文件分为两层，**临时层在审核结束时清理，仓库只留下持久层**。
+审核产生的所有文件分为两层。**run 隔离**：每次审核以唯一 `$RUN_ID`（格式 `YYYYMMDD-<仓库 HEAD 短 SHA 前 7 位>`，如 `20260802-a1b2c3d`）标识其全部产物；不同审核 run 的文件互不干扰、互不视为遗留。**临时层在审核结束时清理，仓库只留下持久层。**
 
-**持久层（保留）** —— 审核结束后仓库存在的全部文件：
+**持久层（保留）** —— 本次 run 结束后仓库存在的全部文件，均以 `$RUN_ID` 为前缀：
 
 | 文件 | 角色 |
 |------|------|
-| `docs/superpowers/specs/audit-<date>-report.md` | 全局视图：计数 / 维度覆盖 / 所有 findings 汇总 / 维度总结 |
-| `docs/superpowers/specs/audit-<date>-index.md` | 追溯索引：finding ↔ spec 双向映射 |
-| `docs/superpowers/specs/audit-<date>-<sev>-<seq>-*.md` | N 个追踪 spec（每个含完整证据 + 修复方案 + 验收标准） |
+| `docs/superpowers/specs/audit-<RUN_ID>-report.md` | 全局视图：计数 / 维度执行记录 / findings 汇总 / 维度总结 / **矩阵附录（完整 STRIDE + 法规矩阵，含已覆盖格的对策引用）** |
+| `docs/superpowers/specs/audit-<RUN_ID>-index.md` | 追溯索引：finding ↔ spec 双向映射 |
+| `docs/superpowers/specs/audit-<RUN_ID>-<first-finding-id>-<slug>.md` | N 个追踪 spec（每个含完整证据 + 修复方案 + 验收标准） |
 
-**临时层（审核结束时必须删除）** —— 这些是审核过程的脚手架，其价值已被沉淀进持久层：
+> **为何矩阵入报告而非清理**（修 C-1）：矩阵的"已覆盖格"记录的是**正面安全/合规证据**（"组件 X 的篡改威胁已有对策，见 doc:line"），这是合规审查最需要的产物。空洞格转 finding 进 spec（保留"哪里有洞"），已覆盖格进报告附录（保留"哪里安全"）。两者都不可丢。
+
+**临时层（审核结束时必须删除）** —— 这些是审核过程的脚手架：
 
 - 工作笔记（grep 命令 + 命中行号草稿）
-- STRIDE×组件、法规×控制点 矩阵草稿
 - 步骤 1 的文件清单 / 术语 grep 列表草稿
-- 任何散落的中间 `.md` / `.txt` 草稿
+- 矩阵构造期的中间草稿（**最终矩阵必须沉淀进报告附录后，草稿方可删除**）
+- 任何散落的中间文件
+
+**临时文件写入位置（修 M-3）**：临时层文件**禁止写入仓库内**（避免污染 git 工作树、避免被完成判据误判）。写入系统临时目录（如 `/tmp/audit-<RUN_ID>/`）或 agent 内存。**唯一允许写入仓库内的文件是持久层三类**。
 
 **沉淀规则**（临时层删除前，关键信息必须已进入持久层）：
 
-- 矩阵的每个**空洞** → 已转为 finding → 已进入某 spec 的 `Source Finding(s)` + `Evidence`。完整矩阵不保留，但其结论（哪些格未覆盖）已固化进 spec。
+- 矩阵**全部格子**（空洞 + 已覆盖）→ 完整矩阵进报告附录；空洞格**额外**转为 finding 进 spec。
 - grep 命中行 → 已进入对应 finding 的 `位置` + `证据` 字段。grep 命令本身不保留。
-- 维度总结（每个维度的整体评价）→ 进入报告 `report.md` 的"维度总结"段。
+- 每个维度的执行记录（grep 了什么 / 读了哪些文件 / finding 数，**含 0 finding 的维度**）→ 进入报告"维度执行记录"段（修 I-2：无缺陷的维度也要有审核证据）。
+- 维度总结（每个维度的整体评价）→ 进入报告"维度总结"段。
 
-**完成判据**：审核结束时，`docs/superpowers/specs/` 下**只存在**上述持久层三类文件。任何其他文件 = 违规。
+**完成判据（零遗留，按 run 隔离）**：本次 run 结束时，`docs/superpowers/specs/` 下以 `audit-<RUN_ID>-` 为前缀的文件**只存在**持久层三类。其他 **run** 的文件（`audit-<其他RUN_ID>-*`）不算遗留、不检查、不清理。仓库内**无**非持久层文件（临时层应已在 /tmp 删除）。
+
+**产物的 git 处置（修 C-3）**：审核结束后，本次 run 的全部持久层文件作为一次 commit 提交：`docs(superpowers): audit <RUN_ID> — N findings (C:c I:i M:m) + specs`。提交是审核闭环的一部分。历史 run 的文件随各自 commit 留存，供趋势对比；无需清理历史 run。
 
 ---
 
@@ -174,6 +182,10 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 | "我已经整体读过架构文档" | 禁止通读后凭印象。必须按"执行流程"的分批策略读取并记录。 |
 | "grep 过了没发现问题" | 必须把 grep 命令 + 命中行号列入工作笔记。无输出的 grep 也要记录命令本身。 |
 | "矩阵这一格应该是安全的" | 矩阵每格必须显式填（有对策/无对策-残余风险接受/未覆盖-finding），不得留空或"应该"。 |
+| "这个维度没发现问题，不用记录" | 禁止。0-finding 维度也必须在报告"维度执行记录"段留一行（执行动作 + findings 数=0）。无记录 = 无法证明审过 = 未审（修 I-2）。 |
+| "矩阵的已覆盖格没洞，不用保留" | 禁止。已覆盖格是正面安全/合规证据，必须进报告附录（修 C-1）。只保留空洞、丢掉安全证据 = 合规审查时无法证明"哪里安全"。 |
+| "工作笔记写在仓库里方便点" | 禁止。临时层文件只写 `/tmp/audit-<RUN_ID>/`，不写仓库内（修 M-3）。写仓库内 = 零遗留判据失败。 |
+| "这次审核的文件和上次混着没事" | 禁止。每次 run 用独立 `$RUN_ID` 前缀，完成判据只查本次前缀。混用 = 无法区分 run = 遗留歧义（修 C-3）。 |
 
 ---
 
@@ -356,15 +368,21 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 
 ---
 
-## 执行流程（7 步 · 单 agent 逐维度自查）
+## 执行流程（8 步 · 单 agent 逐维度自查）
+
+### 步骤 0 · 派生 RUN_ID + 建临时目录
+
+- `$RUN_ID = YYYYMMDD-<git rev-parse --short=7 HEAD>`（如 `20260802-a1b2c3d`）。记入工作笔记，贯穿本次审核全部产物命名。
+- 创建临时目录 `/tmp/audit-<RUN_ID>/`（工作笔记/矩阵草稿/批次摘要均写此处，**不写仓库内** —— 原则 8 / 修 M-3）。
+- 此步骤不产生持久文件。
 
 ### 步骤 1 · 范围界定与索引
 
 - 读 `AGENTS.md`（根 + `docs/AGENTS.md` + `adr/AGENTS.md`）—— 这些定义"什么算正确"。
 - 读 `glossary.md`（102 术语）+ `docs/adr-index.md`（25 ADR 概览）+ `docs/README.md`（阅读顺序）+ `adr/README.md`。
 - 读 `cross-reference-checklist.md` —— 注意它若自标记"待对齐"，这本身就是线索。
-- **产出**：审核文件清单（明确每个要读的文件）+ 关键术语 grep 列表（用于步骤 2）。**这些是临时产物**（原则 8），在步骤 7 清理；其价值会被消耗在后续步骤的 grep 执行和 findings 里。
-- 若设了 `$AUDIT_SCOPE`，在此裁剪范围（如只审"ADR-0025 迁移"则聚焦 A2/A3/A4/A5）。
+- **产出**（写入 `/tmp/audit-<RUN_ID>/`）：审核文件清单 + 关键术语 grep 列表（用于步骤 2）。**临时产物**（原则 8），步骤 7 清理；其价值消耗在后续 grep 执行和 findings 里。
+- 若设了 `$AUDIT_SCOPE`，在此裁剪范围（如只审"ADR-0025 迁移"则聚焦 A2/A3/A4/A5）。scope 限定影响报告"维度执行记录"只列范围内维度（见输出 B 的 scope 适配）。
 
 ### 步骤 2 · 机械类批量扫描（A1-A8）
 
@@ -375,7 +393,7 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 - **引用完整性**：除 `check_adr_semantics.py` 覆盖的，查 narrative 引用（"见 §X.Y""如 ADR-ZZZZ 所述"）。
 - **图表-正文同步**：读每个 `.mmd` 的标签，回正文核对。
 - **占位/TBD 扫描**：grep `TODO|TBD|FIXME|占位|待定`。
-- **规则**：每个 grep 必须记录命令 + 命中行号到工作笔记。"grep 过了没问题"无输出 = 未执行。**工作笔记是临时产物**（原则 8）：命中行号在步骤 6 进入对应 finding 的 `位置`+`证据` 字段（持久化），笔记草稿在步骤 7 删除。
+- **规则**：每个 grep 必须记录命令 + 命中行号到 `/tmp/audit-<RUN_ID>/` 工作笔记。"grep 过了没问题"无输出 = 未执行。**工作笔记是临时产物**（原则 8）：命中行号在步骤 6 进入对应 finding 的 `位置`+`证据` 字段（持久化），笔记草稿在步骤 7 删除。**无 finding 的 grep 也要记录**（进报告"维度执行记录"段，证明该维度已审 —— 修 I-2）。
 
 ### 步骤 3 · 按模块分批深读（B/C 类）
 
@@ -394,12 +412,19 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 - 每批读完，**立即记录**该批覆盖维度产生的 findings（趁热打铁，避免上下文丢失）。
 - 读某章节引用 ADR 时，同时打开该 ADR 对照。
 
+**上下文压力应对（修 I-1）**：6410 行 + 25 ADR 即便分批，单 agent 累计读取量仍大，且步骤 5 的跨批核对（如"SLO 在架构/operations/timeline 三处是否同值"）依赖早期批次内容。对策：
+- **关键事实摘要**：每批读完，在临时笔记（`/tmp/audit-<RUN_ID>/batch-N.md`）记下该批的**可核查事实**（数值/术语映射/组件清单/SLO 值），格式为 `事实 → 文件:行号`。这是跨批核对的索引，非完整复述。
+- 跨批核对时，先查摘要定位候选冲突，再回原文取证（不凭摘要下结论 —— 原则 2 仍适用）。
+- 若某批内容超出单次读取上限，进一步细分（如批 2 拆 §1-3 / §4-6）。
+- 上下文逼近上限时，findings 立即落盘到临时笔记，不留在对话内存。
+
 ### 步骤 4 · 矩阵构造（D1/D4）
 
 - **STRIDE × 组件矩阵**：从 `docs/diagrams/*.mmd`（C4 图）提取组件列表 → 构造 6 列（S/T/R/I/D/E）矩阵 → 逐格问"对策？对策在哪份文档:行号？" → 空格 = finding。
 - **法规 × 控制点矩阵**：列 SOX(ITGC)/HIPAA/GDPR 关键条目 → 逐条问"设计文档映射了控制？" → 空格 = finding。
 - **规则**：矩阵每格必须显式填（有对策 / 无对策-残余风险接受 / 未覆盖-finding），不得留空。
-- **矩阵是临时草稿**（原则 8）：矩阵本身在步骤 7 清理，但其**每个空洞**必须先转为带 ID 的 finding，进入步骤 6 汇总 → 最终沉淀进 spec 的 `Evidence`。矩阵的"已覆盖"格若产生有价值的整体评价，记入步骤 6 的维度总结（进报告）。
+- **矩阵归宿（修 C-1）**：完整矩阵（含**已覆盖格的对策引用** —— 这是正面安全/合规证据）在步骤 6 沉淀进报告附录，**不清理**。只有矩阵构造期的中间草稿属于临时层。
+- **空洞转 finding 检查点（修 I-4）**：本步骤结束前，遍历矩阵所有"未覆盖"格，确认**每个**已记入临时笔记的 finding 草稿（此时尚未分配 ID —— ID 在步骤 6 统一分配；此处只确认"无空洞格被遗漏未记录"）。若有空洞格未记草稿，不得进入步骤 5。此检查点保证步骤 7 沉淀/清理时无遗漏。
 
 ### 步骤 5 · 交叉维度核对
 
@@ -410,8 +435,8 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 ### 步骤 6 · 汇总与分级
 
 - 所有候选 findings 去重（不同维度可能发现同一问题，合并为一条，标注涉及的维度）。
-- 按 C/I/M 分级（见下方"输出格式"）。
-- 写 findings 报告（输出 B）。
+- 按 C/I/M 分级（见下方"输出"）。
+- 写 findings 报告（输出 B），**含**：汇总统计、维度执行记录（每维度一行，含 0 finding 维度 —— 修 I-2）、findings 详情、维度总结、**矩阵附录 A/B（完整矩阵含已覆盖格 —— 修 C-1，从步骤 4 草稿沉淀）**。
 - **本步骤结束时，每个 finding 有唯一稳定 ID**（C-NNN / I-NNN / M-NNN）。ID 一旦分配，后续步骤不得重排或丢弃。
 
 ### 步骤 7 · 为所有 findings 创建追踪 spec（Track Everything）
@@ -423,22 +448,27 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 **执行**：
 
 1. **分组**：按"严重程度 + 根因 + 区域"对 findings 聚合（见核心原则 7 的分组规则）。同严重程度、同根因的可合并为一个 spec；**跨严重程度绝不合并**。
-2. **创建 spec 文件**：为每个分组写一个 spec 到 `docs/superpowers/specs/`，命名 `audit-<run-date>-<severity>-<seq>-<short-slug>.md`（如 `audit-2026-08-02-I-003-glossary-term-migration.md`）。`<seq>` 取该 spec 覆盖的最小 finding ID 的数字部分。
-3. **每个 spec 必含字段**：
-   - `Source Finding(s)`：覆盖的 finding ID 列表（全部列出，无一遗漏）
-   - `Severity`：C / I / M
-   - `Evidence`：从 findings 报告复制对应原文证据（文件:行号 + 引用）
-   - `Problem`：问题分析（为什么是缺陷，引用的判断标准/维度）
-   - `Fix Plan`：修复方案（具体到改哪些文件、怎么改；机械类给批量替换策略，架构类给论证补充方向）
-   - `Acceptance Criteria`：修复如何验证（如"grep 'Design Plane' 仅返回豁免处""SLO 在三处文档同值""矩阵空洞填满"）
-   - `Audit Trail`：来源审核 run（日期 + HEAD SHA + spec 路径）
-4. **构造追溯索引**：在 `docs/superpowers/specs/audit-<run-date>-index.md` 写一张映射表，保证 `finding ID → spec 文件` 双向可查。
+2. **创建 spec 文件**：为每个分组写一个 spec 到 `docs/superpowers/specs/`，命名 `audit-<RUN_ID>-<first-finding-id>-<slug>.md`（如 `audit-20260802-a1b2c3d-I-003-glossary-term-migration.md`）。`<first-finding-id>` = 该 spec 覆盖的**最小** finding ID（含字母，如 `I-003`，它同时编码了 severity 与序号 —— 修 C-2 去除冗余）。
+3. **每个 spec 必含 10 字段**（前 5 个入"元数据"段，后 5 个各为正文的 `##` 段，见输出 C-1 模板）：
+   - `Source Finding(s)`：覆盖的 finding ID 列表（全部列出，无一遗漏）〔元数据〕
+   - `Severity`：C / I / M 〔元数据〕
+   - `Source Dimensions`：涉及的维度编号（如 A2, A5）〔元数据〕
+   - `Created From Audit`：`$RUN_ID`（HEAD SHA）〔元数据〕
+   - `Status`：`open`（生命周期：`open` → 修复开始置 `in-progress` → 验收通过置 `done`。**由后续修复流程更新，非审核阶段**）〔元数据〕
+   - `Evidence`（正文段）：从 findings 报告复制对应原文证据（文件:行号 + 引用）
+   - `Problem`（正文段）：问题分析（为什么是缺陷，引用的判断标准/维度；合并多个 findings 时说明共同根因）
+   - `Fix Plan`（正文段）：修复方案（具体到改哪些文件、怎么改；机械类给批量替换策略，架构类给论证补充方向。此为方案，不在审核阶段执行 —— 原则 6）
+   - `Acceptance Criteria`（正文段）：修复如何验证（如"grep 'Design Plane' 仅返回豁免处""SLO 在三处文档同值""矩阵空洞填满"）
+   - `Audit Trail`（正文段）：来源审核 run（`$RUN_ID` + HEAD SHA + 报告路径）
+4. **构造追溯索引**：在 `docs/superpowers/specs/audit-<RUN_ID>-index.md` 写一张映射表，保证 `finding ID → spec 文件` 双向可查。
 5. **孤儿检查**：遍历全部 finding ID，确认每个都出现在某 spec 的 `Source Finding(s)` 中。**孤儿 finding = 审核未完成。**
-6. **临时文件清理（强制 · 原则 8）**：删除本审核过程中产生的所有临时层文件（工作笔记草稿、矩阵草稿、文件清单/grep 列表草稿、任何散落中间文件）。删除前确认其关键信息已按"沉淀规则"进入持久层（spec / 报告）。清理后核验：`docs/superpowers/specs/` 下**只存在**持久层三类文件（report.md / index.md / 追踪 spec）。
+6. **沉淀确认**：遍历临时层（`/tmp/audit-<RUN_ID>/`），确认其价值已按沉淀规则全部进入持久层 —— 完整矩阵进报告附录、每维度执行记录进报告、grep 命中进 finding 证据、维度总结进报告。**依赖步骤 4 的"空洞转 finding 检查点"已通过**（否则矩阵空洞可能漏转）。
+7. **临时文件清理（强制 · 原则 8）**：删除 `/tmp/audit-<RUN_ID>/` 全部临时层文件。清理后核验：仓库 `docs/superpowers/specs/` 下以 `audit-<RUN_ID>-` 为前缀的文件**只存在**持久层三类（report / index / 追踪 spec）；仓库内**无**其他本次 run 的散落文件（临时层应只在 /tmp，现已删）。
+8. **git 提交（修 C-3）**：将本次 run 的全部持久层文件作为一次 commit：`docs(superpowers): audit <RUN_ID> — N findings (C:c I:i M:m) + specs`。这是审核闭环的最后动作。
 
-**与原则 6 的关系**：本步骤创建的是**新文件**（追踪 spec），不修改任何被审文件。这是审核产物，不是修复动作 —— 修复动作（按 spec 的 Fix Plan 执行）是后续独立流程。
+**与原则 6 的关系**：本步骤创建/提交的是**审核产物文件**（spec/报告/索引），不修改任何**被审**设计文件。修复动作（按 spec 的 Fix Plan 改设计文档）是后续独立流程。
 
-**与原则 8 的关系**：前 6 步用临时文件（笔记/矩阵）做脚手架，本步骤把脚手架的价值沉淀进 spec/报告后，删除脚手架本身。仓库不留审核过程的中间垃圾。
+**与原则 8 的关系**：前 6 步用临时文件做脚手架，本步骤把脚手架价值沉淀进持久层后删除脚手架；矩阵等正面证据进报告附录保留。仓库不留审核中间垃圾，但保留全部持久产物。
 
 ---
 
@@ -448,9 +478,9 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 
 | 部分 | 形式 | 交付位置 | 内容 |
 |------|------|---------|------|
-| **A. 直接消息** | 对话消息（非文件） | 调用方收到的最终回复 | 汇总信息：范围/计数/维度覆盖/最严重问题/已创建 spec 清单/下一步建议 |
-| **B. Findings 报告** | Markdown 文件 | `docs/superpowers/specs/audit-<run-date>-report.md` | 完整 findings 详情（C/I/M 分级 + 证据） |
-| **C. 追踪 spec 文件集** | 多个 Markdown 文件 + 1 个索引 | `docs/superpowers/specs/audit-<run-date>-<severity>-<seq>-*.md` + `audit-<run-date>-index.md` | 每个 finding 一个或一组 spec，全部可追溯 |
+| **A. 直接消息** | 对话消息（非文件） | 调用方收到的最终回复 | 汇总信息：范围/计数/维度覆盖/最严重问题/已创建 spec 清单/孤儿+零遗留确认/git commit SHA/下一步建议 |
+| **B. Findings 报告** | Markdown 文件 | `docs/superpowers/specs/audit-<RUN_ID>-report.md` | 完整 findings 详情（C/I/M 分级 + 证据）+ 维度执行记录 + 矩阵附录 |
+| **C. 追踪 spec 文件集** | 多个 Markdown 文件 + 1 个索引 | `docs/superpowers/specs/audit-<RUN_ID>-<first-finding-id>-*.md` + `audit-<RUN_ID>-index.md` | 每个 finding 一个或一组 spec，全部可追溯 |
 
 ---
 
@@ -461,9 +491,9 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 ```
 ## 设计审核完成 · llm-reporting
 
+**RUN_ID**：<YYYYMMDD-SHA7>
 **范围**：<全量 / $AUDIT_SCOPE 摘要>
 **仓库 HEAD**：<SHA>
-**审核日期**：YYYY-MM-DD
 
 ### 计数
 | 严重程度 | findings | 已建 spec |
@@ -474,7 +504,7 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 | **合计** | **N** | **n** |
 
 ### 维度覆盖
-<一行总结：审了 X/20 维度，跳过 Y（原因）>
+<一行总结：审了 X/20 维度，跳过 Y（原因）。scope 限定时只计范围内维度>
 
 ### 最值得关注（Top 3 Critical）
 1. C-001 <标题> — <一句话>
@@ -482,11 +512,11 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 3. C-003 <标题> — <一句话>
 （若无 Critical，写"无 Critical"；若 Top 不足 3，据实列）
 
-### 产物
-- Findings 报告：docs/superpowers/specs/audit-<date>-report.md
-- 追踪 spec：<n> 个，见索引 docs/superpowers/specs/audit-<date>-index.md
+### 产物（已 git commit：<commit SHA>）
+- Findings 报告：docs/superpowers/specs/audit-<RUN_ID>-report.md
+- 追踪 spec：<n> 个，见索引 docs/superpowers/specs/audit-<RUN_ID>-index.md
 - 孤儿 finding 检查：<0 / N（审核未完成）>
-- 零遗留确认：docs/superpowers/specs/ 下仅持久层三类文件，临时草稿已清理 ✅
+- 零遗留确认：本次 run 前缀下仅持久层三类，临时层(/tmp)已清理 ✅
 
 ### 建议下一步
 <如"优先处理 3 个 Critical spec""Minor 批量合并为 2 个 spec 可低优先排期">
@@ -496,16 +526,17 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 
 ### 输出 B · Findings 报告（完整详情文件）
 
-写入 `docs/superpowers/specs/audit-<run-date>-report.md`。结构：
+写入 `docs/superpowers/specs/audit-<RUN_ID>-report.md`。结构：
 
 ```markdown
 # 设计审核报告 · llm-reporting
 
-**审核范围**：<文件清单摘要 / 或 $AUDIT_SCOPE>
+**RUN_ID**：<YYYYMMDD-SHA7>
+**审核范围**：<全量文件清单摘要 / 或 $AUDIT_SCOPE 明确声明>
 **审核日期**：YYYY-MM-DD
-**仓库 HEAD**：<git SHA，标注审核时的代码状态>
+**仓库 HEAD**：<git SHA>
 **基线 ADR**：<最新重大 ADR，如 ADR-0025 统一工作流引擎>
-**审核执行**：单 agent 逐维度自查（design-audit-prompt v3）
+**审核执行**：单 agent 逐维度自查（design-audit-prompt v4）
 
 ## 汇总统计
 
@@ -516,16 +547,19 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 | 🟢 Minor | N | n |
 | **合计** | **N** | **n** |
 
-## 维度覆盖表
+## 维度执行记录（修 I-2：含无 finding 维度）
 
-| 类别 | 维度 | 已审 | findings 数 |
-|------|------|------|------------|
-| A 机械 | A1 完整性 | ✅ | n |
-| A 机械 | A2 术语一致性 | ✅ | n |
-| ... | ... | ... | ... |
-| D 安全 | D6 LLM 危害 | ✅ | n |
+> 每个审过的维度一行，记录执行动作与 finding 数。**finding 数 = 0 也要列**（证明该维度已审且无缺陷，是正面审核证据）。scope 限定时只列范围内维度。
 
-（未审维度标 ⏭ + 原因）
+| 维度 | 执行动作（grep 命令/读过的文件/矩阵） | findings 数 |
+|------|--------------------------------------|------------|
+| A1 完整性 | grep `TODO\|TBD\|FIXME` 全仓；读 docs/api/ | n |
+| A2 术语一致性 | grep `Design Plane\|Runtime Plane\|Intelligence Plane` 全仓 | n |
+| B1 可靠性 | 读 03-arch §15 SLO + docs/operations/slo-sli.md | n（可为 0） |
+| D1 STRIDE | 构造组件×STRIDE 矩阵（见附录 A） | n |
+| ... | ... | ... |
+
+（未审维度不列；scope 限定时此处只含范围内维度）
 
 ## Findings 详情
 
@@ -541,7 +575,7 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 - **问题**：<具体描述为什么不合规，引用判断标准>
 - **影响**：<如果不修复会导致什么后果>
 - **建议**：<修复方向。仅建议，不在本审核中执行 —— 原则 6>
-- **追踪 spec**：`docs/superpowers/specs/audit-<date>-C-001-<slug>.md`（步骤 7 创建）
+- **追踪 spec**：`docs/superpowers/specs/audit-<RUN_ID>-C-001-<slug>.md`（步骤 7 创建）
 
 ### 🟡 I-003 · <简短标题>
 （同结构，含追踪 spec 字段）
@@ -558,12 +592,37 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
   论证充分；但生产环境 egress 阻断的具体 NetworkPolicy 规则未规格化。
 - ...
 
+## 附录 A · STRIDE × 组件 矩阵（修 C-1：正面安全证据，完整保留）
+
+> 完整矩阵，含已覆盖格的对策引用。空洞格标对应 finding ID。这是安全论证的正面证据，供合规审查。
+
+| 组件 | S 伪造 | T 篡改 | R 抵赖 | I 信息泄露 | D 拒绝服务 | E 提权 |
+|------|--------|--------|--------|-----------|-----------|--------|
+| Conversation Interface | ✅ 见 doc:l | ✅ 见 doc:l | ✅ 见 doc:l | ... | ... | ... |
+| Freeze Pipeline | ✅ | ⚠️ C-002 | ✅ | ... | ... | ... |
+| Production Engine | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| ... | ... | ... | ... | ... | ... | ... |
+
+（图例：✅ = 有对策（附 doc:line）；⚠️<ID> = 未覆盖，转 finding；⚡ = 残余风险已接受（附理由））
+
+## 附录 B · 法规 × 控制点 矩阵（修 C-1）
+
+| 法规条目 | 设计控制 | 状态 |
+|---------|---------|------|
+| SOX ITGC-访问管理 | docs/security/... | ✅ 见 doc:l |
+| SOX ITGC-职责分离 | — | ⚠️ I-007 |
+| HIPAA 风险评估 | docs/security/threat-model.md | ✅ |
+| GDPR DPIA | — | ⚠️ I-008 |
+| ... | ... | ... |
+
 ## 追溯索引引用
 
-完整 finding → spec 映射见 `docs/superpowers/specs/audit-<date>-index.md`。
+完整 finding → spec 映射见 `docs/superpowers/specs/audit-<RUN_ID>-index.md`。
 ```
 
 > **关键**：每条 finding 的"追踪 spec"字段**必须**非空（原则 7）。若该字段为空，说明步骤 7 未对该 finding 创建 spec = 孤儿 = 审核未完成。
+
+**scope 适配（修 I-5）**：当 `$AUDIT_SCOPE` 限定范围时，报告的"维度执行记录"与"维度总结"只列范围内维度；附录矩阵仅在范围内含 D1/D4 时才出现，否则省略并注明"scope 未含安全合规维度"。汇总统计始终覆盖本次 run 全部 findings。
 
 ---
 
@@ -571,7 +630,7 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 
 #### C-1. 单个 spec 文件模板
 
-文件：`docs/superpowers/specs/audit-<run-date>-<severity>-<seq>-<short-slug>.md`
+文件：`docs/superpowers/specs/audit-<RUN_ID>-<first-finding-id>-<slug>.md`
 
 ```markdown
 # Audit Fix Spec · <简短标题>
@@ -580,8 +639,8 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 - **Source Finding(s)**：C-001, C-004（列出本 spec 覆盖的全部 finding ID，无一遗漏）
 - **Severity**：Critical
 - **Source Dimensions**：A2, A5
-- **Created From Audit**：audit-<run-date>（HEAD <SHA>）
-- **Status**：open
+- **Created From Audit**：<RUN_ID>（HEAD <SHA>）
+- **Status**：open（生命周期：`open` → 修复开始置 `in-progress` → 验收通过置 `done`；由后续修复流程更新，非审核阶段）
 
 ## 证据（从 findings 报告复制）
 
@@ -608,38 +667,38 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 - [ ] SLO 数值在架构 / operations / timeline 三处同值
 
 ## Audit Trail
-- 来源审核 run：audit-<run-date>（HEAD <SHA>）
-- 来源报告：`docs/superpowers/specs/audit-<run-date>-report.md`
+- 来源审核 run：<RUN_ID>（HEAD <SHA>）
+- 来源报告：`docs/superpowers/specs/audit-<RUN_ID>-report.md`
 ```
 
 #### C-2. 追溯索引文件
 
-文件：`docs/superpowers/specs/audit-<run-date>-index.md`
+文件：`docs/superpowers/specs/audit-<RUN_ID>-index.md`
 
 ```markdown
-# Audit Spec 追溯索引 · <run-date>
+# Audit Spec 追溯索引 · <RUN_ID>
 
-**审核 run**：audit-<run-date>（HEAD <SHA>）
-**报告**：`audit-<run-date>-report.md`
+**审核 run**：<RUN_ID>（HEAD <SHA>）
+**报告**：`audit-<RUN_ID>-report.md`
 **孤儿检查**：<0 孤儿 / N 孤儿（审核未完成）>
 
 ## Finding → Spec 映射
 
 | Finding ID | Severity | 标题 | 追踪 spec |
 |-----------|---------|------|----------|
-| C-001 | 🔴 | <标题> | audit-<date>-C-001-<slug>.md |
-| C-002 | 🔴 | <标题> | audit-<date>-C-002-<slug>.md |
-| I-003 | 🟡 | <标题> | audit-<date>-I-003-<slug>.md |
-| I-004 | 🟡 | <标题> | audit-<date>-I-003-<slug>.md（与 I-003 同根因合并） |
-| M-012 | 🟢 | <标题> | audit-<date>-M-012-<slug>.md |
+| C-001 | 🔴 | <标题> | audit-<RUN_ID>-C-001-<slug>.md |
+| C-002 | 🔴 | <标题> | audit-<RUN_ID>-C-002-<slug>.md |
+| I-003 | 🟡 | <标题> | audit-<RUN_ID>-I-003-<slug>.md |
+| I-004 | 🟡 | <标题> | audit-<RUN_ID>-I-003-<slug>.md（与 I-003 同根因合并） |
+| M-012 | 🟢 | <标题> | audit-<RUN_ID>-M-012-<slug>.md |
 | ... | ... | ... | ... |
 
 ## Spec → Finding 映射（反向）
 
 | 追踪 spec | 覆盖 findings | 状态 |
 |----------|-------------|------|
-| audit-<date>-C-001-<slug>.md | C-001 | open |
-| audit-<date>-I-003-<slug>.md | I-003, I-004 | open |
+| audit-<RUN_ID>-C-001-<slug>.md | C-001 | open |
+| audit-<RUN_ID>-I-003-<slug>.md | I-003, I-004 | open |
 | ... | ... | ... |
 
 ## 统计核验
@@ -677,15 +736,17 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 
 审核"完成"的充要条件（全部满足，缺一即未完成）：
 
-1. **维度覆盖**：范围内所有维度标 ✅（或 ⏭ + 合理原因），每个 ✅ 维度在步骤 2-5 有执行痕迹（grep 命中已进入 finding 证据 / 矩阵空洞已转为 finding / 读过的文件已反映在 findings）。
-2. **findings 完整**：所有 findings 满足 7 必填字段 + 证据强制（原则 1），无"待补充""后续再查"遗留。
-3. **输出三部分齐全**：
-   - A 直接消息已发送（含计数/覆盖/Top Critical/spec 清单/孤儿检查结果/零遗留确认）
-   - B findings 报告文件已写入 `docs/superpowers/specs/audit-<run-date>-report.md`
-   - C 追踪 spec 文件集已创建（含索引 `audit-<run-date>-index.md`）
-4. **零孤儿**：遍历全部 finding ID，每个都出现在某 spec 的 `Source Finding(s)` 中。孤儿数 = 0。
-5. **追踪 spec 字段非空**：findings 报告中每条 finding 的"追踪 spec"字段都已填入路径。
-6. **零遗留（原则 8）**：`docs/superpowers/specs/` 下**只存在**持久层三类文件 —— `audit-<date>-report.md`、`audit-<date>-index.md`、`audit-<date>-<sev>-<seq>-*.md`。任何其他文件（工作笔记/矩阵草稿/中间 txt）= 违规 = 审核未完成。
+1. **维度执行记录完整（修 I-2）**：报告"维度执行记录"段列出范围内**每个**维度一行（含 finding 数 = 0 的维度），每行有具体执行动作（grep 命令/读过的文件/矩阵引用）。无该段或某维度缺行 = 未审。
+2. **矩阵空洞检查点通过（修 I-4）**：步骤 4 的"空洞转 finding 检查点"已确认所有矩阵"未覆盖"格转为 finding。
+3. **findings 完整**：所有 findings 满足 7 必填字段 + 证据强制（原则 1），无"待补充""后续再查"遗留。
+4. **输出三部分齐全**：
+   - A 直接消息已发送（含 RUN_ID/计数/覆盖/Top Critical/spec 清单/孤儿检查/零遗留确认/commit SHA）
+   - B findings 报告文件已写入 `docs/superpowers/specs/audit-<RUN_ID>-report.md`（含矩阵附录 + 维度执行记录）
+   - C 追踪 spec 文件集已创建（含索引 `audit-<RUN_ID>-index.md`）
+5. **零孤儿**：遍历全部 finding ID，每个都出现在某 spec 的 `Source Finding(s)` 中。孤儿数 = 0。
+6. **追踪 spec 字段非空**：findings 报告中每条 finding 的"追踪 spec"字段都已填入路径。
+7. **零遗留（原则 8 · run 隔离）**：`docs/superpowers/specs/` 下以 `audit-<RUN_ID>-` 为前缀的文件**只存在**持久层三类（report / index / `<first-finding-id>`-spec）。仓库内**无**本次 run 的临时层文件（应只在 /tmp，已清理）。其他 run 的文件不算违规。
+8. **已 git 提交（修 C-3）**：本次 run 持久层文件已作为一次 commit 提交，commit SHA 已写入直接消息。
 
 不满足以上任一 = 审核未完成，不得声称"审核完成"。
 
@@ -713,9 +774,9 @@ $REPO_PATH = /Users/xiaotiac/Documents/GitHub/llm-reporting
 $AUDIT_SCOPE = （空 = 全量）
 
 [将本文件全文 + 上述变量喂给 AI agent]
-→ agent 按执行流程 7 步运行
+→ agent 步骤 0 派生 $RUN_ID，按执行流程 8 步运行
 → 产出三部分：A 直接消息 + B findings 报告文件 + C 追踪 spec 文件集（含索引）
-→ 零孤儿方可声称完成
+→ 零孤儿 + 零遗留 + git 提交完成，方可声称完成
 ```
 
 限定范围示例：
@@ -723,11 +784,12 @@ $AUDIT_SCOPE = （空 = 全量）
 ```
 $AUDIT_SCOPE = "ADR-0025 迁移完整性"
 → agent 聚焦 A2/A3/A4/A5（术语/引用/计数/图表），跳过 B/C/D
+→ 报告"维度执行记录"只列这 4 个维度；无 D 类则报告无矩阵附录（注明 scope 未含）
 ```
 
 ```
 $AUDIT_SCOPE = "安全合规"
-→ agent 聚焦 D1-D6 + 相关的 B1/B5，构造 STRIDE/法规矩阵
+→ agent 聚焦 D1-D6 + 相关的 B1/B5，构造 STRIDE/法规矩阵（进报告附录 A/B）
 ```
 
 ---
