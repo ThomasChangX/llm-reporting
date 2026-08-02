@@ -702,6 +702,8 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 
 **调用顺序建议**：先跑 `check_adr_semantics.py` + CI 确保机械基线绿，再用本 spec 做深度审核。
 
+**为何不引入 superpowers skill（如 `requesting-code-review` / `systematic-debugging`）**：那些是**代码工作流** skill，前提假设与本文档审核场景错配 —— 前者依赖 git diff（审核既有文档无 diff 基线）、派 fresh-context 子 agent（本 prompt 明确选单 agent 自查）、调试运行时故障并修复（本 prompt 是文档审核且原则 6 不修复）。本 prompt 的纪律性由 8 条 Iron Laws + 反合理化守则 + 完成判据内化保证，无需外部 skill。"证据强制"与"声称完成前必须验证"的精神已分别内化进原则 1 与完成判据。
+
 ---
 
 ## 调用示例
