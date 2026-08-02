@@ -1,11 +1,13 @@
-# Design Audit Prompt v2（全方位设计审核 · 单 agent 逐维度自查 + 全量追踪）
+# Design Audit Prompt v3（全方位设计审核 · 单 agent 逐维度自查 + 全量追踪 + 零遗留）
 
 > **用途**：在需要对 llm-reporting 设计仓库做全方位深度审核时，将本文件作为 prompt 反复调用。
 > 它不是被动运行的 skill，而是一份操作指令：定义审核维度（rubric）、执行流程、判断标准、输出格式与反偷懒守则。
 >
 > **调用方式**：将本文件全文 + `$REPO_PATH` 喂给 AI agent，令其按本文件执行。
 >
-> **v2 变更**：审核发现的**每一个**问题（不论 Critical/Important/Minor）都必须由独立的 superpowers spec 追踪。输出扩展为三部分：A 直接汇总消息 + B findings 报告文件 + C 追踪 spec 文件集。零孤儿方可声称完成。
+> **变更历史**：
+> - **v3**：产物分层 + 零遗留。临时文件（工作笔记/矩阵草稿）在审核结束时清理，仓库只留持久层（报告 + 索引 + 追踪 spec）。
+> - **v2**：全量追踪。每个 finding（C/I/M 无例外）由独立 superpowers spec 追踪，零孤儿方可声称完成。
 
 ---
 
@@ -35,7 +37,12 @@
 2. **B findings 报告**：`docs/superpowers/specs/audit-<run-date>-report.md`（C/I/M 分级 + 证据）
 3. **C 追踪 spec 文件集**：每个 finding 对应的 superpowers spec + 追溯索引（`audit-<run-date>-index.md`）
 
-审核阶段**仅报告不修复被审文件**（核心原则 6）；追踪 spec 记录修复方案，修复执行是后续独立流程。
+**审核输出（三部分，缺一不可 · 详见"输出"段）**：
+1. **A 直接消息**：对话中的汇总（计数/维度覆盖/Top Critical/spec 清单/孤儿检查/零遗留确认/下一步）
+2. **B findings 报告**：`docs/superpowers/specs/audit-<run-date>-report.md`（C/I/M 分级 + 证据）
+3. **C 追踪 spec 文件集**：每个 finding 对应的 superpowers spec + 追溯索引（`audit-<run-date>-index.md`）
+
+审核阶段**仅报告不修复被审文件**（核心原则 6）；追踪 spec 记录修复方案，修复执行是后续独立流程。审核产生的临时文件（工作笔记/矩阵草稿）在结束时清理，仓库**零遗留**（核心原则 8）。
 
 ---
 
@@ -118,6 +125,33 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 | 根因 | 同根因（如同一术语迁移残留散落多文件）→ 合并为 1 spec | 不同根因 → 各自 spec |
 | 维度 | 同维度同区域可合并 | 跨大类的 findings 即便同根因也建议拆分（修复路径不同） |
 
+### 8. 零遗留，产物分层（No Residue · Tiered Artifacts）
+
+审核产生的所有文件分为两层，**临时层在审核结束时清理，仓库只留下持久层**。
+
+**持久层（保留）** —— 审核结束后仓库存在的全部文件：
+
+| 文件 | 角色 |
+|------|------|
+| `docs/superpowers/specs/audit-<date>-report.md` | 全局视图：计数 / 维度覆盖 / 所有 findings 汇总 / 维度总结 |
+| `docs/superpowers/specs/audit-<date>-index.md` | 追溯索引：finding ↔ spec 双向映射 |
+| `docs/superpowers/specs/audit-<date>-<sev>-<seq>-*.md` | N 个追踪 spec（每个含完整证据 + 修复方案 + 验收标准） |
+
+**临时层（审核结束时必须删除）** —— 这些是审核过程的脚手架，其价值已被沉淀进持久层：
+
+- 工作笔记（grep 命令 + 命中行号草稿）
+- STRIDE×组件、法规×控制点 矩阵草稿
+- 步骤 1 的文件清单 / 术语 grep 列表草稿
+- 任何散落的中间 `.md` / `.txt` 草稿
+
+**沉淀规则**（临时层删除前，关键信息必须已进入持久层）：
+
+- 矩阵的每个**空洞** → 已转为 finding → 已进入某 spec 的 `Source Finding(s)` + `Evidence`。完整矩阵不保留，但其结论（哪些格未覆盖）已固化进 spec。
+- grep 命中行 → 已进入对应 finding 的 `位置` + `证据` 字段。grep 命令本身不保留。
+- 维度总结（每个维度的整体评价）→ 进入报告 `report.md` 的"维度总结"段。
+
+**完成判据**：审核结束时，`docs/superpowers/specs/` 下**只存在**上述持久层三类文件。任何其他文件 = 违规。
+
 ---
 
 ## 反合理化守则（Anti-Rationalization）
@@ -135,6 +169,8 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 | "Minor 不必建 spec，太琐碎" | 禁止。原则 7：所有 finding 不论优先级都要 spec 追踪。批量 Minor 可合并为单个 spec，但 ID 全列。 |
 | "这几个 finding 我合并成一个 spec 了" | 必须验证：①同严重程度 ②同根因 ③所有 finding ID 都在 spec 内列出。跨严重程度合并 = 违规。 |
 | "这个 finding 和那个差不多，共用一个 spec 就行" | 若根因不同则必须拆分。共用 spec 必须显式列出每个 finding ID + 各自证据，否则 = 孤儿。 |
+| "工作笔记/矩阵草稿留着以后参考" | 禁止。原则 8：临时文件必须清理。其价值已沉淀进 spec（证据/空洞）和报告（维度总结）。留着 = 遗留垃圾 = 审核未完成。 |
+| "这个中间文件有信息，删了可惜" | 若信息有价值，它必须已进入持久层（spec/报告）。若没进入 = 沉淀失败，应补进 spec 后再删，而非保留草稿。 |
 | "我已经整体读过架构文档" | 禁止通读后凭印象。必须按"执行流程"的分批策略读取并记录。 |
 | "grep 过了没发现问题" | 必须把 grep 命令 + 命中行号列入工作笔记。无输出的 grep 也要记录命令本身。 |
 | "矩阵这一格应该是安全的" | 矩阵每格必须显式填（有对策/无对策-残余风险接受/未覆盖-finding），不得留空或"应该"。 |
@@ -327,7 +363,7 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 - 读 `AGENTS.md`（根 + `docs/AGENTS.md` + `adr/AGENTS.md`）—— 这些定义"什么算正确"。
 - 读 `glossary.md`（102 术语）+ `docs/adr-index.md`（25 ADR 概览）+ `docs/README.md`（阅读顺序）+ `adr/README.md`。
 - 读 `cross-reference-checklist.md` —— 注意它若自标记"待对齐"，这本身就是线索。
-- **产出**：审核文件清单（明确每个要读的文件）+ 关键术语 grep 列表（用于步骤 2）。
+- **产出**：审核文件清单（明确每个要读的文件）+ 关键术语 grep 列表（用于步骤 2）。**这些是临时产物**（原则 8），在步骤 7 清理；其价值会被消耗在后续步骤的 grep 执行和 findings 里。
 - 若设了 `$AUDIT_SCOPE`，在此裁剪范围（如只审"ADR-0025 迁移"则聚焦 A2/A3/A4/A5）。
 
 ### 步骤 2 · 机械类批量扫描（A1-A8）
@@ -339,7 +375,7 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 - **引用完整性**：除 `check_adr_semantics.py` 覆盖的，查 narrative 引用（"见 §X.Y""如 ADR-ZZZZ 所述"）。
 - **图表-正文同步**：读每个 `.mmd` 的标签，回正文核对。
 - **占位/TBD 扫描**：grep `TODO|TBD|FIXME|占位|待定`。
-- **规则**：每个 grep 必须记录命令 + 命中行号到工作笔记。"grep 过了没问题"无输出 = 未执行。
+- **规则**：每个 grep 必须记录命令 + 命中行号到工作笔记。"grep 过了没问题"无输出 = 未执行。**工作笔记是临时产物**（原则 8）：命中行号在步骤 6 进入对应 finding 的 `位置`+`证据` 字段（持久化），笔记草稿在步骤 7 删除。
 
 ### 步骤 3 · 按模块分批深读（B/C 类）
 
@@ -363,6 +399,7 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 - **STRIDE × 组件矩阵**：从 `docs/diagrams/*.mmd`（C4 图）提取组件列表 → 构造 6 列（S/T/R/I/D/E）矩阵 → 逐格问"对策？对策在哪份文档:行号？" → 空格 = finding。
 - **法规 × 控制点矩阵**：列 SOX(ITGC)/HIPAA/GDPR 关键条目 → 逐条问"设计文档映射了控制？" → 空格 = finding。
 - **规则**：矩阵每格必须显式填（有对策 / 无对策-残余风险接受 / 未覆盖-finding），不得留空。
+- **矩阵是临时草稿**（原则 8）：矩阵本身在步骤 7 清理，但其**每个空洞**必须先转为带 ID 的 finding，进入步骤 6 汇总 → 最终沉淀进 spec 的 `Evidence`。矩阵的"已覆盖"格若产生有价值的整体评价，记入步骤 6 的维度总结（进报告）。
 
 ### 步骤 5 · 交叉维度核对
 
@@ -397,8 +434,11 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
    - `Audit Trail`：来源审核 run（日期 + HEAD SHA + spec 路径）
 4. **构造追溯索引**：在 `docs/superpowers/specs/audit-<run-date>-index.md` 写一张映射表，保证 `finding ID → spec 文件` 双向可查。
 5. **孤儿检查**：遍历全部 finding ID，确认每个都出现在某 spec 的 `Source Finding(s)` 中。**孤儿 finding = 审核未完成。**
+6. **临时文件清理（强制 · 原则 8）**：删除本审核过程中产生的所有临时层文件（工作笔记草稿、矩阵草稿、文件清单/grep 列表草稿、任何散落中间文件）。删除前确认其关键信息已按"沉淀规则"进入持久层（spec / 报告）。清理后核验：`docs/superpowers/specs/` 下**只存在**持久层三类文件（report.md / index.md / 追踪 spec）。
 
 **与原则 6 的关系**：本步骤创建的是**新文件**（追踪 spec），不修改任何被审文件。这是审核产物，不是修复动作 —— 修复动作（按 spec 的 Fix Plan 执行）是后续独立流程。
+
+**与原则 8 的关系**：前 6 步用临时文件（笔记/矩阵）做脚手架，本步骤把脚手架的价值沉淀进 spec/报告后，删除脚手架本身。仓库不留审核过程的中间垃圾。
 
 ---
 
@@ -446,6 +486,7 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 - Findings 报告：docs/superpowers/specs/audit-<date>-report.md
 - 追踪 spec：<n> 个，见索引 docs/superpowers/specs/audit-<date>-index.md
 - 孤儿 finding 检查：<0 / N（审核未完成）>
+- 零遗留确认：docs/superpowers/specs/ 下仅持久层三类文件，临时草稿已清理 ✅
 
 ### 建议下一步
 <如"优先处理 3 个 Critical spec""Minor 批量合并为 2 个 spec 可低优先排期">
@@ -464,7 +505,7 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 **审核日期**：YYYY-MM-DD
 **仓库 HEAD**：<git SHA，标注审核时的代码状态>
 **基线 ADR**：<最新重大 ADR，如 ADR-0025 统一工作流引擎>
-**审核执行**：单 agent 逐维度自查（design-audit-prompt v1）
+**审核执行**：单 agent 逐维度自查（design-audit-prompt v3）
 
 ## 汇总统计
 
@@ -636,14 +677,15 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 
 审核"完成"的充要条件（全部满足，缺一即未完成）：
 
-1. **维度覆盖**：范围内所有维度标 ✅（或 ⏭ + 合理原因），每个 ✅ 维度工作笔记有执行痕迹（grep 命令 + 命中行号 / 读过的文件 / 构造的矩阵）。
+1. **维度覆盖**：范围内所有维度标 ✅（或 ⏭ + 合理原因），每个 ✅ 维度在步骤 2-5 有执行痕迹（grep 命中已进入 finding 证据 / 矩阵空洞已转为 finding / 读过的文件已反映在 findings）。
 2. **findings 完整**：所有 findings 满足 7 必填字段 + 证据强制（原则 1），无"待补充""后续再查"遗留。
 3. **输出三部分齐全**：
-   - A 直接消息已发送（含计数/覆盖/Top Critical/spec 清单/孤儿检查结果）
+   - A 直接消息已发送（含计数/覆盖/Top Critical/spec 清单/孤儿检查结果/零遗留确认）
    - B findings 报告文件已写入 `docs/superpowers/specs/audit-<run-date>-report.md`
    - C 追踪 spec 文件集已创建（含索引 `audit-<run-date>-index.md`）
 4. **零孤儿**：遍历全部 finding ID，每个都出现在某 spec 的 `Source Finding(s)` 中。孤儿数 = 0。
 5. **追踪 spec 字段非空**：findings 报告中每条 finding 的"追踪 spec"字段都已填入路径。
+6. **零遗留（原则 8）**：`docs/superpowers/specs/` 下**只存在**持久层三类文件 —— `audit-<date>-report.md`、`audit-<date>-index.md`、`audit-<date>-<sev>-<seq>-*.md`。任何其他文件（工作笔记/矩阵草稿/中间 txt）= 违规 = 审核未完成。
 
 不满足以上任一 = 审核未完成，不得声称"审核完成"。
 
