@@ -343,7 +343,7 @@ Default Constants (tunable per deployment):
 
 When data is distributed across different types of data sources (OLTP PG + OLAP ClickHouse + Data Lake S3):
 
-(See the scenarios table under [Interfaces](#§5446-federated-heterogeneous-data-source-strategy--scenarios) above.)
+(See the federated scenarios table under [Interfaces](#interfaces) above.)
 
 **Query Service Federated Query Decision Tree**:
 

@@ -201,8 +201,10 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 
 #### A1 · 完整性（Completeness）
 
+<!-- vale off -->
 - **审视**：所有应有章节/FR/ADR/术语是否齐全？有无 TBD/占位/空引用？占位区是否有说明？
 - **标准**：无 TODO/FIXME/TBD 残留于非归档文档（CI 的 `NoTbdTodo` 规则已覆盖部分，但本审核查更广）；占位区明确标注"待定 + 原因 + 依赖"；编号连续无缺漏；`docs/api/` 等空占位有状态说明。
+<!-- vale on -->
 - **失败模式**：占位无说明；§N 引用指向空章节；FR 组声明了但正文无内容；图表引用了不存在的节点。
 
 #### A2 · 术语一致性（Terminology Consistency）
@@ -392,7 +394,9 @@ Accepted ADR 正文中的历史计数/术语是**决策时刻的合法快照**�
 - **计数对等**：grep "N ADRs / N terms / N Job Types / N Skills / N FRs / N MCP"，交叉对比所有提及处。
 - **引用完整性**：除 `check_adr_semantics.py` 覆盖的，查 narrative 引用（"见 §X.Y""如 ADR-ZZZZ 所述"）。
 - **图表-正文同步**：读每个 `.mmd` 的标签，回正文核对。
+<!-- vale off -->
 - **占位/TBD 扫描**：grep `TODO|TBD|FIXME|占位|待定`。
+<!-- vale on -->
 - **规则**：每个 grep 必须记录命令 + 命中行号到 `/tmp/audit-<RUN_ID>/` 工作笔记。"grep 过了没问题"无输出 = 未执行。**工作笔记是临时产物**（原则 8）：命中行号在步骤 6 进入对应 finding 的 `位置`+`证据` 字段（持久化），笔记草稿在步骤 7 删除。**无 finding 的 grep 也要记录**（进报告"维度执行记录"段，证明该维度已审 —— 修 I-2）。
 
 ### 步骤 3 · 按模块分批深读（B/C 类）
@@ -553,7 +557,9 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 
 | 维度 | 执行动作（grep 命令/读过的文件/矩阵） | findings 数 |
 |------|--------------------------------------|------------|
+<!-- vale off -->
 | A1 完整性 | grep `TODO\|TBD\|FIXME` 全仓；读 docs/api/ | n |
+<!-- vale on -->
 | A2 术语一致性 | grep `Design Plane\|Runtime Plane\|Intelligence Plane` 全仓 | n |
 | B1 可靠性 | 读 03-arch §15 SLO + docs/operations/slo-sli.md | n（可为 0） |
 | D1 STRIDE | 构造组件×STRIDE 矩阵（见附录 A） | n |
@@ -757,7 +763,9 @@ B/C 类（架构/可行性）主战场。**不能一次读 6410 行，必须切�
 | 工具/流程 | 覆盖范围 | 与本 spec 的关系 |
 |----------|---------|----------------|
 | `scripts/check_adr_semantics.py` | ADR 编号/supersede/§N/计数/结构（机械） | 本 spec 的 A3/A4 部分依赖它；先跑它，再补它覆盖不到的（术语迁移/narrative 引用） |
+<!-- vale off -->
 | CI（markdownlint/lychee/Vale） | 格式/链接/prose（机械） | 本 spec 不重复；A1 的 TBD 扫描与之部分重叠 |
+<!-- vale on -->
 | `cross-reference-checklist.md` | 人工交叉引用清单 | 本 spec 的 A3 步骤参考它，但它若过时本身就是 finding |
 | **本 spec** | **机械 + 架构 + 可行性 + 安全合规（全语义深度）** | 覆盖机器脚本无法判断的所有维度 |
 

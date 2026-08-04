@@ -200,7 +200,7 @@ adr:
 
 | Top-level block | Purpose |
 |-----------------|---------|
-| `id`, `title`, `status`, `superseded_by`, `supersedes`, `created_at`, `accepted_at`, `author` | Identity, lifecycle status, and the supersession chain. `status` ∈ `proposed | in_discussion | accepted | deprecated | superseded`. `supersedes` / `superseded_by` form the immutable decision chain (see [Lifecycle State Machine](lifecycle-state-machine.md) §23.4.2). |
+| `id`, `title`, `status`, `superseded_by`, `supersedes`, `created_at`, `accepted_at`, `author` | Identity, lifecycle status, and the supersession chain. `status` is one of `proposed`, `in_discussion`, `accepted`, `deprecated`, or `superseded`. `supersedes` / `superseded_by` form the immutable decision chain (see [Lifecycle State Machine](lifecycle-state-machine.md) §23.4.2). |
 | `decision_makers`, `consulted`, `informed` | The decision's RACI-style participant roster (MADR *Decision Makers*, plus consulted and informed parties). |
 | `context` | Markdown-format full background and problem statement. Establishes whether the decision addresses an Architecturally Significant Requirement (ASR). |
 | `decision_drivers` | Structured list of drivers (e.g. scale targets, RPO, cost ceilings, existing operational experience). |
@@ -274,7 +274,7 @@ The ADR YAML is a structured-materialisation of the MADR format. Every MADR sect
 - **§23.7 BRD/ADR as Compute Spec Types** — capability inheritance and the CI/CD validation pipeline, in [`docs/03-architecture.md`](../../03-architecture.md).
 - **§23.8 External Tool Integration** — the Compliance Mapper that implements the MADR *Confirmation* as a Fitness Function, in [`docs/03-architecture.md`](../../03-architecture.md).
 - [ADR-0010](../../../adr/0010-brd-adr-first-class.md) — BRD/ADR as First-Class Entities (the MADR-compliance direction).
-- [ADR-0042](../../../adr/0042-*.md) — the example ADR used throughout §23.3.1 (Debezium + Kafka Connect for CDC).
+- `ADR-0042` (`adr/0042-debezium-kafka-cdc.md` in the example) — the example ADR used throughout §23.3.1 (Debezium + Kafka Connect for CDC). This is an illustrative filename, not an actual file.
 - [Lifecycle State Machine](lifecycle-state-machine.md) — the ADR's 12-state lifecycle and the immutability invariant at `accepted`.
 - [Generation Pipeline](generation-pipeline.md) — §23.5.9 covers the ADR Generation Flow (architectural significance detection → context → draft → review → acceptance).
 - [BRD Entity Model](brd-entity-model.md) — the entity an ADR is `JUSTIFIED` by.

@@ -102,9 +102,9 @@ engine:
       audit: full
 ```
 
-4. **Freeze Bridge is demoted from a "plane" to a pipeline operation:** `freeze(workflow_def)` scans all `llm_reasoning` Jobs with `capability` other than `read_analyze` or `suggest_plan`, presents each for human resolution (replace with deterministic script OR keep with explicit justification), validates the result in a production-sandbox dry-run, and marks the Workflow as frozen. This is the Workflow Engine performing an operation on a Workflow Definition — not a cross-system migration.
+1. **Freeze Bridge is demoted from a "plane" to a pipeline operation:** `freeze(workflow_def)` scans all `llm_reasoning` Jobs with `capability` other than `read_analyze` or `suggest_plan`, presents each for human resolution (replace with deterministic script OR keep with explicit justification), validates the result in a production-sandbox dry-run, and marks the Workflow as frozen. This is the Workflow Engine performing an operation on a Workflow Definition — not a cross-system migration.
 
-5. **Plane-level NetworkPolicy is explicitly added** to the deployment architecture (§17.3) to complement the existing Sandbox-level seccomp enforcement (§7).
+2. **Plane-level NetworkPolicy is explicitly added** to the deployment architecture (§17.3) to complement the existing Sandbox-level seccomp enforcement (§7).
 
 ## Decision
 

@@ -1,7 +1,7 @@
 # platform-core — Platform Foundation & Cross-Cutting Concerns
 
 > **Origin**: §8, §11, §12.1, §12.3–§12.7, §24, §25 of `docs/03-architecture.md`
-> **Related**: [`docs/security/threat-model.md`](../security/threat-model.md), [`docs/operations/`](../operations/)
+> **Related**: [`docs/security/threat-model.md`](../../security/threat-model.md), [`docs/operations/`](../../operations/)
 
 ## Positioning
 
@@ -47,7 +47,7 @@ This is intentionally the largest "bucket" — cross-cutting concerns are, by de
 
 ## Related Views
 
-- [Threat Model (STRIDE + OWASP LLM)](../security/threat-model.md) — cross-sub-project security analysis
-- [SLO/SLI Definitions](../operations/slo-sli.md) — error budget allocation
-- [Backup & DR](../operations/backup-dr.md) — operational procedures
-- [GDPR Compliance](../operations/gdpr-compliance.md) — compliance procedures
+- [Threat Model (STRIDE + OWASP LLM)](../../security/threat-model.md) — cross-sub-project security analysis
+- [SLO/SLI Definitions](../../operations/slo-sli.md) — error budget allocation
+- [Backup & DR](../../operations/backup-dr.md) — operational procedures
+- [GDPR Compliance](../../operations/gdpr-compliance.md) — compliance procedures
