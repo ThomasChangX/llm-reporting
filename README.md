@@ -2,13 +2,13 @@
 
 > An AI-assisted design and deterministic execution platform for Reporting, ETL, Adjustment, and Reconciliation — replacing Excel and PowerBI.
 
-**Status**: Design Phase (pre-implementation) | **Version**: 1.5 | **Last Updated**: 2026-07-08
+**Status**: Design Phase (pre-implementation) | **Version**: 1.6 | **Last Updated**: 2026-07-30
 
 ## Philosophy
 
-**"Explore with AI in the Design Plane, Execute without AI Side Effects in the Runtime Plane."**
+**"Explore with AI in the Exploration Environment, Execute without AI Side Effects in the Production Environment."**
 
-AI assists in exploration and authoring. Once workflows are validated, they are "frozen" into deterministic scripts requiring zero LLM calls during production execution. The Intelligence Plane provides AI-powered read-only analysis (ad-hoc Q&A, attribution) without writing to any system state.
+AI assists in exploration and authoring. Once workflows pass through the Freeze Pipeline (mandatory human sign-off), they are "frozen" into deterministic scripts. Production Environment blocks LLM API egress at NetworkPolicy level for defense-in-depth. Cross-Environment Read-Only Mode provides AI-powered read-only analysis (ad-hoc Q&A, attribution) without writing to any system state.
 
 ## Documentation Map
 
@@ -16,9 +16,9 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 
 | # | Document | Contents |
 |---|----------|----------|
-| 01 | [docs/01-facts.md](docs/01-facts.md) | Project background, design philosophy, 24 Architecture Decision Records (summarized in facts doc) |
+| 01 | [docs/01-facts.md](docs/01-facts.md) | Project background, design philosophy, 25 Architecture Decision Records (summarized in facts doc) |
 | 02 | [docs/02-requirement.md](docs/02-requirement.md) | 46 functional requirement groups + 9 NFR groups (ISO 25010) |
-| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Full architecture design (~6200 lines): Four-Layer Architecture, Compute Spec, KB, Agents, BRD/ADR, and more |
+| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Architecture overview (~1300 lines): Core philosophy, panoramic architecture, deployment topology. Detailed module design migrated to [`docs/sub-projects/`](docs/sub-projects/) (7 sub-projects, 40+ comprehensive docs) |
 | 04 | [docs/04-timeline.md](docs/04-timeline.md) | Development roadmap with Token-Speed estimation methodology |
 | 05 | [docs/05-cost.md](docs/05-cost.md) | Full lifecycle cost analysis: development, infrastructure, LLM, pricing model |
 
@@ -26,13 +26,13 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 
 | Directory | Contents |
 |-----------|----------|
-| [adr/](adr/) | 24 complete ADRs in MADR format |
+| [adr/](adr/) | 25 complete ADRs in MADR format |
 
 ### Supplementary Documentation
 
 | Document | Contents |
 |----------|----------|
-| [docs/glossary.md](docs/glossary.md) | 109 domain and technical terms |
+| [docs/glossary.md](docs/glossary.md) | 102 domain and technical terms |
 | [docs/security/threat-model.md](docs/security/threat-model.md) | STRIDE threat matrix + OWASP Top 10 for LLM Applications assessment |
 | [docs/operations/slo-sli.md](docs/operations/slo-sli.md) | Service Level Objectives for 5 critical user journeys with error budgets |
 | [docs/architecture/c4-model.md](docs/architecture/c4-model.md) | C4 Model diagrams (System Context, Container, Component) |
@@ -42,8 +42,8 @@ AI assists in exploration and authoring. Once workflows are validated, they are 
 
 ## Key Architecture Decisions
 
-1. **Four-Layer Architecture**: Design Plane (AI-assisted) + Freeze Bridge + Runtime Plane (zero AI side effects) + Intelligence Plane (AI read-only, answers don't cross the bridge)
-2. **Compute Spec (YAML)**: Unified IR for Reporting/ETL/Adjustment/Reconciliation — 9 Job Types
+1. **Unified Workflow Engine — Three Environments**: Exploration Environment (AI-assisted) → Freeze Pipeline (human sign-off) → Production Environment (zero AI side effects, LLM API egress blocked by NetworkPolicy) + Cross-Environment Read-Only Mode (AI read-only, write operations intercepted at Engine level). (Refined by ADR-0025; formerly "Four-Layer Architecture.")
+2. **Compute Spec (YAML)**: Unified IR for Reporting/ETL/Adjustment/Reconciliation — 10 Job Types (including `llm_reasoning` per ADR-0025)
 3. **Knowledge Base**: 9 domains, PG-First storage (PostgreSQL + pgvector + S3), unified Content Processing Pipeline (ADR-0023), Diagnostic Playbooks & Code Knowledge domains (ADR-0024), dedicated engines on-demand via interface abstraction
 4. **BRD/ADR as First-Class Entities**: Full lifecycle management with AI-assisted generation and 6-round verification
 5. **Dual-Model Strategy**: DeepSeek V4 Pro (China, cost-optimized) + Claude Sonnet 5 (US, capability-optimized)

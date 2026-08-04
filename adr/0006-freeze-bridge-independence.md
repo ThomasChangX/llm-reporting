@@ -5,13 +5,16 @@ status: accepted
 date: 2026-07-04
 deciders: "Project Sponsor"
 domain: Architecture
+refined_by: "ADR-0025"
 ---
 
 # ADR-0006: Freeze Bridge Independence
 
-- **Status**: Accepted
+- **Status**: Accepted (Refined 2026-07-30 by ADR-0025)
 - **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
+
+> **Refined by ADR-0025** (2026-07-30): Freeze Bridge is repositioned from an independent plane to a built-in `freeze()` pipeline operation on the unified Workflow Engine. The core guarantees — mandatory human sign-off, no auto-compilation, deterministic validation — are preserved. See [ADR-0025](../adr/0025-unified-workflow-engine.md) for the refined framing.
 
 ## Context
 

@@ -8,13 +8,13 @@
 
 | Term | Definition |
 |------|------------|
-| Design Plane | The AI-assisted exploration and authoring layer. All artifacts are "design drafts" with no production side effects. Includes Conversation UI, Visual Designer, Workbench, and AI Copilot Engine. |
-| Freeze Bridge | The independent transition plane connecting Design Plane and Runtime Plane. Core principle: no auto-compilation — scan fuzzy nodes → propose deterministic solutions → **mandatory human sign-off** → validate → test → approve → deploy. Freeze is reversible. |
-| Runtime Plane | The deterministic, zero AI side-effect production execution layer. Includes Workflow Executor, Data Connectors, Output Renderer, Scheduler, Query Rewriter (executes pre-generated deterministic SQL), and Incident Manager. The Intelligence Plane provides AI read-only analysis (ad-hoc Q&A, attribution) without crossing the bridge. |
-| Intelligence Plane | Cross-plane AI read-only analysis layer (AI Knowledge Agent, NL Q&A, attribution analysis, Log Analysis, Observability). Core constraint: read-only, never writes — AI outputs are returned directly to the user without persistence unless the user explicitly confirms and goes through the Design Plane flow. |
-| Compute Spec | Unified YAML-based computation definition covering Reporting/ETL/Adjustment/Reconciliation. 9 Job Types: source, transform, output, quality, workflow_ref, data_writer, decision, wait, materialize. |
-| Light Engine | Lightweight compute engine for the Design Plane: DuckDB (zero-config, sub-second startup) + Polars (high-performance DataFrames). Used for sample data and development/debugging. |
-| Heavy Engine | Production compute engine for the Runtime Plane: **Spark** (Post-MVP). Trino and Ray deferred to Phase 7+. |
+| Exploration Environment | The AI-assisted exploration and authoring environment of the unified Workflow Engine. All artifacts are "design drafts" with no production side effects. LLM APIs are fully reachable. Includes Conversation UI, Visual Designer, Workbench, and AI Copilot Engine. Formerly called "Design Plane." |
+| Freeze Pipeline | A built-in operation of the Workflow Engine — `freeze(workflow_def)` — not an independent plane. Scans `llm_reasoning` Jobs (capabilities beyond `read_analyze`/`suggest_plan`) and `fuzzy_nodes`, presents each for human resolution, validates the result, and marks the Workflow Definition as frozen. Core guarantee: no auto-compilation — mandatory human sign-off. Formerly called "Freeze Bridge." |
+| Production Environment | The deterministic, zero AI side-effect production execution environment of the unified Workflow Engine. LLM API egress is physically blocked at NetworkPolicy level; `llm_reasoning` capabilities beyond `read_analyze`/`suggest_plan` are rejected at Engine submission time. Includes Workflow Executor, Data Connectors, Output Renderer, Scheduler, Query Rewriter, and Incident Manager. Formerly called "Runtime Plane." |
+| Cross-Environment Read-Only Mode | The same Workflow Engine operating with write operations intercepted at Engine level. Queries read-replicas of both Exploration and Production environments; write attempts are rejected. Core constraint: AI outputs are temporary consumables — returned directly to the user, never persisted unless the user explicitly confirms through the Exploration Environment → Freeze Pipeline flow. Formerly called "Intelligence Plane." |
+| Compute Spec | Unified YAML-based computation definition covering Reporting/ETL/Adjustment/Reconciliation. 10 Job Types: source, transform, output, quality, workflow_ref, data_writer, decision, wait, materialize, llm_reasoning. |
+| Light Engine | Lightweight compute engine for the Exploration Environment: DuckDB (zero-config, sub-second startup) + Polars (high-performance DataFrames). Used for sample data and development/debugging. |
+| Heavy Engine | Production compute engine for the Production Environment: **Spark** (Post-MVP). Trino and Ray deferred to Phase 7+. |
 | Common Compute Subset | The minimal set of operations guaranteed to be portable between Light Engine and Heavy Engine. Workflows using only this subset can switch between engines seamlessly. |
 
 ## Knowledge Base
@@ -42,7 +42,8 @@
 |------|------------|
 | Execution Sandbox | Per-Job isolated execution environment: CPU/Memory/Disk/Network resource isolation + FS/Network/seccomp security boundaries. Sandbox Pool pre-warming <100ms. |
 | Data Writer (data_writer) | Job type that writes computed results back to a Data Catalog-registered data source (write_mode: append/upsert/overwrite/merge). Distinct from output (file/notification distribution). |
-| Materialize | The 9th Job Type. Pre-computes and persists frequently-queried aggregation results (Full Refresh or Incremental Refresh) for automatic routing by the Query Service. |
+| llm_reasoning | The 10th Job Type (ADR-0025). Invokes LLM capabilities through registered MCP Servers and Tools. Governed by the capability taxonomy: `read_analyze` (read-only analysis, attribution, anomaly explanation), `suggest_plan` (recommend actions), `generate_draft` (generate Workflow Definition fragments), `modify_spec` (propose Spec modifications), `kb_write` (extract and write KB knowledge). Capabilities `generate_draft`, `modify_spec`, `kb_write` are rejected at Engine level in Production Environment; `read_analyze` and `suggest_plan` are configurable. All invocations route through MCP, preserving provider agnosticism. |
+| Materialize | Pre-computes and persists frequently-queried aggregation results (Full Refresh or Incremental Refresh) for automatic routing by the Query Service. |
 | Dependency Trigger Rules | 5 trigger coverage modes for `depends_on`: all_success (default), all_failed, all_done, one_success, none_failed. |
 | Workflow Reference (workflow_ref) | Nested Workflow execution exposing a summary DAG to the parent Workflow but with isolated execution context (grey-box, not pure black-box). |
 
@@ -85,7 +86,7 @@
 | Reconciliation (Recon) | `type: recon` — matching two independent data sources by match key with three-tier routing (Matched/Unmatched/Partial). Break Analysis assisted by AI Agent (Intelligence Plane) for classification (TIMING/MISSING/ROUNDING/MAPPING/CURRENCY/DUPLICATE/UNKNOWN). All finance-related Resolutions must go through the Adjustment pipeline (Permission → Validation → Approval → Trigger ETL). No Auto-write-off. |
 | Data Quality Check | `type: rule` — explicit conditional expressions. 7 dimensions (completeness/accuracy/consistency/timeliness/uniqueness/validity/temporal_consistency), three severity levels (Error/Warning/Info). |
 | Adjustment Form | Standardized data entry form defined by Dev/Admin via Form Builder (column definitions, validation rules, approval chain). Business Users can submit via Web UI / Excel upload / API — all three go through the same pipeline: Permission → Validation → Approval → Trigger ETL. |
-| Agent Triage Layer | Auto-alert classification layer within the Intelligence Plane. Runs automatically after Data Health Check results are produced but before the user sees them: severity=error auto-triggers S07 parallel diagnosis; severity=warning proactively pushes Health Summary (dedup + pattern match + predicted confidence). All operations are read-only — configuration changes must go through Remediation Gateway. |
+| Agent Triage Layer | Auto-alert classification layer within Cross-Environment Read-Only Mode. Runs automatically after Data Health Check results are produced but before the user sees them: severity=error auto-triggers S07 parallel diagnosis; severity=warning proactively pushes Health Summary (dedup + pattern match + predicted confidence). All operations are read-only — configuration changes must go through Remediation Gateway. |
 | Remediation Gateway | L0-L3 four-tier risk-graded approval: L0 (zero risk, auto-execute) → L1 (low risk, Agent suggestion + one-click confirm) → L2 (medium risk, single Approver + DQ Gate) → L3 (high risk, dual approval + Impact Report + Canary). L3 interfaces with the Freeze Bridge. |
 | Closed-Loop Learning | S08 DataQualityAdvisor receives user action signals (false positive markings, repeated drill-downs, coverage gaps) → auto-suggests rule optimization. Does not auto-modify rules — suggestions take effect after human confirmation through the Remediation Gateway. |
 | Learning Period | Initial state for `type: anomaly` checks. New tenants or newly created anomaly checks automatically enter a 30-day learning period: no alert generation, no Triage push, baseline statistics establishment only. Progressive timeline activation (Day 7 ratio_change → Day 30 seasonal_decomp → Day 90 trend_change). Strict tenant isolation — uses only tenant's own data. Anomaly rate >30% or consecutive false positives → degraded to degraded status. |
@@ -152,4 +153,4 @@
 
 ---
 
-*Last Updated: 2026-07-09 | Total Terms: 101 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022, adr/0023, adr/0024*
+*Last Updated: 2026-07-30 | Total Terms: 102 | Sources: docs/01-facts.md, docs/03-architecture.md, adr/0022, adr/0023, adr/0024, adr/0025*

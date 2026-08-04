@@ -3,7 +3,7 @@
 
 # ADR Index
 
-> 24 Architecture Decision Records (MADR 4.0.0 format). Human-readable detail in [adr/README.md](../adr/README.md).
+> 25 Architecture Decision Records (MADR 4.0.0 format). Human-readable detail in [adr/README.md](../adr/README.md).
 
 | # | Title | Status | Date | Domain | Superseded By |
 |---|-------|--------|------|--------|---------------|
@@ -31,3 +31,4 @@
 | [0022](../adr/0022-brd-generation-agent-pipeline.md) | BRD Generation Agent Pipeline Redesign | ✅ accepted | 2026-07-04 | Architecture | — |
 | [0023](../adr/0023-kb-content-lifecycle-pipeline.md) | KB Content Lifecycle Pipeline — Unified Processing, Linkage Weaving, and Quality Flywheel | ✅ accepted | 2026-07-08 | Architecture | — |
 | [0024](../adr/0024-kb-reasoning-support-playbooks-code.md) | KB Reasoning Support — Diagnostic Playbooks & Code Knowledge Domains | ✅ accepted | 2026-07-08 | Architecture | — |
+| [0025](../adr/0025-unified-workflow-engine.md) | Unified Workflow Engine — One Engine, Three Environments | ✅ accepted | 2026-07-30 | Architecture | — |

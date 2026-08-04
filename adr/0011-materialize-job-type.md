@@ -80,6 +80,6 @@ Materialized views are included in the Freeze Bridge validation process as part 
 
 ## Linked Modules
 
-- `docs/02-requirement.md` → FR13.6 (9 Job Types), FR15c.4 (Materialized Aggregation)
+- `docs/02-requirement.md` → FR13.6 (10 Job Types), FR15c.4 (Materialized Aggregation)
 - `docs/03-architecture.md` → §6 (Compute Spec), §5.4.4 (Pre-Aggregation & Materialization)
 - `adr/0008-large-scale-data-strategy.md` → Decision #8 (Large-Scale Data Strategy)

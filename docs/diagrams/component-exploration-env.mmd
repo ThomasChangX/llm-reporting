@@ -1,7 +1,7 @@
 graph TB
-%% C4 Component Diagram — llm-reporting Design Plane Detail
+%% C4 Component Diagram — llm-reporting Exploration Environment Detail
 %% See docs/architecture/c4-model.md (§15) for System Context and Container levels
-    subgraph DP["DESIGN PLANE"]
+    subgraph PE["EXPLORATION ENVIRONMENT"]
         direction TB
         
         subgraph UI["User Interfaces"]
@@ -12,7 +12,7 @@ graph TB
 
         subgraph Core["AI Copilot Engine"]
             SDK["LLM SDK<br/>Model Router<br/>Streaming Response"]
-            Skill["Skill Engine<br/>14 Skills<br/>Skill Chaining"]
+            Skill["Skill Engine<br/>18 Skills<br/>Skill Chaining"]
             MCP["MCP Gateway<br/>21 MCP Servers<br/>Protocol Adapter"]
             Guard["Input/Output Guard<br/>5-Layer Defense"]
         end

@@ -58,6 +58,7 @@ Adopt **Option C**: BRD/ADR as system first-class citizens.
 ### External Tool Integration
 - Jira/Rally multi-layer mapping: BRD→Epic/Feature, requirement→Story/US, AC→Sub-task/Task
 - New MCPs: MCP-17 (jira-sync), MCP-18 (confluence-export), MCP-19 (compliance-mapper)
+  <!-- Clarification (non-decision; recorded 2026-08-04 per audit C-002): these three BRD-pipeline MCP IDs were subsequently renumbered to MCP-20/21/22 to avoid colliding with Core Catalog MCP-17 (`external-ticketing`) after the §22C catalog expanded. Authoritative mapping: MCP-20 jira-sync / MCP-21 confluence-export / MCP-22 compliance-mapper — see docs/03-architecture.md §23.8.2 + glossary. This ADR's substantive decision (BRD/ADR as first-class entities) is unaffected. -->
 - Import capability: Legacy BRDs from Confluence/SharePoint/Word
 
 ### Full Traceability Chain

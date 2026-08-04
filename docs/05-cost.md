@@ -304,11 +304,13 @@ The Intelligence Plane provides cross-plane read-only AI analysis — ad-hoc NL 
 |---------------|----------------------------------|-------------------------------|---------------------|------------------|
 | Design Plane — Exploration | $36 / $363 / $3,630 (S/M/L) | $248 / $2,475 / $24,750 (S/M/L) | $432 / $4,356 / $43,560 | $2,976 / $29,700 / $297,000 |
 | Design Plane — BRD/ADR Generation | $0 / $50 / $300 (S/M/L) | $30 / $300 / $1,800 (S/M/L) | $0 / $600 / $3,600 | $360 / $3,600 / $21,600 |
-| Design Plane — Freeze Bridge Resolution | $0 / $30 / $200 (S/M/L) | $15 / $200 / $1,200 (S/M/L) | $0 / $360 / $2,400 | $180 / $2,400 / $14,400 |
-| Intelligence Plane — Q&A | $8 / $80 / $800 (S/M/L) | $50 / $500 / $5,000 (S/M/L) | $96 / $960 / $9,600 | $600 / $6,000 / $60,000 |
+| Exploration Environment — Freeze Pipeline Resolution | $0 / $30 / $200 (S/M/L) | $15 / $200 / $1,200 (S/M/L) | $0 / $360 / $2,400 | $180 / $2,400 / $14,400 |
+| Cross-Env Read-Only Mode — Q&A | $13 / $132 / $1,320 (S/M/L) | $92 / $924 / $9,240 (S/M/L) | $156 / $1,584 / $15,840 | $1,104 / $11,088 / $110,880 |
 | Agent Evaluation (CI Regression) | $45 / $45 / $45 | $111 / $111 / $111 | $540 / $540 / $540 | $1,332 / $1,332 / $1,332 |
 | Agent Cost Governance Overhead | $5 / $30 / $150 (S/M/L) | $5 / $30 / $150 (S/M/L) | $60 / $360 / $1,800 | $60 / $360 / $1,800 |
-| **Total Runtime LLM Cost** | **$94 / $598 / $5,125/mo** | **$459 / $3,616 / $33,011/mo** | **$1,128 / $7,176 / $61,500/yr** | **$5,508 / $43,392 / $396,132/yr** |
+| **Total Runtime LLM Cost** | **$99 / $650 / $5,645/mo** | **$501 / $4,040 / $37,251/mo** | **$1,188 / $7,800 / $67,740/yr** | **$6,012 / $48,480 / $447,012/yr** |
+
+> **Note (per audit M-022)**: The Intelligence Plane row is now derived from the authoritative scenario volumes in §6.1 (40 / 400 / 4,000 daily queries for Small / Medium / Large) × the §4.3 average per-query cost ($0.015 DeepSeek, $0.105 Claude) × 22 workdays. §4.3's per-user "7.5 queries/user/day" is a unit-economics reference for pricing design, not the TCO volume driver — the authoritative tenant-level volumes live in §6.1. The Total Runtime LLM Cost row is the sum of the six rows above.
 
 > **Key Insight**: Runtime LLM costs are entirely variable (per-use) and directly proportional to user activity. A tenant with 0 active analysts incurs $0 runtime LLM cost. This is fundamentally different from traditional SaaS where infrastructure cost is the dominant factor — here, LLM costs can exceed infrastructure costs for heavy-use tenants.
 
@@ -326,7 +328,7 @@ These advantages are inherent in the architecture and require no additional impl
 
 | Advantage | Architecture Basis | Mechanism | Savings vs. Traditional AI-BI |
 |-----------|-------------------|-----------|-------------------------------|
-| **Zero Runtime AI Cost** | ADR-0005 (Four-Layer Architecture), ADR-0006 (Freeze Bridge) | Frozen scripts execute deterministically; zero LLM tokens consumed after freezing | 100% of runtime AI invocation cost eliminated |
+| **Zero Runtime AI Cost** | ADR-0005 (Unified Workflow Engine Environments), ADR-0006 (Freeze Pipeline) | Frozen scripts execute deterministically; zero LLM tokens consumed after freezing | 100% of runtime AI invocation cost eliminated |
 | **Design-Time AI Only** | Architecture §2 (Core Design Philosophy) | AI costs accrue only during exploration/authoring, not during recurring execution | Eliminates per-report/per-run LLM costs |
 | **Dual-Model Cost Arbitrage** | ADR-0009 (Dual-Model Pricing) | Route T1-T2 tasks to DeepSeek V4 Pro ($0.50/$2.00 per M) vs. Claude ($3.00/$15.00 per M) | 40-60% on bulk generation tasks |
 | **KB-Driven Reduces Iterations** | Architecture §3.4 (AI Copilot Engine → KB Retriever) | High-quality KB context improves first-pass generation accuracy, reducing iteration count per task | 20-30% fewer tokens per exploration session |
@@ -406,15 +408,15 @@ These advantages are inherent in the architecture and require no additional impl
 | **Subtotal B** | **$17,466/yr** | **$34,932/yr** | Includes isolation premium |
 | **C. Runtime LLM (annual)** | | | |
 | Design Plane Exploration | $432/yr | $2,976/yr | See §4.1-4.2 |
-| Intelligence Plane Q&A | $96/yr | $600/yr | See §4.3 |
+| Intelligence Plane Q&A | $156/yr | $1,104/yr | See §4.3 |
 | Agent Evaluation (CI) | $540/yr | $1,332/yr | See §2.2.3 |
-| **Subtotal C** | **$1,128/yr** | **$5,508/yr** | Includes BRD/ADR, Freeze Bridge, Governance |
+| **Subtotal C** | **$1,188/yr** | **$6,012/yr** | Includes BRD/ADR, Freeze Bridge, Governance |
 | **D. Operations Personnel (annual)** | | | |
 | DevOps/SRE (part-time) | $20,000/yr | $40,000/yr | 0.25 FTE for small |
 | Support (part-time) | $10,000/yr | $20,000/yr | 0.25 FTE |
 | **Subtotal D** | **$30,000/yr** | **$60,000/yr** | — |
-| **TOTAL TCO (Annual)** | **~$103,179/yr** | **~$252,928/yr** | — |
-| **Per-Tenant Annual TCO** | **~$10,318/tenant/yr** | **~$25,293/tenant/yr** | Based on 10 tenants |
+| **TOTAL TCO (Annual)** | **~$103,239/yr** | **~$253,432/yr** | — |
+| **Per-Tenant Annual TCO** | **~$10,324/tenant/yr** | **~$25,343/tenant/yr** | Based on 10 tenants |
 
 ### 6.3 TCO Breakdown — Medium Scenario (≤ 100 tenants)
 
@@ -422,10 +424,10 @@ These advantages are inherent in the architecture and require no additional impl
 |---------------|-------------------------------|--------------------------|-------|
 | **A. Development (amortized over 3 years)** | $54,585/yr | $152,489/yr | Same as Small |
 | **B. Runtime Infrastructure** | $48,090/yr | $96,180/yr | 3-5× Small due to scale |
-| **C. Runtime LLM** | $7,176/yr | $43,392/yr | 6-8× Small due to user growth |
+| **C. Runtime LLM** | $7,800/yr | $48,480/yr | 6-8× Small due to user growth |
 | **D. Operations Personnel** | $80,000/yr | $180,000/yr | 1.0 FTE SRE + 0.5 support |
-| **TOTAL TCO (Annual)** | **~$189,851/yr** | **~$472,061/yr** | — |
-| **Per-Tenant Annual TCO** | **~$1,899/tenant/yr** | **~$4,721/tenant/yr** | Expected lower than Small (economies of scale) |
+| **TOTAL TCO (Annual)** | **~$190,475/yr** | **~$477,149/yr** | — |
+| **Per-Tenant Annual TCO** | **~$1,905/tenant/yr** | **~$4,771/tenant/yr** | Expected lower than Small (economies of scale) |
 
 ### 6.4 TCO Breakdown — Large Scenario (≤ 1000 tenants)
 
@@ -433,10 +435,10 @@ These advantages are inherent in the architecture and require no additional impl
 |---------------|-------------------------------|--------------------------|-------|
 | **A. Development (amortized over 3 years)** | $54,585/yr | $152,489/yr | Same as Small |
 | **B. Runtime Infrastructure** | $171,744/yr | $343,488/yr | 8-15× Small; cluster isolation premium |
-| **C. Runtime LLM** | $61,500/yr | $396,132/yr | 50-100× Small; volume discounts possible |
+| **C. Runtime LLM** | $67,740/yr | $447,012/yr | 50-100× Small; volume discounts possible |
 | **D. Operations Personnel** | $140,000/yr | $350,000/yr | 2.0 FTE SRE + 1.0 support + 0.5 compliance |
-| **TOTAL TCO (Annual)** | **~$427,829/yr** | **~$1,242,109/yr** | — |
-| **Per-Tenant Annual TCO** | **~$428/tenant/yr** | **~$1,242/tenant/yr** | Significant economies of scale expected |
+| **TOTAL TCO (Annual)** | **~$434,069/yr** | **~$1,292,989/yr** | — |
+| **Per-Tenant Annual TCO** | **~$434/tenant/yr** | **~$1,293/tenant/yr** | Significant economies of scale expected |
 
 ### 6.5 TCO Comparison — China vs. US Team
 
@@ -446,7 +448,7 @@ These advantages are inherent in the architecture and require no additional impl
 | Development LLM — Code Gen | $78.30 | $548.10 | ~1:7.0 (per ADR-0009 pricing ratio) |
 | Development Infrastructure | $11,632 | $21,872 | ~1:1.9 (Alibaba vs. AWS) |
 | Runtime Infrastructure (annual, Small) | $17,466/yr | $34,932/yr | ~1:2.0 |
-| Runtime LLM (annual, Small) | $1,128/yr | $5,508/yr | ~1:4.9 |
+| Runtime LLM (annual, Small) | $1,188/yr | $6,012/yr | ~1:5.1 |
 | Operations Personnel (annual, Small) | ~$30,000/yr | ~$60,000/yr | ~1:2.0 |
 | **Total TCO (3-year, Small)** | **~$310K** | **~$759K** | **~1:2.5** |
 
@@ -456,9 +458,9 @@ These advantages are inherent in the architecture and require no additional impl
 |-------|-------|--------|-------|-------|
 | Runtime LLM : Runtime Infrastructure | 0.06 : 1 | 0.15 : 1 | 0.36 : 1 | LLM costs grow faster than infra |
 | Development Amortization : Annual Runtime | 1.1 : 1 | 0.40 : 1 | 0.15 : 1 | Dev becomes negligible at scale |
-| Per-Tenant Cost (China) | ~$10,318 | ~$1,899 | ~$428 | Declines sharply with scale |
+| Per-Tenant Cost (China) | ~$10,324 | ~$1,905 | ~$434 | Declines sharply with scale |
 | Operations : Total TCO | ~29% | ~42% | ~33% | Roughly constant % |
-| China TCO : US TCO | ~1:2.5 | ~1:2.5 | ~1:2.9 | Consistent ~1:2.5 to 1:3 advantage |
+| China TCO : US TCO | ~1:2.5 | ~1:2.5 | ~1:3.0 | Consistent ~1:2.5 to 1:3 advantage |
 
 ### 6.7 Breakeven Analysis
 
@@ -471,8 +473,8 @@ These advantages are inherent in the architecture and require no additional impl
 | Monthly Revenue per Tenant (avg.) | $2,000 (Small), $1,500 (Medium), $1,000 (Large) | Per FR12.3 tiered pricing |
 | Gross Margin (after Runtime costs) | 70% (China) / 60% (US) | Revenue − (Infrastructure + LLM + Ops) |
 | Breakeven Tenant Count (China, 24mo) | ~5 tenants | $163,854 ÷ ($2,000 × 0.70 × 24) |
-| Breakeven Tenant Count (US, 24mo) | ~16 tenants | $457,464 ÷ ($2,000 × 0.60 × 24) |
+| Breakeven Tenant Count (US, 24mo) | ~16 tenants | $458,564 ÷ ($2,000 × 0.60 × 24) |
 
 ---
 
-*Last Updated: 2026-07-04*
+*Last Updated: 2026-08-04*

@@ -189,7 +189,7 @@ Probability of merge conflicts requiring Reviewer rework, by number of workers m
 | M3.6: Prompt Injection Defense | W18 | Input Sanitization, Instruction Boundary wrapping, KB Content Sanitization, Output Guard | M3.3 (all LLM calls pass through this) |
 
 **Key FR Coverage**: FR1 (AI-Assisted Exploration), FR5 (Reporting), FR6 (ETL Workflow), FR29 (AI Agent Architecture), FR30.1-30.2 (Agent Customization basics)
-**NFR Coverage**: NFR3.1 (NL→Preview P95 ≤ 3s), NFR6.2 (first-report < 15 min), NFR1.2 (critical paths independent of LLM)
+**NFR Coverage**: NFR3.1 (NL→Preview P95 ≤ 15s), NFR6.2 (first-report < 15 min), NFR1.2 (critical paths independent of LLM)
 **Architecture Reference**: docs/03-architecture.md §3 (Design Plane), §3.1 (Conversation Interface), §3.2 (Design Artifact Schema), §3.3 (Workbench), §3.4 (Component Architecture)
 **ADR References**: ADR-0002 (LLM Role Positioning), ADR-0009 (Dual-Model Pricing), ADR-0015 (Agent Triage), ADR-0016 (Dual-Mode Orchestration), ADR-0019 (Memory Architecture)
 **Team**: 3 engineers (1 frontend + 1 backend + 1 AI/LLM) | **Budget**: See docs/05-cost.md §2.1, §2.2
@@ -213,11 +213,11 @@ Probability of merge conflicts requiring Reviewer rework, by number of workers m
 
 ---
 
-### Phase 4: Freeze Bridge (Weeks 19–23)
+### Phase 4: Freeze Pipeline (Weeks 19–23)
 
 > **Status**: Structure defined; detailed task breakdown pending Phase 3 Design Artifact schema finalization.
 
-**Phase Objective**: Build the independent transition plane — the Spec Refinement Assistant, Validation Engine, Test Runner, CI/CD Pipeline, and Release Manager. This is the critical governance boundary between AI exploration and deterministic production.
+**Phase Objective**: Build the Freeze Pipeline — the Spec Refinement Assistant, Validation Engine, Test Runner, CI/CD Pipeline, and Release Manager. This is the critical governance boundary between AI exploration and deterministic production (a built-in `freeze()` operation on the Workflow Engine per ADR-0025).
 
 | Milestone | Target Week | Deliverables | Dependencies |
 |-----------|-------------|-------------|--------------|
@@ -255,13 +255,13 @@ Probability of merge conflicts requiring Reviewer rework, by number of workers m
 
 ### Phase 5: Runtime Plane (Weeks 24–28)
 
-> **Status**: Structure defined; detailed task breakdown pending Phase 4 Freeze Bridge stabilization.
+> **Status**: Structure defined; detailed task breakdown pending Phase 4 Freeze Pipeline stabilization.
 
 **Phase Objective**: Build the deterministic, zero-AI-side-effect production execution layer — Workflow Executor, Scheduler, Data Connectors, Output Renderer, Incident Manager, and Heavy Engine integration (Spark, post-MVP).
 
 | Milestone | Target Week | Deliverables | Dependencies |
 |-----------|-------------|-------------|--------------|
-| M5.1: Workflow Executor Core | W25 | DAG execution engine, Job Sandbox isolation (per FR26), State machine with retry/rollback, Immutable inter-job state passing | Phase 4: Freeze Bridge produces validated Specs to execute |
+| M5.1: Workflow Executor Core | W25 | DAG execution engine, Job Sandbox isolation (per FR26), State machine with retry/rollback, Immutable inter-job state passing | Phase 4: Freeze Pipeline produces validated Specs to execute |
 | M5.2: Scheduler | W25 | Cron/Event/Manual/API/Webhook triggers, Timezone-aware scheduling, Concurrency control (three-tier), Missed-execution compensation | M5.1 (executor is the target) |
 | M5.3: Data Connector Adapters (L1-L3) | W26 | File connectors (S3/SFTP/HDFS), DB connectors (JDBC/ODBC PG/MySQL/Oracle), API connectors (REST/GraphQL), Unified DataSource Interface | Phase 1: Integration Framework interface (FR15), ADR-0007 (Query Service) |
 | M5.4: Output Renderer | W26 | PDF/Excel/CSV/JSON/Parquet renderers, Email/Slack/Webhook delivery channels, Format System binding (FR24) | M5.1 (executor triggers output) |
@@ -440,7 +440,7 @@ Each phase boundary is gated by a formal checkpoint review. The following criter
 | Checkpoint | Gate Criteria | Evidence Required | Sign-off Authority |
 |-----------|---------------|-------------------|-------------------|
 | **CP0: Foundation Complete** | (a) Architecture docs approved (ADR-0002/0005/0006), (b) Dev environment operational for all engineers, (c) Token-Speed baseline measured from Phase 0 tasks, (d) CI/CD skeleton passing, (e) Phase 1 task breakdown approved | Architecture doc sign-off, CI dashboard (green), Velocity report | Architecture Lead + Project Sponsor |
-| **CP1: Core Compute Complete** | (a) Compute Spec YAML schema stable (all 9 Job types defined), (b) Dual Engine interface validated with DuckDB MVP, (c) Integration Framework (L1-L2) operational, (d) Query Service metadata manager operational, (e) Format System (5 format types) defined | Integration test suite passing, Demo of Compute Spec → DuckDB execution, Schema review sign-off | Tech Lead + Architecture Lead |
+| **CP1: Core Compute Complete** | (a) Compute Spec YAML schema stable (all 10 Job types defined), (b) Dual Engine interface validated with DuckDB MVP, (c) Integration Framework (L1-L2) operational, (d) Query Service metadata manager operational, (e) Format System (5 format types) defined | Integration test suite passing, Demo of Compute Spec → DuckDB execution, Schema review sign-off | Tech Lead + Architecture Lead |
 | **CP2: KB Complete** | (a) All 9 KB domains populated with sample data, (b) Hybrid search (semantic + keyword + graph) returning results < 200ms P95, (c) KB Write Governance (5 gates) operational, (d) KB ↔ Code Graph bridge edges functional | Search benchmark report, Write governance test suite, Demo of KB context retrieval for sample NL query | Tech Lead + Domain Expert |
 | **CP3: Design Plane Complete** | (a) Conversation Interface handling 50+ intents, (b) Visual Designer producing valid Design Artifact YAML, (c) AI Copilot Engine with both LLM adapters operational, (d) Prompt injection defense passing security review, (e) Design Artifact confidence ≥ 0.7 on sample workflows | Intent coverage report, Security review sign-off, UX usability test (NFR6.2: first-report < 15 min) | Product Lead + Security Lead + UX Lead |
 | **CP4: Freeze Bridge Complete** | (a) Spec Refinement Assistant resolving all 5 fuzzy node types, (b) Validation Engine passing 100% of well-formed specs, (c) CI/CD pipeline deploying to sandbox, (d) Canary gating (4-stage) operational, (e) Pre/Post-Change doc generation accurate | Canary demo (1%→100%), Fuzzy node resolution test suite, CI/CD dashboard (green) | Tech Lead + DevOps Lead |

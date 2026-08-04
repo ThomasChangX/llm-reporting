@@ -3,7 +3,9 @@
 > Manual verification checklist for validating cross-reference integrity after document structure adjustments.
 > Run this checklist after every major document change.
 >
-> **Last Run**: 2026-07-09 | **Status**: ✅ All verifiable cross-references confirmed — see individual check items
+> **Last Verified Run**: 2026-07-30 (pre-ADR-0025 baseline) | **Status**: ⚠️ Pending re-verification after ADR-0025 documentation alignment (term-migration sweep tracked by audit spec I-008)
+>
+> *Semantics*: "Last Verified Run" = the most recent run where every checklist item was actively confirmed. Mechanical fixes applied since then (e.g. glossary count corrections) update individual lines and the "last updated" footer below, but do not constitute a full re-verification run.
 
 ## 1. Path Reference Checks
 
@@ -26,12 +28,13 @@
 
 ### 1.3 ADR References
 
-- [x] `adr/README.md` → links to all 24 ADRs resolve
+- [x] `adr/README.md` → links to all 25 ADRs resolve
 - [x] `adr/0004-document-structure.md` → marked as Superseded by 0012
 - [x] `adr/0012-document-structure-v2.md` → references all new file paths
 - [x] All ADRs → `docs/01-facts.md` → `docs/03-architecture.md` path updates verified
 - [x] `adr/0023-kb-content-lifecycle-pipeline.md` → `docs/01-facts.md` Decision #22, `docs/03-architecture.md` §10.2-§10.4
 - [x] `adr/0024-kb-reasoning-support-playbooks-code.md` → `docs/01-facts.md` Decision #23, `docs/03-architecture.md` §10 (domain table), §22B (S18), §22C (MCP-23)
+- [x] `adr/0025-unified-workflow-engine.md` → `docs/01-facts.md` Decision #25, `docs/03-architecture.md` §2, §3, §4, §6, §7, §11, §17; refines `adr/0005`, `adr/0006`
 
 ### 1.4 Root Governance Files
 
@@ -54,7 +57,7 @@ In sections extracted to standalone files, bare `§N` references are **expected 
 - [x] §16 STRIDE: original 84 lines → extracted file 93 lines (≥ 84 ✅) + all §N rewritten
 - [x] §18 ERD: original 140 lines → extracted file 148 lines (≥ 140 ✅)
 - [x] §19 SLO/SLI: original 81 lines → extracted file 89 lines (≥ 81 ✅)
-- [x] Glossary: original 12 entries → extracted file 101 entries (≥ 50 ✅)
+- [x] Glossary: original 12 entries → extracted file 102 entries (≥ 50 ✅)
 
 ## 4. Architecture Doc Section Header Retention Check
 
@@ -67,7 +70,18 @@ Section headers retained after extraction (to prevent `→ §N` inbound referenc
 - [x] `docs/03-architecture.md` Appendix Section Index → §15/§16/§18/§19 lines point to new file paths
 - [x] All other entries in Section Index remain unchanged
 
-## 6. Periodic Review
+## 6. Sub-Project Migration (2026-08-04)
+
+> **Scope**: `docs/03-architecture.md` decomposed from 6412 → 1276 lines. Detailed module design migrated to `docs/sub-projects/` (7 sub-projects, 41 files). The architecture doc retains §1, §2, §13, §14, §17 in full + stub headings for all migrated sections (preserving `§N` anchors).
+
+- [x] All migrated sections have stub headings preserving `§N` anchors (185 stubs)
+- [x] `check_adr_semantics.py` passes — all 57 validated `§N` tokens in ADRs + `01-facts.md` resolve
+- [x] ADR relative paths corrected: `../../../adr/` (3 levels up from `docs/sub-projects/X/`)
+- [x] Content conserved (migration, not summary) — every table, YAML, pseudocode, ASCII diagram preserved in sub-project docs
+- [x] Appendix Section Index updated with `→` migration pointers for §3–§12, §20–§25
+- [ ] ⚠️ Full re-verification of cross-references within new sub-project files (pending — the checker only validates ADRs + `01-facts.md` → `03-architecture.md`; intra-sub-project `§N` references are not machine-checked)
+
+## 7. Periodic Review
 
 | Review Item | Frequency | Responsible |
 |------------|-----------|-------------|
@@ -76,4 +90,4 @@ Section headers retained after extraction (to prevent `→ §N` inbound referenc
 | Glossary coverage | Quarterly | Domain Expert |
 | ADR status cleanup (Deprecated/Superseded) | Semi-annually | Architect |
 
-*This checklist last updated: 2026-07-09*
+*This checklist last updated: 2026-08-04 (sub-project migration: 03-architecture.md 6412→1276 lines, 41 new files under docs/sub-projects/; full re-verification of intra-sub-project refs still pending)*

@@ -1,0 +1,3 @@
+# Lychee ignore patterns
+# Files referenced in prose (not as markdown links) that lychee falsely checks
+./03-architecture.md

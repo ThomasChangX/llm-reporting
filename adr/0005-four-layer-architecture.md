@@ -5,13 +5,16 @@ status: accepted
 date: 2026-07-04
 deciders: "Project Sponsor"
 domain: Architecture
+refined_by: "ADR-0025"
 ---
 
 # ADR-0005: Four-Layer Architecture (Zero AI Side Effects)
 
-- **Status**: Accepted (Refined 2026-07-04)
+- **Status**: Accepted (Refined 2026-07-30 by ADR-0025)
 - **Date**: 2026-07-04
 - **Deciders**: Project Sponsor
+
+> **Refined by ADR-0025** (2026-07-30): The "four independent planes" are now understood as three environments of a unified Workflow Engine (Exploration / Freeze Pipeline / Production) + one cross-environment read-only mode. The core decisions — separation of exploration from production, zero AI side effects, mandatory human sign-off — are preserved. See [ADR-0025](../adr/0025-unified-workflow-engine.md) for the refined framing.
 
 ## Context
 

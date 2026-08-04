@@ -7,9 +7,9 @@ This directory contains architecture diagram source files in [Mermaid](https://m
 | File | Type | Description |
 |------|------|-------------|
 | [`system-context.mmd`](system-context.mmd) | C4 System Context | External actors and system boundaries |
-| [`four-plane-arch.mmd`](four-plane-arch.mmd) | C4 Container | Four-Layer Architecture: Design Plane / Freeze Bridge / Runtime Plane (Zero AI Side Effects) / Intelligence Plane (AI Read-Only) |
-| [`freeze-bridge-flow.mmd`](freeze-bridge-flow.mmd) | Sequence | Freeze Bridge workflow: AI artifact → deterministic script |
-| [`component-design-plane.mmd`](component-design-plane.mmd) | C4 Component | Design Plane detail: UI, AI Copilot Engine, Artifact Store, external integrations |
+| [`unified-engine-arch.mmd`](unified-engine-arch.mmd) | C4 Container | Unified Workflow Engine Architecture: Exploration Environment / Freeze Pipeline / Production Environment + Cross-Environment Read-Only Mode |
+| [`freeze-pipeline-flow.mmd`](freeze-pipeline-flow.mmd) | Sequence | Freeze Pipeline workflow: exploration artifact → deterministic frozen Spec |
+| [`component-exploration-env.mmd`](component-exploration-env.mmd) | C4 Component | Exploration Environment detail: UI, AI Copilot Engine, Artifact Store, external integrations |
 
 ## Conventions
 
