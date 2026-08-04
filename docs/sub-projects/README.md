@@ -1,6 +1,6 @@
 # Sub-Projects — Detailed Module Design
 
-> **Parent**: [03-architecture.md](../03-architecture.md) (in `docs/`) — slimmed overview + §N anchor stubs
+> **Parent**: `docs/03-architecture.md` (slimmed overview + §N anchor stubs). All migrated sections retain stub headings that preserve `§N` anchors.
 > **Scope**: Per-module deep-dive design, migrated from the original monolithic `03-architecture.md` (6412 lines) into focused, maintainable files.
 
 This directory decomposes the llm-reporting platform into **seven sub-projects**, each a cohesive domain with its own deployment surface, team boundary, and module set. The decomposition follows three signals from the design itself:
