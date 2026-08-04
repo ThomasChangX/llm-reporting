@@ -5,7 +5,7 @@
 - **Severity**：Minor
 - **Source Dimensions**：B3, A7
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open
+- **Status**：done（2026-08-04。移除 §13 选型表两处 `TigerGraph`（L1831 + L1859），仅留 Neo4j——全仓无任何论证/引用，属早期候选残留）
 
 ## 证据
 

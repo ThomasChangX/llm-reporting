@@ -5,7 +5,7 @@
 - **Severity**：Critical
 - **Source Dimensions**：A4, B1
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open（生命周期：`open` → 修复开始置 `in-progress` → 验收通过置 `done`；由后续修复流程更新，非审核阶段）
+- **Status**：done（2026-08-04。NFR3.1 统一为 ≤15s，同步 `docs/02-requirement.md:175` + `docs/04-timeline.md:192`；权威值见 `docs/operations/slo-sli.md`。生命周期：`open` → `in-progress` → `done`）
 
 ## 证据（从 findings 报告复制）
 

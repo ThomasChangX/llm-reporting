@@ -5,7 +5,7 @@
 - **Severity**：Minor
 - **Source Dimensions**：A6
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open
+- **Status**：done（2026-08-04。Breakeven 分子 $457,464→$458,564（与 :469 一致，~16 tenant 结论不变）。Intelligence 行以 §6.1 场景量(40/400/4000 q/day)为权威假设重算：中 $13/$132/$1,320、美 $92/$924/$9,240；级联 §4.4 Total + §6.2/6.3/6.4 Subtotal C + TOTAL TCO + §6.5/6.6 比率。§4.3 加注区分"per-query 单位经济"vs"§6.1 权威场景量"。3-yr 结论 ~$310K/$760K 与 ~1:2.5 不变）
 
 ## 证据
 

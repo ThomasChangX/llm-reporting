@@ -5,7 +5,7 @@
 - **Severity**：Minor
 - **Source Dimensions**：A1
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open
+- **Status**：in-progress（2026-08-04。机械项已修：glossary 计数 101→102；L6/L80 日期语义明确区分（Last Verified Run vs last updated）；L80 更新到 2026-08-04。**未完成**：L6 的"⚠️ Pending re-verification after ADR-0025"——逐项 re-verification 属 I-008 术语迁移的工作范围，待 I-008 完成后执行）
 
 ## 证据
 

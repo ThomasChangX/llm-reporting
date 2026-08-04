@@ -1,24 +1,24 @@
 sequenceDiagram
-%% Freeze Bridge Sequence Diagram
+%% Freeze Pipeline Sequence Diagram
 %% See docs/03-architecture.md §4 for full textual description
     actor User as 👤 Business User
-    participant DP as Design Plane
+    participant EE as Exploration Environment
     participant SRA as Spec Refinement Assistant
     participant VE as Validation Engine
     participant TR as Test Runner (Sandbox)
     participant RM as Release Manager
-    participant RP as Runtime Plane
+    participant PE as Production Environment
     participant KB as Knowledge Base
 
-    Note over User,DP: EXPLORATION PHASE (Design Plane)
-    User->>DP: NL query: "Monthly revenue by region"
-    DP->>KB: Retrieve data catalog, business glossary
-    DP->>User: AI-generated report preview
-    User->>DP: Adjust filters, approve design
-    User->>DP: Click "Freeze Workflow"
+    Note over User,EE: EXPLORATION PHASE
+    User->>EE: NL query: "Monthly revenue by region"
+    EE->>KB: Retrieve data catalog, business glossary
+    EE->>User: AI-generated report preview
+    User->>EE: Adjust filters, approve design
+    User->>EE: Click "Freeze Workflow"
 
-    Note over SRA,RM: FREEZE BRIDGE PHASE
-    DP->>SRA: Submit AI-generated Compute Spec (YAML)
+    Note over SRA,RM: FREEZE PIPELINE PHASE
+    EE->>SRA: Submit exploration Compute Spec (YAML)
     SRA->>SRA: Scan for ambiguous nodes<br/>(inferred JOINs, fuzzy aggregations, implicit filters)
     
     alt Ambiguity found
@@ -34,7 +34,7 @@ sequenceDiagram
     
     alt Validation fails
         VE-->>User: Error: column mismatch, DQ threshold exceeded
-        User->>DP: Return to Design Plane, fix issues
+        User->>EE: Return to Exploration Environment, fix issues
     else Validation passes
         VE->>TR: Run in Sandbox
     end
@@ -45,15 +45,15 @@ sequenceDiagram
     User->>RM: Approve deployment
 
     alt Canary enabled (Post-MVP)
-        RM->>RP: Deploy 1% → monitor
-        RM->>RP: Deploy 10% → monitor
-        RM->>RP: Deploy 50% → monitor
-        RM->>RP: Deploy 100%
+        RM->>PE: Deploy 1% → monitor
+        RM->>PE: Deploy 10% → monitor
+        RM->>PE: Deploy 50% → monitor
+        RM->>PE: Deploy 100%
     else MVP simplified flow
-        RM->>RP: Deploy directly (Light Engine, deterministic)
+        RM->>PE: Deploy directly (Light Engine, deterministic)
     end
 
-    RP->>User: Workflow live — scheduled execution begins
+    PE->>User: Workflow live — scheduled execution begins
     RM->>User: Post-Change Summary (actual vs designed, cost profile)
 
-    Note over User,RP: All decisions immutably recorded in audit log
+    Note over User,PE: All decisions immutably recorded in audit log

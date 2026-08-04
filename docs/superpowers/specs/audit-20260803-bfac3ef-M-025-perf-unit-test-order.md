@@ -5,7 +5,7 @@
 - **Severity**：Minor
 - **Source Dimensions**：B2, B1
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open
+- **Status**：done（2026-08-04。(a) §5.4 pushdown_policy 加 `max_bytes_transferred: 10GB` + `assumed_avg_row_width: 1KB` 换算说明，与 §6.3 联邦查询 ≤10GB 阈值对齐。(b) 经核实非问题：CP5（04-timeline:447）本身已含"100 concurrent workflows"验收 + "Load test report (100 workflows)"，非仅在 Phase 8；M8.7 是更大的 1000-concurrent + DR 演练。spec (b) 前提部分不成立，无需修改 timeline）
 
 ## 证据
 

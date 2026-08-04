@@ -5,7 +5,7 @@
 - **Severity**：Minor
 - **Source Dimensions**：A4, A5
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open
+- **Status**：done（2026-08-04。`README.md:21` ~6200→~6400；`component-exploration-env.mmd:15` 14→18 Skills）
 
 ## 证据
 

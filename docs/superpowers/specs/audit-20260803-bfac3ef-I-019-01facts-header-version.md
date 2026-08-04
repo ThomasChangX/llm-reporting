@@ -5,7 +5,7 @@
 - **Severity**：Important
 - **Source Dimensions**：A8, A1
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open
+- **Status**：done（2026-08-04。`01-facts.md:470` 标题改为 "Supplemental Decisions (Decision #8–#25)" + 补 Decision#N 为叙事序号的说明；Version History 补 v1.5 "folded into v1.6" 条目消除跳号）
 
 ## 证据
 

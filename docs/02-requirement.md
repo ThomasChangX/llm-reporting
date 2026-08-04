@@ -160,7 +160,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 ### NFR1: Reliability
 | ID | Requirement | Priority |
 |----|------------|----------|
-| NFR1.1 | Frozen workflow scripts must execute deterministically with zero AI side effects (no LLM invocation; Intelligence Plane provides AI read-only analysis but does not cross the bridge) | P0 |
+| NFR1.1 | Frozen workflow scripts must execute deterministically with zero AI side effects (no unapproved LLM invocation; Cross-Environment Read-Only Mode provides AI read-only analysis but does not write) | P0 |
 | NFR1.2 | System must handle LLM output drift/hallucination issues; critical paths must not depend on LLMs | P0 |
 
 ### NFR2: Cost
@@ -172,7 +172,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 ### NFR3: Performance
 | ID | Requirement | Priority |
 |----|------------|----------|
-| NFR3.1 | Interaction latency in AI Exploration Mode must meet usability requirements (NL→Preview P95 ≤ 3s, follow-up context refresh ≤ 2s) | P1 |
+| NFR3.1 | Interaction latency in AI Exploration Mode must meet usability requirements (NL→Preview P95 ≤ 15s — authoritative target with latency breakdown in `docs/operations/slo-sli.md` Journey 1; follow-up context refresh ≤ 2s) | P1 |
 | NFR3.2 | Frozen script execution must meet enterprise batch processing requirements: 1M rows end-to-end P95 < 5min | P0 |
 
 ### NFR4: Security
@@ -198,8 +198,8 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 ### NFR7: Availability & Resilience
 | ID | Requirement | Priority |
 |----|------------|----------|
-| NFR7.1 | Design Plane service availability ≥ 99.9% (monthly), planned maintenance windows ≤ 4 hours/month | P1 |
-| NFR7.2 | Runtime Plane critical Workflow execution availability ≥ 99.95% (quarterly) | P0 |
+| NFR7.1 | Exploration Environment service availability ≥ 99.9% (monthly), planned maintenance windows ≤ 4 hours/month | P1 |
+| NFR7.2 | Production Environment critical Workflow execution availability ≥ 99.95% (quarterly) | P0 |
 | NFR7.3 | Disaster Recovery (RPO/RTO see FR41) | P1 |
 
 ### NFR8: Maintainability & Portability
@@ -243,15 +243,15 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 
 | Term | Definition |
 |------|------------|
-| Design Plane | AI-assisted exploration and authoring layer. All artifacts are design drafts with no production side effects. |
-| Freeze Bridge | The independent transition plane that converts AI artifacts into deterministic scripts with mandatory human sign-off — not auto-compilation. |
-| Runtime Plane | Deterministic, zero AI side-effect production execution layer. The Intelligence Plane provides AI read-only analysis (ad-hoc Q&A) without crossing the bridge. |
-| Intelligence Plane | Cross-plane AI read-only analysis layer (ad-hoc NL Q&A, attribution analysis). Core constraint: read-only, never writes; temporary answers do not cross the bridge. |
-| Compute Spec | Unified YAML-based computation definition. 9 Job Types. |
+| Exploration Environment | AI-assisted exploration and authoring environment of the unified Workflow Engine. All artifacts are design drafts with no production side effects. |
+| Freeze Pipeline | Built-in Workflow Engine operation — `freeze(workflow_def)` — that scans `llm_reasoning` Jobs and fuzzy nodes and converts them into deterministic artifacts with mandatory human sign-off. |
+| Production Environment | Deterministic, zero AI side-effect production execution environment. LLM API egress physically blocked at NetworkPolicy level. |
+| Cross-Environment Read-Only Mode | Same Workflow Engine operating with write operations intercepted at Engine level. Queries read-replicas across environments; core constraint: read-only, never writes. |
+| Compute Spec | Unified YAML-based computation definition. 10 Job Types. |
 | Knowledge Base (KB) | 9 knowledge domains. PG-First storage strategy: PostgreSQL + pgvector unified + S3/MinIO. Dedicated engines introduced on-demand. Unified Content Processing Pipeline (ADR-0023) + Diagnostic Playbooks & Code Knowledge domains (ADR-0024). |
 | ADR (Architecture Decision Record) | MADR format. 12 lifecycle states, first-class entity in the system. |
 
-> See [glossary.md](glossary.md) for the complete glossary (101 terms).
+> See [glossary.md](glossary.md) for the complete glossary (102 terms).
 
 ---
 
@@ -265,15 +265,15 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | FR13.3 | Engine-independent design: the same spec can execute on different compute engines | P0 |
 | FR13.4 | The Spec itself forms a complete DAG, naturally traceable for data lineage | P0 |
 | FR13.5 | Supports embedding Python/Polars/SQL code blocks as transform logic | P0 |
-| FR13.6 | Supports 9 Job types: source, transform, output, quality, workflow_ref, data_writer, decision, wait, materialize | P0 |
+| FR13.6 | Supports 10 Job types: source, transform, output, quality, workflow_ref, data_writer, decision, wait, materialize, llm_reasoning | P0 |
 | FR13.7 | Distinguishes Variables (runtime-injected, e.g., date ranges — cannot change DAG topology) from Parameters (config-level, e.g., connection strings) | P0 |
 | FR13.8 | Supports Group-level default policies: concurrency limits, retry policy, timeout, failure strategy | P1 |
 
 ### FR14: Dual Engine Strategy
 | ID | Requirement | Priority |
 |----|------------|----------|
-| FR14.1 | Light Engine (Design Plane): DuckDB + Polars for interactive exploration, data preview, dev/testing | P0 |
-| FR14.2 | Heavy Engine (Runtime Plane): Spark (Post-MVP), Trino/Ray (Phase 7+) for production execution, large-scale data, multi-source federation | P1 |
+| FR14.1 | Light Engine (Exploration Environment): DuckDB + Polars for interactive exploration, data preview, dev/testing | P0 |
+| FR14.2 | Heavy Engine (Production Environment): Spark (Post-MVP), Trino/Ray (Phase 7+) for production execution, large-scale data, multi-source federation | P1 |
 | FR14.3 | The same Compute Spec can specify a target execution engine for seamless switching | P1 |
 
 ### FR15: Integration Framework
@@ -321,7 +321,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 | FR16.2 | Dynamic Masking: decide at query time whether to show original values or masks based on role | P0 |
 | FR16.3 | Row-Level Security: roles can only see data rows matching their permissions | P0 |
 | FR16.4 | Aggregation Restrictions: low-privilege roles see only aggregated results, cannot drill down to detail | P1 |
-| FR16.5 | Runtime Plane Query Rewriter injects permission predicates and masking functions | P0 |
+| FR16.5 | Production Environment Query Rewriter injects permission predicates and masking functions | P0 |
 
 ---
 
@@ -629,7 +629,7 @@ Each functional requirement should include: User Story (As a [role], I want [cap
 
 > **Matrix Notes**: This matrix annotates the target delivery phase for each FR group. P0 sub-items within a group may be delivered as "thin slices" in earlier phases (e.g., FR7.4 delivers basic Adjustment capabilities in P0 Foundation, but the complete Adjustment flow is delivered in P7 Advanced; FR9 core RBAC is delivered in P6 Enterprise, but basic authentication integration already has Auth Gateway in P0 Foundation). See per-FR priority annotations within each group for specific sub-item-to-phase mapping.
 
-| FR Group | Requirement Theme | Phase 0: Foundation | Phase 1: Core Compute | Phase 2: KB | Phase 3: Design Plane | Phase 4: Freeze Bridge | Phase 5: Runtime | Phase 6: Enterprise | Phase 7: Advanced | Phase 8: Polish |
+| FR Group | Requirement Theme | Phase 0: Foundation | Phase 1: Core Compute | Phase 2: KB | Phase 3: Exploration Env | Phase 4: Freeze Pipeline | Phase 5: Production Env | Phase 6: Enterprise | Phase 7: Advanced | Phase 8: Polish |
 |----------|-----------------|---------------|------------------|--------|-----------------|-------------------|-------------|----------------|--------------|------------|
 | FR1 | AI-Assisted Exploration | ✅ | — | — | — | — | — | — | — | — |
 | FR2 | Workflow Freeze & Script | ✅ | — | — | — | — | — | — | — | — |

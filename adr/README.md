@@ -33,6 +33,7 @@
 | 0022 | [BRD Generation Agent Pipeline](./0022-brd-generation-agent-pipeline.md) | Architecture | ✅ Accepted | 2026-07-04 |
 | 0023 | [KB Content Lifecycle Pipeline](./0023-kb-content-lifecycle-pipeline.md) | Architecture | ✅ Accepted | 2026-07-08 |
 | 0024 | [KB Reasoning Support — Playbooks & Code Knowledge](./0024-kb-reasoning-support-playbooks-code.md) | Architecture | ✅ Accepted | 2026-07-08 |
+| 0025 | [Unified Workflow Engine — One Engine, Three Environments](./0025-unified-workflow-engine.md) | Architecture | ✅ Accepted | 2026-07-30 |
 
 ## Status Meanings
 

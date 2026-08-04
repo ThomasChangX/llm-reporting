@@ -1,7 +1,8 @@
 # Spec 执行索引
 
-> **最后更新**：2026-08-03（设计审核 run `20260803-bfac3ef`）
+> **最后更新**：2026-08-04（首批 spec 修复：7 done / 1 in-progress，见下）
 > **活跃 spec 数**：24（覆盖 25 findings；M-020+M-021 同根因合并）| **已归档**：0
+> **进度**：7 done（C-001, C-002, I-019, M-020+M-021, M-022, M-023, M-025）· 1 in-progress（M-024 机械项已修，re-verification 待 I-008）· 16 open
 > **审核报告**：[`audit-20260803-bfac3ef-report.md`](audit-20260803-bfac3ef-report.md)
 > **finding↔spec 追溯索引**：[`audit-20260803-bfac3ef-index.md`](audit-20260803-bfac3ef-index.md)
 

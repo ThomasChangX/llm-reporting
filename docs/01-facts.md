@@ -4,7 +4,7 @@
 >
 > ⚠️ **Note**: There is a timeliness risk between the main body of this document and supplementary sections added later. The main body should be treated as the authoritative source and periodically reviewed; supplementary sections may become outdated as the design iterates. If contradictions arise, the main body takes precedence.
 >
-> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (101 terms) | ADR → [adr/](../adr/) (24 records)
+> **📋 Related Documents**: Requirements → [02-requirement.md](02-requirement.md) | Architecture → [03-architecture.md](03-architecture.md) | Roadmap → [04-timeline.md](04-timeline.md) | Cost → [05-cost.md](05-cost.md) | Glossary → [glossary.md](glossary.md) (102 terms) | ADR → [adr/](../adr/) (25 records)
 
 ---
 
@@ -20,7 +20,7 @@
 - **Assumption**: Continued improvement in LLM capabilities is the high-probability trend, but drift and hallucination issues (unreliable reasoning) still exist today.
 - Invoking an LLM for every task leads to cost explosion.
 - LLM success rates for data inference are limited (structured data inference accuracy ~60-70%, complex business metric inference below 50%, based on industry experience estimates, not rigorous experimental data). Human-provided additional context is required.
-- **Therefore**: LLMs are suitable for the exploration phase, not suitable for direct use in production deterministic tasks. This does not mean AI is completely absent in production — the Intelligence Plane provides AI read-only analysis (ad-hoc Q&A, attribution analysis), with answers returned directly to the user and not written into system state, achieving "zero AI side effects" rather than "zero AI participation."
+- **Therefore**: LLMs are suitable for the exploration phase, not suitable for direct use in production deterministic tasks. This does not mean AI is completely absent in production — Cross-Environment Read-Only Mode provides AI read-only analysis (ad-hoc Q&A, attribution analysis), with answers returned directly to the user and not written into system state, achieving "zero AI side effects" rather than "zero AI participation."
 
 ### Enterprise Environment Constraints
 - Enterprise users have strict **SDLC process** and **entitlement control** requirements.
@@ -35,7 +35,7 @@
 - Once a flow is validated and proven correct → one-click "freeze" into a deterministic script.
 - After freezing, no LLM inference dependency → zero hallucination, low-cost execution.
 - **Freeze is reversible**: Freezing is not a one-way irreversible operation — you can "unfreeze" at any time to return to exploration mode, modify, and re-freeze, supporting iterative evolution.
-- **Freeze Bridge**: The core architectural component connecting the Design Plane and Runtime Plane. Its responsibility is to assist in transforming AI exploration artifacts into deterministic scripts — not auto-compilation. Flow: scan fuzzy nodes → propose deterministic solutions → **mandatory human Sign-off** → validate → test → approve → deploy.
+- **Freeze Pipeline**: The core architectural component connecting Exploration and Production environments. Its responsibility is to assist in transforming AI exploration artifacts into deterministic scripts — not auto-compilation. Flow: scan `llm_reasoning` Jobs and fuzzy nodes → propose deterministic solutions → **mandatory human Sign-off** → validate → test → approve → deploy. (Per ADR-0025: a built-in `freeze()` operation on the unified Workflow Engine, formerly called "Freeze Bridge.")
 
 ### System Observation + Proactive Suggestions
 - The system observes user repeatable operation patterns.
@@ -59,17 +59,17 @@
 ### Decision #1: AI Positioned for Exploration, Deterministic for Production
 - **Status**: Accepted (2026-07-04)
 - **Background**: LLMs are creative but unreliable — multiple runs on the same input can produce different results. Financial-grade production requires determinism and auditability. The project must leverage LLM capabilities without creating hallucination risks.
-- **Decision**: Strictly separate Design Plane (AI-assisted exploration, free-form interaction) and Runtime Plane (deterministic script execution, zero LLM dependency). The Freeze Bridge converts AI-assisted designs into deterministic scripts with mandatory human sign-off — no auto-compilation.
+- **Decision**: Strictly separate exploration and production execution. One unified Workflow Engine runs in Exploration Environment (AI-assisted, LLM APIs reachable) and Production Environment (deterministic, LLM API egress blocked by NetworkPolicy). The Freeze Pipeline converts exploration artifacts into deterministic frozen Specs with mandatory human sign-off — no auto-compilation. Cross-Environment Read-Only Mode provides AI read-only analysis across environments without write capability. (Refined by ADR-0025: the "four independent planes" are now understood as three environments + one cross-environment mode of the same Workflow Engine.)
 - **Alternatives Considered**: End-to-End AI pipeline (Rejected: LLM hallucination in production financial data is unacceptable); Pure traditional approach (Rejected: misses the LLM era entirely)
-- **Consequences**: Dual-plane architecture increases system complexity; Freeze Bridge becomes a critical conversion component; Intelligence Plane provides AI read-only ad-hoc Q&A and attribution without crossing the bridge
-- **References**: → 03-architecture §2, §4, §5, §7, §8
+- **Consequences**: Multi-environment architecture increases system complexity; Freeze Pipeline becomes a critical built-in engine operation; Cross-Environment Read-Only Mode provides AI read-only ad-hoc Q&A and attribution without write capability
+- **References**: → 03-architecture §2, §3, §4, §5, §7, §8
 
-### Decision #2: Separation of Concerns — Design Plane, Freeze Bridge, Runtime Plane, Intelligence Plane
-- **Status**: Accepted (2026-07-04, Refined 2026-07-04)
-- **Background**: Need for clear operational boundaries between exploration and production to prevent AI side effects from entering the deterministic Runtime Plane.
-- **Decision**: Four independent planes with strict separation: Design Plane (AI-assisted authoring, all artifacts are drafts), Freeze Bridge (scans → proposes → requires human sign-off, not automatic), Runtime Plane (deterministic, zero AI side-effect production execution), Intelligence Plane (read-only AI analysis across Design and Runtime Planes, ad-hoc Q&A + attribution, answers return to the user without bridging to Runtime)
-- **Consequences**: Freeze Bridge is an independent transition plane, not a simple pipeline; Intelligence Plane ensures AI has read-only production visibility
-- **References**: → 03-architecture §2
+### Decision #2: Separation of Concerns — One Engine, Three Environments + Cross-Environment Read-Only Mode
+- **Status**: Accepted (2026-07-04, Refined 2026-07-30 by ADR-0025)
+- **Background**: Need for clear operational boundaries between exploration and production to prevent AI side effects from entering deterministic production execution.
+- **Decision**: A single Workflow Engine operates in three environments: Exploration Environment (AI-assisted authoring, all artifacts are drafts, LLM APIs reachable), Freeze Pipeline (built-in `freeze()` operation — scans → proposes → requires human sign-off), Production Environment (deterministic, zero AI side-effect execution, LLM API egress blocked by NetworkPolicy). Cross-Environment Read-Only Mode provides AI read-only analysis across environments (write operations intercepted at Engine level). (Originally described as four independent planes per ADR-0005; refined by ADR-0025.)
+- **Consequences**: Freeze Pipeline is a built-in engine operation, not a separate system; Cross-Environment Read-Only Mode ensures AI has read-only production visibility without write risk
+- **References**: → 03-architecture §2, §3
 
 ### Decision #3: Compute Spec (YAML) as Unified IR
 - **Status**: Accepted (2026-07-04)
@@ -83,16 +83,16 @@
 ### Decision #4: AI Knowledge Agent — read-only, never writes
 - **Status**: Accepted (2026-07-04)
 - **Background**: AI Agents have powerful reasoning capabilities but granting write access to Agents carries risk. In a financial environment, every write must be auditable.
-- **Decision**: AI Knowledge Agent can only read KB, Code Graph, and logs; answers natural language queries; performs attribution analysis — but NEVER directly writes to any system state. All write operations go through human confirmation in the Design Plane. Intelligence Plane output directly returns to the user, temporary answers don't cross the bridge.
-- **Consequences**: AI Knowledge Agent is purely a "consultant" — can answer "why is there a Recon break" but can't modify adjustment rules
+- **Decision**: AI Knowledge Agent can only read KB, Code Graph, and logs; answers natural language queries; performs attribution analysis — but NEVER directly writes to any system state. All write operations go through human confirmation in the Exploration Environment. Cross-Environment Read-Only Mode output directly returns to the user; temporary answers are not persisted. (Per ADR-0025, the AI Knowledge Agent operates in Cross-Environment Read-Only Mode of the unified Workflow Engine.)
+- **Consequences**: AI Knowledge Agent is purely a "consultant" — can answer "why is there a Recon break" but can't modify adjustment rules. Cross-Environment Read-Only Mode output directly returns to the user; temporary answers are not persisted.
 - **References**: → 03-architecture §9.3, §22
 
 ### Decision #5: Python as Logic Script Language
 - **Status**: Accepted (2026-07-04)
 - **Background**: Need to choose a language for transform logic in Compute Spec. It must be LLM-generation-friendly and also production-ready.
-- **Decision**: Python is the logic script language (not Java): dominates the data ecosystem, LLM-generated Python quality is higher, analysts can read and write it. Runtime Plane execution engine can be implemented in Go/Rust for performance and isolation. Hybrid mode: Python (logic) + SQL (queries) + YAML (orchestration definition).
+- **Decision**: Python is the logic script language (not Java): dominates the data ecosystem, LLM-generated Python quality is higher, analysts can read and write it. Production Environment execution engine can be implemented in Go/Rust for performance and isolation. Hybrid mode: Python (logic) + SQL (queries) + YAML (orchestration definition).
 - **Alternatives Considered**: Java (Rejected: data ecosystem not dominant, verbose); SQL only (Rejected: can't express complex transform logic; still use SQL for data queries)
-- **Consequences**: Multi-language hybrid architecture; Compute Engine needs embedded Python runtime; Runtime Plane may need transpile/compilation
+- **Consequences**: Multi-language hybrid architecture; Compute Engine needs embedded Python runtime; Production Environment may need transpile/compilation
 - **References**: → 03-architecture §6, §7.2
 
 ### Decision #6: PG-First Knowledge Base Storage
@@ -105,9 +105,9 @@
 ### Decision #7: Design Order — Architecture First, KB Co-Evolution
 - **Status**: Accepted (2026-07-04)
 - **Background**: Designing a complex system requires clear priorities and dependency relationships to avoid "draw the UI first, patch the architecture later." The timing of building the Knowledge Base has significant impact on design quality.
-- **Decision**: Architectural Blueprint → Core Engine → Thin KB + Basic Design Plane evolving in parallel (KB starts from PG+pgvector, Design Plane user interactions drive organic KB growth) → Full KB. This explicitly rejects UI-first and full-parallel approaches.
+- **Decision**: Architectural Blueprint → Core Engine → Thin KB + Basic Exploration Environment evolving in parallel (KB starts from PG+pgvector, Exploration Environment user interactions drive organic KB growth) → Full KB. This explicitly rejects UI-first and full-parallel approaches.
 - **Alternatives Considered**: UI First → Engine Later (Rejected: castles in the air); Full Parallel (Rejected: strong inter-module dependencies)
-- **Consequences**: Phase 0-3 roadmap follows this order; KB starts thin and grows organically; Design Plane exploration directly feeds KB enrichment
+- **Consequences**: Phase 0-3 roadmap follows this order; KB starts thin and grows organically; Exploration Environment exploration directly feeds KB enrichment
 - **References**: → adr/0003-design-order.md, 04-timeline §Phases 0-3
 
 ## Three Core Concepts
@@ -146,24 +146,24 @@
 
 ### Script Language Selection
 - Python as logic script language (not Java): dominates the data ecosystem, LLM-generated Python quality is higher, analysts can read and write.
-- Runtime Plane execution engine can be implemented in Go/Rust for performance and isolation.
+- Production Environment execution engine can be implemented in Go/Rust for performance and isolation.
 - Hybrid mode: Python (logic) + SQL (queries) + YAML (orchestration definition).
 
 ### Unified Compute Definition: Compute Spec (YAML)
 - Core Insight: Reporting, ETL, and Adjustment can share a single compute definition.
 - Format selection: YAML (not JSON): supports comments, code embedding without escaping, industry-standard direction.
-- Engine-independent design: the same YAML spec → Design Plane uses Light Engine → Runtime Plane uses Heavy Engine.
+- Engine-independent design: the same YAML spec → Exploration Environment uses Light Engine → Production Environment uses Heavy Engine.
 - The system internally uses a standardized data structure; YAML/JSON are just serialization formats.
 
 ### Dual-Engine Compute Strategy
-- **Light Engine (Design Plane)**: DuckDB (zero-config, sub-second startup for sampled data) + Polars (high-performance DataFrame for in-memory transformation).
-- **Heavy Engine (Runtime Plane)**: Spark (Post-MVP for production, large-scale scenarios); Trino (MPP for federated queries across heterogeneous sources) and Ray (distributed Python for ML-heavy transforms) deferred to Phase 7+ evaluation.
+- **Light Engine (Exploration Environment)**: DuckDB (zero-config, sub-second startup for sampled data) + Polars (high-performance DataFrame for in-memory transformation).
+- **Heavy Engine (Production Environment)**: Spark (Post-MVP for production, large-scale scenarios); Trino (MPP for federated queries across heterogeneous sources) and Ray (distributed Python for ML-heavy transforms) deferred to Phase 7+ evaluation.
 - **Core Principle**: Same Compute Spec (using Common Compute Subset), Light for development, Heavy for production. Workflows containing Python transforms must be transpiled before Heavy Engine execution (see Architecture §6.1).
 
 ### Multi-Tenancy & Data Masking
 - Three-tier permission hierarchy (Tenant → Group → Role).
 - Static masking (storage layer) + Dynamic masking (inject masking functions at query time based on role).
-- Runtime Plane's Query Rewriter is responsible for permission predicate injection and data masking.
+- Production Environment's Query Rewriter is responsible for permission predicate injection and data masking.
 
 ### Legacy System Integration
 - Five-level integration framework: File-Based → DB Protocol → API/Service → Message/Stream → Custom Plugin.
@@ -226,7 +226,7 @@ Write conflict resolution: (a) User explicit input is highest priority, overwrit
 
 ### Compute Spec YAML — Complete Job Model
 - Workflow = an ordered set of Job Groups → each Group = an ordered set of Jobs with shared defaults (concurrency, retry policy, SLA, on_failure).
-- 9 Job Types: `source`, `transform`, `output`, `quality`, `workflow_ref`, `data_writer`, `decision`, `wait`, `materialize`.
+- 10 Job Types: `source`, `transform`, `output`, `quality`, `workflow_ref`, `data_writer`, `decision`, `wait`, `materialize`, `llm_reasoning`.
 - Dependencies between Groups specified via `depends_on`; within a Group, Jobs execute sequentially with shared defaults.
 - Variables (runtime-injected, e.g., date ranges — cannot change DAG topology) vs Parameters (config-level, e.g., connection strings).
 
@@ -242,7 +242,7 @@ Write conflict resolution: (a) User explicit input is highest priority, overwrit
 - Each Job executes in an isolated Sandbox: CPU/Mem/Disk/Net resource isolation + FS/Network/seccomp security boundaries.
 - Sandbox Pool with pre-warming; directory structure: /workspace/, /input/, /output/, /secrets/.
 - Network whitelist (allowed hosts/ports only); seccomp profile (restrict syscalls); SaaS mode enforces network isolation per tenant.
-- Design Plane uses lightweight Sandboxes (DuckDB/Polars, second-level startup, sampled data).
+- Exploration Environment uses lightweight Sandboxes (DuckDB/Polars, second-level startup, sampled data).
 - Sandbox lifecycle: Acquire → Inject → Execute → Collect → Verify → Release.
 
 ### Log System (AI-Era Logging)
@@ -283,7 +283,7 @@ Write conflict resolution: (a) User explicit input is highest priority, overwrit
 ### Data Quality Check
 - As a `type: rule` check in the unified framework. 7 DAMA-standard dimensions: Completeness, Accuracy, Consistency, Timeliness, Uniqueness, Validity (+ Temporal Consistency as 7th dimension).
 - 7th dimension: Temporal Consistency — detects ratio jumps across time, cumulative consistency issues (e.g., Line 3 vs. Line 12 accumulated validation).
-- Three severity levels: Error (blocks Freeze Bridge or Runtime Pre-Exec) / Warning (annotates Report, doesn't block) / Info (log only).
+- Three severity levels: Error (blocks Freeze Pipeline or Production Pre-Exec) / Warning (annotates Report, doesn't block) / Info (log only).
 - Output: Annotated Report (row-level anomaly marking + root cause summary + confidence). Does not block report publication.
 - Users can click anomaly annotations → ask AI Agent (root cause analysis) → optionally create BRD → push to Jira/Rally/ServiceNow.
 
@@ -317,7 +317,7 @@ Write conflict resolution: (a) User explicit input is highest priority, overwrit
 
 ### DevOps & CI/CD
 - Pipeline: Develop → Build → Test (Lint + Static Analysis + Unit + Integration) → Review → Staged Rollout (Canary 10% → 50% → 100%) → Monitor → Deprecate.
-- Compute Spec / Workflow Script versioned through Git; Sandbox environments auto-created/destroyed per PR/Branch; Infrastructure as Code manages Runtime Plane resources.
+- Compute Spec / Workflow Script versioned through Git; Sandbox environments auto-created/destroyed per PR/Branch; Infrastructure as Code manages Production Environment resources.
 - Runtime Monitoring: Success Rate, Duration (P50/P95/P99), Data Volume Delta, Data Quality Score, SLA Compliance.
 - Alert Rules: execution failure → immediate alert + auto Incident; data deviation >20% → Warning; latency >2x SLA → Warning.
 
@@ -359,7 +359,7 @@ BRDs and ADRs are not merely documents — they are first-class citizen entities
 
 **External Tool Integration**:
 - Jira/Rally multi-layer mapping: BRD→Epic/Feature, requirement→Story/US, AC→Sub-task/Task.
-- New MCPs: MCP-17 (jira-sync), MCP-18 (confluence-export), MCP-19 (compliance-mapper).
+- BRD/ADR external-tool MCPs: MCP-20 (jira-sync), MCP-21 (confluence-export), MCP-22 (compliance-mapper) — authoritative mapping defined in `docs/03-architecture.md` §23.8.2 + `docs/glossary.md`. (IDs were renumbered from the MCP-17/18/19 draft in ADR-0010 to avoid collision with Core Catalog MCP-17 `external-ticketing` per §22C.)
 - Import capability: Legacy BRDs from Confluence/SharePoint/Word.
 
 **Traceability Relationship Web**:
@@ -384,7 +384,7 @@ The Query Service is the core bridge connecting "what data the user wants to see
 | **Pushdown Optimizer** | Push as much computation to the data source as possible | WHERE/JOIN/AGGREGATION executed at the data source; only necessary result sets transferred to Compute Engine; Pushdown Plan visualization |
 | **Query Cache** | Cache query results to avoid repeated computation | Same SQL + parameters + Schema version → reuse cached result, configurable TTL; Schema change → auto-invalidate related caches → notify affected Workflow Owners |
 
-**Core Principle**: The Query Service generates query plans but does not execute queries — actual execution is delegated to the Compute Engine (Light/Heavy). This ensures the Runtime Plane has zero AI side effects. The Design Plane assists with NL→SQL generation, and once the user confirms, the deterministic query plan is submitted to the Runtime Plane for execution.
+**Core Principle**: The Query Service generates query plans but does not execute queries — actual execution is delegated to the Compute Engine (Light/Heavy). This ensures the Production Environment has zero AI side effects. The Exploration Environment assists with NL→SQL generation, and once the user confirms, the deterministic query plan is submitted to the Production Environment for execution.
 
 ### Large-Scale Data Architecture → FR15c
 
@@ -397,11 +397,11 @@ Architectural strategy for TB-scale data volumes and complex data source scenari
 | **Pre-Aggregation & Materialization** | materialize Job Type | Full Refresh + Incremental Refresh strategies; Query Service auto-detects available materialized views and routes queries |
 | **Cost-Based Optimization** | Table statistics (NDV, Min-Max, row count) | JOIN strategy selection (Broadcast/Shuffle/Pushdown) based on statistics |
 | **Federated Query** | Heterogeneous data source federation | Small dimension tables broadcast → same-source Pushdown → cross-source materialized copies → federated query engine (auto-selection by transfer cost) |
-| **Query Plan Guard** | Pre-execution estimation | Estimated scan >100M rows or >10GB → Warning; estimated execution time >30min → reject Design Plane preview |
+| **Query Plan Guard** | Pre-execution estimation | Estimated scan >100M rows or >10GB → Warning; estimated execution time >30min → reject Exploration Environment preview |
 
 ### materialize Job Type (Materialized Aggregation) → FR13.6
 
-The 9th Job Type for pre-computing frequently-queried aggregation results:
+Pre-computes frequently-queried aggregation results:
 
 ```yaml
 job_type: materialize
@@ -419,7 +419,7 @@ materialize:
 - **Full Refresh** (small datasets): recompute all, suitable when base data changes and incremental is unreliable.
 - **Incremental Refresh** (TB-scale): only process new/modified partitions, suitable for large-scale append-only data.
 - Query Service auto-detects available materialized views and routes queries to materialized views instead of raw tables.
-- Materialized views are Compute Specs — governed by the same Freeze Bridge lifecycle.
+- Materialized views are Compute Specs — governed by the same Freeze Pipeline lifecycle.
 
 ### Data Classification Tier (T0-T3)
 
@@ -446,16 +446,18 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 
 ---
 
-## 2026-07-04 Supplement: Intelligence Plane / Freeze Bridge Evolution / Dual-Model Strategy
+## 2026-07-04 Supplement: Cross-Environment Read-Only Mode / Freeze Pipeline Evolution / Dual-Model Strategy
 
-### Intelligence Plane
-- Cross-plane AI read-only analysis layer, independent from Design Plane and Runtime Plane.
-- Does not execute LLM reasoning — queries pre-generated structured analysis results. Core capabilities: AI Knowledge Agent (NL Q&A over Code Graph + KB + Log), Log Analysis (anomaly detection, cost tracking), Observability (SLO dashboards), Usage Pattern Mining (behavior pattern → Design Plane suggestions).
-- Core constraint: read-only, never writes — answers directly returned to the user without persistence; if the user wants to act on insights, they must explicitly go through the Design Plane.
+> **Refined by ADR-0025** (2026-07-30): This section was originally titled "Intelligence Plane / Freeze Bridge Evolution." The concepts are now reframed as Cross-Environment Read-Only Mode and Freeze Pipeline within the unified Workflow Engine architecture.
 
-### Freeze Bridge Evolution Notes
+### Cross-Environment Read-Only Mode
+- Cross-environment AI read-only analysis mode (per ADR-0025: same Workflow Engine, write operations intercepted at Engine level). Queries read-replicas of both Exploration and Production environments.
+- Does not execute LLM reasoning — queries pre-generated structured analysis results. Core capabilities: AI Knowledge Agent (NL Q&A over Code Graph + KB + Log), Log Analysis (anomaly detection, cost tracking), Observability (SLO dashboards), Usage Pattern Mining (behavior pattern → Exploration Environment suggestions).
+- Core constraint: read-only, never writes — answers directly returned to the user without persistence; if the user wants to act on insights, they must explicitly go through the Exploration Environment.
+
+### Freeze Pipeline Evolution Notes
 - Canary deployment will be fully enabled Post-MVP alongside the Heavy Engine.
-- MVP uses simplified flow: Design Plane output → manual Sign-off → Light Engine execution.
+- MVP uses simplified flow: Exploration Environment output → manual Sign-off → Light Engine execution.
 
 ### Agent Dual-Model Strategy
 - **China Region**: Default DeepSeek V4 Pro (cost-priority, ~$0.50/M input + $2.00/M output).
@@ -465,7 +467,9 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 
 ---
 
-## 2026-07-04 Supplemental Decisions (ADR #7-#21)
+## 2026-07-04 Supplemental Decisions (Decision #8–#25)
+
+> **Note**: `Decision #N` below is a **narrative sequence number** (not an ADR number). The mapping from Decision #N to ADR-NNNN is given in each entry's Status/Background field. This section records Decision #8 through Decision #25.
 
 ### Decision #8: Large-Scale Data Architecture Strategy
 - **Status**: Accepted (2026-07-04)
@@ -487,10 +491,10 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 - **Decision**: BRD 16 lifecycle states, ADR 12 lifecycle states; AI-assisted generation + 6-round LLM deep verification; multi-layer mapping with Jira/Rally/ServiceNow (via MCP-17 external-ticketing unified adapter); BRD↔ADR↔Workflow triangle traceability; 3 new Skills (S15 BRDGenerator internally refined by ADR-0022 into 6 Agents, S16 ADRGenerator, S17 TraceabilityAnalyzer).
 - **References**: → FR23, → 03-architecture §23
 
-### Decision #11: materialize as 9th Job Type
+### Decision #11: materialize Job Type
 - **Status**: Accepted (2026-07-04)
 - **Background**: Repeated aggregation queries on TB-scale data waste compute resources. Pre-aggregation mechanism needed to materialize frequently-queried results.
-- **Decision**: New `materialize` Job Type. Supports Full Refresh (small data/Schema changes) and Incremental Refresh (TB-scale). Query Service auto-detects available materialized views and routes queries. Materialized views are Compute Specs included in Freeze Bridge validation.
+- **Decision**: New `materialize` Job Type. Supports Full Refresh (small data/Schema changes) and Incremental Refresh (TB-scale). Query Service auto-detects available materialized views and routes queries. Materialized views are Compute Specs included in Freeze Pipeline validation.
 - **Alternatives Considered**: Database materialized views (Rejected: coupled to specific database, not portable across engines); Query Service cache only (Rejected: cache is passively populated, less reliable than active materialization).
 - **References**: → FR13.6, → FR15c.4, → 03-architecture §6
 
@@ -510,7 +514,7 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 ### Decision #14: Agent Triage & Layered Remediation Gateway
 - **Status**: Accepted (2026-07-04)
 - **Background**: There's a gap between Data Health Check Framework output and user action — high alert volume (tens to hundreds daily), inconsistent Agent intervention (only Recon has auto-analysis), uniform approval granularity (all operations follow the same approval chain). Industry best practice (Monte Carlo 2025-2026) adds an Agent Triage Layer above the detection layer.
-- **Decision**: (a) Agent Triage Layer (Intelligence Plane): auto-classification, false positive prediction, dedup-merge, proactive Health Summary push. severity=error auto-triggers S07 parallel diagnosis; severity=warning proactively pushes summary with predicted confidence. (b) L0-L3 four-tier Remediation Gateway: zero-risk auto-execute (L0) → low-risk one-click confirm (L1) → medium-risk single approval (L2) → high-risk dual approval + Impact Report (L3). (c) S08 DataQualityAdvisor (Closed-Loop Learning): auto-suggests rule optimization based on user signals. (d) Phase 7+ evolution: Hierarchical Multi-Agent (Central Reasoner + 5 Sub-Agents).
+- **Decision**: (a) Agent Triage Layer (Cross-Environment Read-Only Mode): auto-classification, false positive prediction, dedup-merge, proactive Health Summary push. severity=error auto-triggers S07 parallel diagnosis; severity=warning proactively pushes summary with predicted confidence. (b) L0-L3 four-tier Remediation Gateway: zero-risk auto-execute (L0) → low-risk one-click confirm (L1) → medium-risk single approval (L2) → high-risk dual approval + Impact Report (L3). (c) S08 DataQualityAdvisor (Closed-Loop Learning): auto-suggests rule optimization based on user signals. (d) Phase 7+ evolution: Hierarchical Multi-Agent (Central Reasoner + 5 Sub-Agents).
 - **Core Constraint**: All Agent Triage operations are read-only. Any config or data modification must pass through the Remediation Gateway with human confirmation.
 - **References**: → adr/0015, → 03-architecture §9, §12.2, §22A.5, §22B S08
 
@@ -572,9 +576,16 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 ### Decision #24: Query Service Independent Component (ADR-0007)
 - **Status**: Accepted (2026-07-04)
 - **Background**: Natural language queries over databases require NL→SQL conversion + query optimization + caching. Existing architecture lacked a dedicated component.
-- **Decision**: Four-component Query Service — Metadata Manager, Query Generator, Pushdown Optimizer, Query Cache. Generation and execution are separated — Design Plane assists with NL→SQL, Runtime Plane executes deterministic query plans.
+- **Decision**: Four-component Query Service — Metadata Manager, Query Generator, Pushdown Optimizer, Query Cache. Generation and execution are separated — Exploration Environment assists with NL→SQL, Production Environment executes deterministic query plans.
 - **Alternatives Considered**: All-in-one database solution (Rejected: vendor lock-in); LLM handles all query optimization (Rejected: cost, latency, correctness — deterministic optimization superior).
 - **References**: → FR15b, → 03-architecture §7
+
+### Decision #25: Unified Workflow Engine — One Engine, Three Environments
+- **Status**: Proposed (2026-07-30)
+- **Background**: ADR-0005 established four independent planes, but analysis reveals all planes share a common Workflow Engine executing the same Compute Spec — deployed in the same K8s cluster, same VPC, using shared infrastructure (Git VCS, Audit Trail, OpenTelemetry, KB). The "four independent systems" narrative obscures the underlying unity and creates three problems: (a) the boundary between Intelligence Plane and Design Plane is unclear — both invoke LLMs, both are read-capable; (b) LLM reasoning is treated as a plane concern rather than a capability concern, leaving no model for production LLM-driven attribution analysis; (c) the "zero AI side effects" guarantee relies on Sandbox-level seccomp alone without plane-level NetworkPolicy.
+- **Decision**: Reframe the architecture as one Workflow Engine running in three environments (Exploration / Freeze / Production) + one cross-environment read-only mode. Introduce `llm_reasoning` as the 10th Job Type with a capability taxonomy (read_analyze / suggest_plan / generate_draft / modify_spec / kb_write). Workflow Definition becomes environment-agnostic — no `mode` field; each environment's configuration determines which capabilities are enabled. Freeze Bridge is demoted from "independent plane" to a built-in `freeze()` pipeline operation. Plane-level NetworkPolicy is added to complement Sandbox seccomp. ADR-0005 and ADR-0006 are refined but not superseded.
+- **Consequences**: Architectural narrative now matches deployment reality. Finer-grained AI control (Production can enable read-only LLM analysis while blocking Spec generation). Reduced code duplication (one engine, not four). Documentation refactoring needed across §2, §3, §4, §6 of architecture doc. ADR-0005/0006 frontmatter updated with `refined_by`.
+- **References**: → adr/0025, → adr/0005, → adr/0006, → 03-architecture §2, §3, §4, §6, §7, §11, §17
 
 ---
 
@@ -587,9 +598,10 @@ The default behavior for `depends_on` is `all_success`. Supports 5 trigger rule 
 | 1.2 | 2026-07-04 | Core philosophy refinement + four-layer model + ADR #5 rewrite + ADR #12-#16: Data Health Check Framework, Adjustment Form Builder, KB PG-First strategy, Agent Triage + L0-L3 Remediation Gateway + S08 Closed-Loop Learning, Dual-Mode Agent Orchestration + Verified Path Catalog |
 | 1.3 | 2026-07-04 | ADR #17-#20: Agent Evaluation Framework (six-dimension trajectory scoring + evaluation flywheel), Agent Memory Architecture (four-layer memory model), Agent Cost Governance (hierarchical token budgeting + tiered enforcement + four-stage model deployment funnel), VP Promotion & Multi-Agent Concurrency (risk-graded promotion + three-layer concurrency control + priority preemption). Architecture doc added §22H-§22L |
 | 1.4 | 2026-07-04 | ADR #21 + ADR-0022: BRD Generation Agent Pipeline Redesign — S15 refined from monolithic to 6-Agent serial pipeline, Inline AssumptionCheck, Experience Typology Tree, Suspect Flag, Pre-Sync Gate, Jira unidirectional sync. Architecture doc §23 major update (new §23.5.1-§23.5.8 + §23.11-§23.12). Glossary added 10 BRD generation terms |
-| 1.5 | 2026-07-08 | ADR #22 + ADR-0023: KB Content Lifecycle Pipeline — unified 5-stage Content Processing Pipeline (Contextual Retrieval), Linkage Weaving Layer (lazy edges vs full GraphRAG), Quality Flywheel (dedup/conflict/freshness/RAGAS). ADR #23 + ADR-0024: KB Reasoning Support — 8th domain Diagnostic Playbooks (soft skeleton for Exploration-Mode diagnostics), 9th domain Code Knowledge (three-layer code index). New Skill S18 PlaybookRouter, new MCP-23 code-knowledge-search. KB grows from 7 to 9 domains. Architecture doc new §10.2-§10.4. Bug-fix: §10 domain table was missing 7th domain (Report/Metric Catalog) — now consistent with rest of project. Glossary added 7 terms (102→109). New FR43-FR46 |
+| 1.5 | 2026-07-08 | *(Folded into v1.6 — no standalone release.)* ADR-0023/0024 added (KB content lifecycle pipeline; KB reasoning support — diagnostic playbooks + code knowledge domain, MCP-23 code-knowledge-search, S18). These changes were batched with the v1.6 ADR-0025 reframing below rather than released separately. |
+| 1.6 | 2026-07-30 | ADR-0025 accepted: Reframed architecture as "one Workflow Engine, three environments + cross-environment read-only mode" (replacing "four independent planes" narrative). Introduced `llm_reasoning` as 10th Job Type. Freeze Bridge repositioned to Freeze Pipeline (built-in engine operation). Added plane-level NetworkPolicy for Production Environment. Updated all documentation for terminology consistency. |
 
 ---
 
-*Last Updated: 2026-07-04 | Version: 1.4 | Next Review: 2026-07-17*
+*Last Updated: 2026-07-30 | Version: 1.6 | Next Review: 2026-08-13*
 *Review Process: The project sponsor reviews this document to verify it accurately reflects all confirmed design decisions; after review, update the review date and increment the version number*

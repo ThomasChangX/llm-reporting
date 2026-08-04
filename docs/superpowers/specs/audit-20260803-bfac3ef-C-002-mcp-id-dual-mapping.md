@@ -5,7 +5,7 @@
 - **Severity**：Critical
 - **Source Dimensions**：A8, A4
 - **Created From Audit**：20260803-bfac3ef（HEAD bfac3efd8515f983338a9f39d658e26f792e936e）
-- **Status**：open
+- **Status**：done（2026-08-04。`01-facts.md:362` 叙事改为 MCP-20/21/22 + 重编号说明；`adr/0010:60` 加非内容 HTML 注释指向 §23.8.2/glossary（决策内容不动，ADR-0010 未被 supersede——它承载的"BRD/ADR 一等公民"决策仍活跃）。AC 中"§22C MCP-17 非 jira-sync"已核实：MCP-17 = `external-ticketing`）
 
 ## 证据
 

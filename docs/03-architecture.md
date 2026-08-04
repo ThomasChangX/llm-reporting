@@ -21,6 +21,8 @@
 
 ## 2. Panoramic Architecture
 
+> **Note**: Per ADR-0025, the architecture is reframed as **one Workflow Engine running in three environments + one cross-environment read-only mode**, not four independent planes. The same Compute Spec executes in any environment; environment configuration determines which capabilities are enabled.
+
 ```
                             ┌──────────────────────────────────────────┐
                             │            Auth Gateway                   │
@@ -33,38 +35,55 @@
                     └────────────────────┬────────────────────┘
                                          │
          ┌───────────────────────────────┼───────────────────────────────┐
-         │                               │                               │
-         ▼                               ▼                               ▼
-┌─────────────────────┐    ┌─────────────────────────┐    ┌─────────────────────┐
-│   DESIGN PLANE      │    │      FREEZE BRIDGE      │    │   RUNTIME PLANE      │
-│   (AI-Assisted)     │    │   (Human Sign-off)      │    │   (Zero AI Side       │
-│   Mutability: High   │    │   Mutability: Zero      │    │    Effects)            │
-├─────────────────────┤    ├─────────────────────────┤    ├─────────────────────┤
-│ • Conversation UI   │    │ • Spec Refinement     │    │ • Workflow Executor │
-│ • Visual Designer   │    │ • Validation Engine     │    │ • Data Connectors   │
-│ • Workbench         │    │ • Test Runner (Sandbox) │    │ • Output Renderer   │
-│ • AI Copilot Engine │    │ • Release Manager       │    │ • Scheduler         │
-│                     │    │ • CI/CD Pipeline        │    │ • Incident Manager  │
-│                     │    │ • Pre-Change Doc Gen    │    │ • Query Rewriter    │
-└─────────┬───────────┘    └───────────┬─────────────┘    └──────────┬──────────┘
-          │                            │                              │
-          │     ┌──────────────────────┴──────────────────────┐       │
-          │     │          INTELLIGENCE PLANE                  │       │
-          │     │   (AI Read-Only, Temporary Answers Do Not Cross the Bridge) │       │
-          │     ├──────────────────────────────────────────────┤       │
-          │     │ • AI Knowledge Agent (NL→Answers, Attribution Analysis)     │       │
-          │     │ • Pre/Post-Change Impact Report              │       │
-          │     │ • Observability & Log Analysis               │       │
-          │     │ • Read-Only Queries, Does Not Write to Any Plane State        │       │
-          │     └──────────────────────┬──────────────────────┘       │
-          │                            │                              │
-          │    ┌───────────────────────┴───────────────────────┐      │
-          └───►│           KNOWLEDGE BASE (Cross-Plane)         │◄─────┘
+         │                     WORKFLOW ENGINE                            │
+         │                                                                │
+         │  ┌───────────────────────┐         ┌───────────────────────┐  │
+         │  │ EXPLORATION ENVIRONMENT│  freeze() │ PRODUCTION ENVIRONMENT │  │
+         │  │ (LLM APIs Reachable)  │─────────▶│ (LLM API Egress        │  │
+         │  │ Mutability: High       │  pipeline │  Blocked by NetPolicy) │  │
+         │  │                       │◀─────────│ Mutability: Zero        │  │
+         │  ├───────────────────────┤ rollback ├───────────────────────┤  │
+         │  │ • Conversation UI     │         │ • Workflow Executor     │  │
+         │  │ • Visual Designer     │         │ • Data Connectors       │  │
+         │  │ • Workbench           │         │ • Output Renderer       │  │
+         │  │ • AI Copilot Engine   │         │ • Scheduler             │  │
+         │  │ • Light Engine        │         │ • Incident Manager      │  │
+         │  │   (DuckDB/Polars)     │         │ • Query Rewriter        │  │
+         │  │                       │         │ • Heavy Engine (Spark)  │  │
+         │  └───────────┬───────────┘         └───────────┬───────────┘  │
+         │              │                                 │              │
+         │              │  ┌───────────────────────────┐  │              │
+         │              │  │   FREEZE PIPELINE          │  │              │
+         │              │  │   (built-in engine op)     │  │              │
+         │              │  ├───────────────────────────┤  │              │
+         │              │  │ • Spec Refinement Asst    │  │              │
+         │              │  │ • Validation Engine       │  │              │
+         │              │  │ • Test Runner (Sandbox)   │  │              │
+         │              │  │ • Release Manager         │  │              │
+         │              │  │ • CI/CD Pipeline          │  │              │
+         │              │  │ • Pre-Change Doc Gen      │  │              │
+         │              │  └───────────────────────────┘  │              │
+         │              │                                 │              │
+         │  ┌───────────┴─────────────────────────────────┴───────────┐  │
+         │  │        CROSS-ENVIRONMENT READ-ONLY MODE                  │  │
+         │  │  (Same Engine, Write Operations Intercepted at Engine Level) │
+         │  ├──────────────────────────────────────────────────────────┤  │
+         │  │ • AI Knowledge Agent (NL→Answers, Attribution Analysis) │  │
+         │  │ • Pre/Post-Change Impact Report                         │  │
+         │  │ • Observability & Log Analysis                          │  │
+         │  │ • Queries Read-Replicas of Both Environments             │  │
+         │  └──────────────────────────┬──────────────────────────────┘  │
+         │                             │                                 │
+         └─────────────────────────────┼─────────────────────────────────┘
+                                       │
+               ┌───────────────────────┴───────────────────────┐
+               │      KNOWLEDGE BASE (Cross-Environment)        │
                ├───────────────────────────────────────────────┤
                │  Business Glossary │ Data Catalog             │
                │  Mapping Registry  │ Workflow Templates       │
                │  Adjustment History│ Behavior Patterns        │
-               │  Email Records                                │
+               │  Report/Metric Catalog │ Diagnostic Playbooks│
+               │  Code Knowledge                               │
                │  ──────────────────────────────────────────── │
                │  PostgreSQL + pgvector (Vector/Graph/Relational)   │
                │  + S3/MinIO (Object Store)                     │
@@ -99,20 +118,20 @@ The Code Graph serves as the system's structural knowledge graph — a unified, 
 
 ---
 
-## 3. Four-Layer Model and Design Plane
+## 3. Unified Workflow Engine — Environments & Design
 
-The system is divided into four layers by **Mutability**. Core principle: **AI may participate in read-only analysis but must not produce side effects — Runtime Plane has zero AI side effects; Intelligence Plane AI is read-only and does not write; answers do not cross the bridge.**
+The system is built on a **single Workflow Engine** operating in distinct environments. Core principle: **LLM capability is a property of a Job (`type: llm_reasoning`), not a property of a "plane."** Capability boundaries are enforced at two levels — the Engine rejects unauthorized capability invocations at submission time, and NetworkPolicy blocks LLM API egress at the topology level. The same Workflow Definition executes in any environment; only the environment's configuration determines which capabilities are active.
 
-| Layer | AI Present? | Artifacts | Mutability |
-|---|---|---|---|
-| **Design Plane** | Heavy AI | Persistent Artifacts (Compute Spec, BRD, ADR) | High — exploration, iteration |
-| **Freeze Bridge** | AI-assisted validation | Signed deterministic Spec | Zero — freeze point |
-| **Runtime Plane** | **Zero AI Side Effects** | Scheduled execution, materialized refresh, Pipeline output | Zero — deterministically execute Spec |
-| **Intelligence Plane** | **Read-only AI** | Temporary answers (NL explanations, attribution analysis) | High — but **does not cross the bridge**, does not write any system state |
+| Environment | LLM Capabilities | Network Isolation | Data | Mutability |
+|---|---|---|---|---|
+| **Exploration Environment** | All `llm_reasoning` capabilities enabled (`read_analyze`, `suggest_plan`, `generate_draft`, `modify_spec`, `kb_write`) | LLM API reachable | Sampled / synthetic data | High — exploration, iteration |
+| **Freeze Pipeline** | `llm_reasoning` Jobs scanned and determinized; capabilities beyond `read_analyze`/`suggest_plan` require human resolution | N/A (engine operation, not a deployment environment) | Production-sandbox dry-run data | Zero — freeze point |
+| **Production Environment** | `read_analyze`, `suggest_plan` configurable; `generate_draft`, `modify_spec`, `kb_write` rejected at Engine level | LLM API egress blocked by NetworkPolicy (defense-in-depth with Sandbox seccomp) | Full production data | Zero — deterministically execute frozen Spec |
+| **Cross-Environment Read-Only Mode** | `read_analyze` only | Queries read-replicas of both environments; write operations intercepted at Engine level | Read-replicas | High — but write operations intercepted and rejected |
 
-### 3.1 Design Plane in Detail
+### 3.1 Exploration Environment in Detail
 
-Users explore, design, and test within the Design Plane; all artifacts are "design drafts" and produce no production side effects.
+Users explore, design, and test within the Exploration Environment; all artifacts are "design drafts" and produce no production side effects.
 
 | Component | Responsibility |
 | -------------------------- | ------------------------------------------------------------------------------------------- |
@@ -197,7 +216,7 @@ The Workbench is the primary authoring surface — a Version Control System (VCS
 | **Conflict Resolution** | Concurrent edits to the same artifact are detected via Git merge conflicts. The Workbench provides a side-by-side merge editor with KB context. |
 | **History**             | Full `git log` is exposed as a timeline view: who changed what, when, and why (linked to BRD/ADR/Incident).                                     |
 
-### 3.5 Design Plane — Detailed Component Architecture
+### 3.5 Exploration Environment — Detailed Component Architecture
 
 #### Conversation Interface
 ```
@@ -237,14 +256,14 @@ Core Principles:
 
 ---
 
-## 4. Freeze Bridge
+## 4. Freeze Pipeline
 
-Design Artifact → Validation → Testing → Approval → Production. This is the critical process of transforming AI artifacts into deterministic engineering artifacts.
+The Freeze Pipeline is a built-in operation of the Workflow Engine — `freeze(workflow_def)` — not an independent plane. It scans all `llm_reasoning` Jobs (capabilities beyond `read_analyze`/`suggest_plan`) and `fuzzy_nodes`, presents each for human resolution, validates the result in a production-sandbox dry-run, and marks the Workflow Definition as frozen.
 
 ```
 Design Artifact (YAML)
     │
-    ├── Spec Refinement Assistant: Scan fuzzy_nodes → flag fuzzy nodes → propose deterministic solutions → mandatory human sign-off
+    ├── Spec Refinement Assistant: Scan `llm_reasoning` Jobs (capabilities beyond `read_analyze`/`suggest_plan`) and `fuzzy_nodes` → flag → propose deterministic solutions → mandatory human sign-off
     │   (Not auto-replacement; assists decision-making; all resolutions are recorded)
     ├── Validation Engine: Schema Validation + DQ Gate + Logical Integrity Check
     ├── Test Runner (Sandbox): Execute on sampled data → Snapshot comparison → Regression Test
@@ -260,13 +279,26 @@ The Spec Refinement Assistant replaces the traditional "Script Compiler" concept
 
 | Step           | Action                                                                                                                                                                                                           | Human Involvement                                                  |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| **1. Scan**    | Parse Design Artifact; identify all `fuzzy_nodes` (markers: AMBIGUOUS_FILTER, UNRESOLVED_REFERENCE, UNCERTAIN_FORMULA, MISSING_THRESHOLD, etc.)                                                                  | None                                                               |
+| **1. Scan**    | Parse Design Artifact; identify all `fuzzy_nodes` (markers: AMBIGUOUS_FILTER, UNRESOLVED_REFERENCE, UNCERTAIN_FORMULA, MISSING_THRESHOLD, etc.) and all `llm_reasoning` Jobs with capabilities beyond `read_analyze` or `suggest_plan` | None                                                               |
 | **2. Propose** | For each fuzzy node, generate 1–3 determinization proposals with trade-off explanations (performance, correctness, edge-case behavior). Each proposal includes a confidence score and affected downstream nodes. | None                                                               |
 | **3. Present** | Render proposals in the Workbench with diff preview, impact visualization, and KB evidence links. Fuzzy nodes are grouped by risk level.                                                                         | None                                                               |
 | **4. Decide**  | User reviews each proposal and either: (a) accepts one, (b) edits and accepts, (c) provides a custom resolution, or (d) escalates to a Data Owner.                                                               | **Mandatory** — all fuzzy nodes must be resolved before proceeding |
 | **5. Record**  | Every resolution is recorded with: who, when, which proposal, any edits, and the final deterministic Spec fragment. This record is immutable and linked to the Audit Trail.                                      | Sign-off captured automatically                                    |
 
-**Key Principle**: The Assistant flags and proposes; the human decides. There is no "auto-compile" path from AI artifact to production Spec.
+**Key Principle**: The Assistant flags and proposes; the human decides. There is no "auto-compile" path from exploration artifact to production Spec.
+
+### 4.1b `llm_reasoning` Job Resolution During Freeze
+
+In addition to `fuzzy_nodes`, the Freeze Pipeline identifies all `llm_reasoning` Jobs whose `capability` is `generate_draft`, `modify_spec`, or `kb_write`. For each:
+
+| Step | Action | Human Involvement |
+|------|--------|-------------------|
+| **1. Flag** | Identify `llm_reasoning` Jobs with capabilities beyond `read_analyze`/`suggest_plan` | None |
+| **2. Propose** | For each flagged Job, generate 1-3 deterministic replacement options (Python/SQL script, KB lookup, manual input placeholder) with trade-off explanations | None |
+| **3. Decide** | User reviews and: (a) accepts a deterministic replacement, (b) edits and accepts, (c) provides custom logic, or (d) explicitly justifies retaining the `llm_reasoning` call with a documented rationale | **Mandatory** |
+| **4. Record** | Every resolution is recorded immutably — who, when, which option, and the final artifact | Sign-off captured automatically |
+
+This ensures that when a Workflow enters Production Environment, every step is either deterministic or has an explicitly documented and approved LLM dependency.
 
 ### 4.2 Canary Gating & Auto-Rollback
 
@@ -369,9 +401,9 @@ For each Fuzzy Node type, provide 1-3 deterministic options for human selection:
 
 ---
 
-## 5. Runtime Plane
+## 5. Production Environment
 
-Deterministic, high-performance, fully auditable production execution.
+Deterministic, high-performance, fully auditable production execution. This is the Production Environment of the unified Workflow Engine — LLM API egress is physically blocked at NetworkPolicy level, and `llm_reasoning` capabilities beyond `read_analyze`/`suggest_plan` are rejected at Engine submission time.
 
 | Component | Responsibility |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -580,6 +612,8 @@ Ensures that computation completes at the data source side whenever possible, re
 ```yaml
 pushdown_policy:
   max_rows_transferred: 10_000_000    # Max rows transferred per query (exceeded → paginate/sample/reject)
+  max_bytes_transferred: 10GB         # Byte-budget guardrail (caps wide-row scans that would pass the row limit; see §6.3 federated-query ≤10GB threshold). Both limits enforced — whichever is hit first triggers fallback.
+  assumed_avg_row_width: 1KB          # Reference width for rows↔bytes reconciliation (10M rows × 1KB ≈ 10GB; wide rows exceed bytes-first, narrow rows exceed rows-first)
   max_query_timeout_source: 300s     # Max execution time on data source side
   prefer_source_agg: true             # Prefer aggregation at data source side
   cross_source_join_strategy: auto    # auto | broadcast_small | compute_engine
@@ -917,9 +951,9 @@ Workflow
   ├── Parameters (runtime inputs)
   ├── Formats (output format templates)
   └── Job Groups (logical grouping)
-       └── Jobs (smallest execution unit)
-            ├── type: source | transform | output | quality | workflow_ref | data_writer | decision | wait | materialize
-            └── depends_on: [job_id, ...]  ← sole ordering declaration
+  └── Jobs (smallest execution unit)
+       ├── type: source | transform | output | quality | workflow_ref | data_writer | decision | wait | materialize | llm_reasoning
+       └── depends_on: [job_id, ...]  ← sole ordering declaration
 ```
 
 ### Execution Rules
@@ -941,6 +975,7 @@ Workflow
 | `decision`     | Conditional branching (conditions → branches). **Must declare `default` branch**; the default branch is taken when no condition matches. `default` cannot be omitted.                                                                                                       |
 | `wait`         | Wait for external event (signal/webhook/time). **Must declare `timeout`** (max 72h); auto-transitions to `TIMED_OUT` status if exceeded, triggering an Incident.                                                                                                            |
 | `materialize`  | Materialized aggregation (incremental/full refresh). Pre-computes and persists frequently-queried aggregation results to target tables for direct use by subsequent queries. Supports incremental watermark refresh + retention policy.                                     |
+| `llm_reasoning` | Invoke LLM capabilities through registered MCP Servers and Tools (not direct provider API calls). Governed by the capability taxonomy: `read_analyze` (read-only analysis, attribution, anomaly explanation, NL summarization), `suggest_plan` (recommend next actions), `generate_draft` (generate Workflow Definition fragments from descriptions), `modify_spec` (propose modifications to existing Definitions), `kb_write` (extract knowledge and write to KB). Capabilities `generate_draft`, `modify_spec`, and `kb_write` are rejected at Engine level in Production Environment. Capabilities `read_analyze` and `suggest_plan` are configurable. All invocations preserve provider agnosticism via MCP. |
 
 ### 6.1 Dependency Trigger Rules
 
@@ -976,6 +1011,7 @@ Engine independence is not absolute. The system defines a **Common Compute Subse
 | `decision`           | ✅ Full                     | ✅ Full                  | Unified conditional evaluation engine                                                                                                                                                                |
 | `wait`               | ✅ Full                     | ✅ Full                  | Unified event-waiting logic                                                                                                                                                                          |
 | **materialize**      | ✅ Full (DuckDB)            | ✅ Full (Spark)          | Unified incremental refresh + full refresh interface; DuckDB handles <100GB materialization, Spark handles TB-scale materialization                                                                   |
+| **llm_reasoning**     | — (routes through MCP)      | — (routes through MCP)   | `llm_reasoning` Jobs invoke LLMs via MCP infrastructure (§22); they are orthogonal to the Light/Heavy Engine distinction. Capability enforcement is at the Engine submission level and NetworkPolicy level, not the compute layer. |
 | **Python transform** | ✅ DuckDB/Polars Python UDF | ⚠️ **Restricted**        | Python code blocks are only directly executed in Light Engine. Migration to Heavy Engine requires transpilation to Java/Scala UDF or SQL expressions. Non-transpiled Python transforms will error on Heavy Engine and fall back to Light Engine. |
 | **SQL transform**    | ✅ Full                     | ✅ Full                  | ANSI SQL:2003 compatible subset; engine-specific dialects translated via Dialect Adapter                                                                                                          |
 | **table_format**     | ✅ Iceberg/Delta/Parquet    | ✅ Iceberg/Delta/Parquet | Modern table formats (Iceberg/Delta Lake/Hudi) uniformly supported via Data Connector Adapter table format plugins                                                                                   |
@@ -1107,25 +1143,23 @@ Auto-generated after merge, including:
 - Change Log + Related Resources (BRD/ADR/KB/Incident)
 - Cost & Performance Profile
 
-### 9.3 AI Knowledge Agent (The Omniscient) — Intelligence Plane Core
+### 9.3 AI Knowledge Agent (The Omniscient) — Cross-Environment Read-Only Mode
 
-> **Key Positioning Statement**: The AI Knowledge Agent belongs to the **Intelligence Plane** — a cross-plane read-only analysis layer. It queries Design Plane artifacts (BRD/ADR/Spec), Runtime Plane execution logs (read-only replicas), and the KB, but **never writes to any Plane's state**.
->
-> This upholds the core principle of **"Zero AI Side Effects at Runtime"**:
-> - **Intelligence Plane AI output is a "disposable consumable"**, not a "persistent asset" — answers are returned directly to the user, not written to system state
-> - **User wants to solidify analysis results** → go through Design Plane → Freeze Bridge → Runtime Plane; analysis logic is frozen into a deterministic Compute Spec
+> **Key Positioning Statement**: The AI Knowledge Agent operates in **Cross-Environment Read-Only Mode** of the unified Workflow Engine. It queries Exploration artifacts (BRD/ADR/Spec), Production execution logs (read-only replicas), and the KB, but write operations are intercepted and rejected at the Engine level. This upholds the core principle of **"Zero AI Side Effects at Production"**:
+> - **Cross-environment mode output is a "disposable consumable"**, not a "persistent asset" — answers are returned directly to the user, not written to system state
+> - **User wants to solidify analysis results** → go through Exploration Environment → Freeze Pipeline → Production Environment; analysis logic is frozen into a deterministic Compute Spec
 > - **Worst case**: AI gives a wrong answer. It will not pollute data, will not affect Pipelines, and will not be audited as a "production decision"
 >
-> **Typical ad-hoc scenario**: User asks "Why did East China gross margin drop 2 points last month?" → Intelligence Plane queries KB + Runtime logs (read-only replica) → generates attribution analysis → returns explanatory text + charts → user finds it useful → clicks "Solidify as Weekly Report" → enters Design Plane process
+> **Typical ad-hoc scenario**: User asks "Why did East China gross margin drop 2 points last month?" → Cross-Environment Read-Only Mode queries KB + Production logs (read-only replica) → generates attribution analysis → returns explanatory text + charts → user finds it useful → clicks "Solidify as Weekly Report" → enters Exploration Environment process
 
-- **Belongs to**: Intelligence Plane (read-only analysis surface), not part of Runtime Plane execution path. Runtime Plane only consumes its static analysis report outputs and never calls an LLM.
+- **Belongs to**: Cross-Environment Read-Only Mode (read-only analysis surface), not part of Production execution path. Production Environment may invoke LLMs via `llm_reasoning` Jobs with `read_analyze` or `suggest_plan` capabilities (configurable), but these are governed by Engine-level capability enforcement, not cross-environment mode.
 - **Technical Architecture**: **LLM SDK + Skill + MCP**
 - **Knowledge Sources**: Code Graph + KB + Log Store + Docs (all read-only queries, no write-back)
 - **Capabilities**: Answer factual questions, interrelationships, historical changes, impact analysis, provide suggestions; ad-hoc NL Q&A (attribution analysis, anomaly explanation, definition lineage tracing)
 - **Permission Trimming**: Dev cannot query Business Data; Business User cannot modify code. Every query passes through RBAC filters.
 - **Customization**: Different Teams/Owners predefine multiple sets of Agent Workflows; different users can connect to different AI Models
-- **Operational Boundary**: Agent queries Runtime state (execution logs, metrics) via read-only replicas; Agent suggestions are presented through Design Plane, and after user confirmation go through Freeze Bridge — Agent never directly modifies Runtime configuration or data.
-- **Temporality Constraint**: AI-generated answers are not persisted as KB entries (unless user explicitly confirms and goes through Design Plane process); interaction logs are tagged as "AI-assisted exploration" (distinct from production decision audit trail)
+- **Operational Boundary**: Agent queries execution state (logs, metrics) via read-only replicas; Agent suggestions are presented through Exploration Environment, and after user confirmation go through Freeze Pipeline — Agent never directly modifies Production configuration or data.
+- **Temporality Constraint**: AI-generated answers are not persisted as KB entries (unless user explicitly confirms and goes through Exploration Environment process); interaction logs are tagged as "AI-assisted exploration" (distinct from production decision audit trail)
 
 ---
 
@@ -1796,7 +1830,7 @@ User Intent (Natural Language/Manual Operation)
 | Design Compute| DuckDB + Polars (Light Engine)                   |
 | Runtime Compute| Spark (Heavy Engine, Post-MVP) [Trino/Ray deferred] |
 | Vector DB     | Milvus / pgvector                                |
-| Graph DB      | Neo4j / TigerGraph                               |
+| Graph DB      | Neo4j                                            |
 | Metadata DB   | PostgreSQL                                       |
 | Object Store  | S3 / MinIO                                       |
 | Log Hot Store | Elasticsearch                                    |
@@ -1824,7 +1858,7 @@ For teams that want to start small and grow into the full architecture, the foll
 | ------------------------ | ---------------------------- | --------------------------------------------- | ----------------------------------------------- |
 | **Compute Engine**       | Spark / Trino / Ray          | DuckDB + Polars (Light Engine only)           | Data volume exceeds 500GB or single query >5min |
 | **Vector DB**            | Milvus (dedicated)           | pgvector (PostgreSQL extension)               | >1M embeddings or latency >200ms                |
-| **Graph DB**             | Neo4j / TigerGraph           | PostgreSQL recursive CTEs + adjacency lists   | >10K nodes or traversal depth >3                |
+| **Graph DB**             | Neo4j                        | PostgreSQL recursive CTEs + adjacency lists   | >10K nodes or traversal depth >3                |
 | **Heavy Compute**        | Spark cluster                | DuckDB on single-node with Polars             | Distributed processing needed                   |
 | **Sandbox Orchestrator** | Kubernetes                   | Docker Compose (single-node)                  | Multi-node / HA required                        |
 | **KMS**                  | AWS KMS / Vault              | Vault in dev mode (single instance)           | Production deployment                           |
@@ -1865,7 +1899,7 @@ For teams that want to start small and grow into the full architecture, the foll
 
 ### 15.1 Architecture Overview
 
-Six user roles (Viewer/Analyst/Developer/Admin/Data Owner/External Auditor) connect via HTTPS/WSS to API Gateway. Core four planes: Design Plane Svc (Python/FastAPI, AI-assisted exploration), Freeze Bridge Svc (Python/FastAPI, AI→deterministic conversion), Runtime Executor Svc (Go/Rust, zero AI side effects), Intelligence Plane Svc (Python/FastAPI, AI read-only analysis, does not cross the bridge). Intelligence Plane queries across planes but does not write to any Plane state.
+Six user roles (Viewer/Analyst/Developer/Admin/Data Owner/External Auditor) connect via HTTPS/WSS to API Gateway. Core environments of the unified Workflow Engine: Exploration Environment Svc (Python/FastAPI, AI-assisted exploration), Freeze Pipeline (built-in engine operation, AI→deterministic conversion), Production Executor Svc (Go/Rust, zero AI side effects with NetworkPolicy enforcement), Cross-Environment Read-Only Mode Svc (Python/FastAPI, AI read-only analysis, write operations intercepted at Engine level). Cross-Environment Read-Only Mode queries across environments but does not write to any environment state.
 
 Knowledge Base data layer: PostgreSQL (Source of Truth), Milvus/pgvector (Vector Embeddings), Neo4j Cluster (Graph Relations), Elasticsearch (Hot Logs 7d), Redis Sentinel (Cache+Session), S3/MinIO (Object Store) (MVP: pgvector + PG only; Neo4j/Milvus post-MVP per ADR-0013). Code Graph Svc provides impact analysis and lineage tracking based on Neo4j. Kafka/Redpanda serves as the unified message bus.
 
@@ -2061,11 +2095,72 @@ Item-by-item assessment per OWASP Top 10 for LLM Applications (v1.0, 2023):
 | App Services             | Data Subnet (Redis)       | TCP/TLS   | 6379           | Cache access                                    |
 | App Services             | Data Subnet (Kafka)       | TCP/mTLS  | 9093           | Message produce/consume                         |
 | Data Subnet (PG Primary) | Data Subnet (PG Replicas) | TCP/TLS   | 5432           | Streaming replication                           |
+| App Services (`role: exploration`)  | MCP Gateway / LLM API Endpoint | TCP/TLS   | 443            | LLM invocation for all `llm_reasoning` capabilities                                                                                                              |
+| App Services (`role: production`)   | MCP Gateway / LLM API Endpoint | TCP/TLS   | 443            | LLM invocation for `read_analyze` and `suggest_plan` only (Engine-level enforcement as primary gate; NetworkPolicy provides defense-in-depth)                   |
+| App Services (`role: production`)   | 0.0.0.0/0 (Internet)         | TCP/TLS   | 443            | **DENY** (default-deny for Production egress to internet; explicit allow only to MCP Gateway and approved endpoints)                                           |
+| App Services (`role: cross-env-read`)| Data Subnet (PG Read Replicas)| TCP/TLS   | 5432           | Read-only queries against Exploration and Production read replicas                                                                                              |
 | App Subnet               | S3 Gateway Endpoint       | HTTPS     | 443            | Object store access (VPC endpoint, no internet) |
 | App Subnet               | KMS Endpoint              | HTTPS     | 443            | Key operations (VPC endpoint)                   |
 | Monitor Subnet           | All Subnets               | TCP       | 9100/9113/9150 | Prometheus scraping                             |
 
+### 17.3.1 Environment-Level NetworkPolicy (Kubernetes)
+
+Per ADR-0025, Production Environment Pods require Kubernetes NetworkPolicy resources that complement the cloud-level Security Group rules. These provide defense-in-depth for the "zero AI side effects" guarantee:
+
+```yaml
+# Production Environment — default-deny all egress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: production-deny-all-egress
+  namespace: production
+spec:
+  podSelector:
+    matchLabels:
+      environment: production
+  policyTypes:
+  - Egress
+  egress:
+  # Allow only: MCP Gateway, Data Subnet, S3 Gateway, KMS, DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mcp-gateway
+    ports:
+    - protocol: TCP
+      port: 443
+  - to:
+    - podSelector:
+        matchLabels:
+          role: data
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:  # S3 VPC Endpoint
+    - ipBlock:
+        cidr: 10.0.3.0/24
+    ports:
+    - protocol: TCP
+      port: 443
+  - to:  # DNS (required for service discovery)
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+```
+
+**Enforcement model** (defense-in-depth for zero AI side effects):
+1. **Engine level** (primary): Workflow Engine rejects Jobs whose `llm.capability` is not in the environment's `allowed_capabilities` list. Rejection occurs at Job submission time.
+2. **NetworkPolicy level**: Production Pods cannot egress to the internet. MCP Gateway is the sole allowed external endpoint. Direct LLM provider API calls are impossible — all LLM traffic routes through MCP Gateway.
+3. **Sandbox level**: Existing seccomp profiles (§7.2) block network egress at the Job sandbox level.
+
+This layered enforcement means that even if the Engine-level check is misconfigured, the NetworkPolicy still blocks LLM API egress, and even if NetworkPolicy is misconfigured, the Sandbox seccomp still blocks network calls. Auditors can independently verify each layer.
+
 ---
+
 ## 18. Core Entity ERD
 
 > The complete core entity model (DDL-level definitions of 7 entities, ERD relationship diagram, partitioning strategy, index design) has been moved to **[docs/architecture/entity-erd.md](architecture/entity-erd.md)**.
@@ -2078,7 +2173,7 @@ Item-by-item assessment per OWASP Top 10 for LLM Applications (v1.0, 2023):
 | ---------------- | ---------------- | ------------------------------------------------------------------ |
 | **tenant** | Multi-tenant anchor | UUID PK, isolation_level (L1/L2/L3), JSONB config |
 | **workflow** | Top-level unit of work | spec_yaml immutable after freeze, workflow_version as version chain |
-| **job** | Smallest DAG execution unit | 9 types, UUID[] dependencies, engine overridable |
+| **job** | Smallest DAG execution unit | 10 types, UUID[] dependencies, engine overridable |
 | **data_source** | Registered external data source | connector_config encrypted, schema_catalog periodically refreshed, T0-T3 classification |
 | **kb_entry** | KB entry (9 domains) | content_vector (1536-dim), partitioned by domain LIST, superseded_by version chain |
 | **audit_log** | Immutable audit log | BIGSERIAL PK, monthly RANGE partitioning, no FK constraints, 7-year hot storage |
