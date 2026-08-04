@@ -368,7 +368,9 @@
 
 ## 维度总结
 
+<!-- vale off -->
 - **A1 完整性**：TBD/占位清洁；docs/api/ 有状态说明（正面）。小问题：cross-ref-checklist 自标 stale + 日期不一致（M-024）。
+<!-- vale on -->
 - **A2 术语一致性**：**ADR-0025 迁移未完成**。旧术语残留集中于 glossary（7 词条无 legacy 标注）、03-arch（22 处）、04-timeline（Phase 标题）、05-cost（成本行）、system-context.mmd（四个 box 全旧名）。豁免项已正确识别（ADR 正文 E1、glossary "Formerly called" E3）。
 - **A3 交叉引用**：机械检查全绿（check_adr_semantics + gen_adr_index）。无 finding。
 - **A4 计数对等**：glossary 102 ✅；Skills 18 一致（除图表 14，M-021）；MCP 21 一致（除 ID 冲突 C-002）；Job Types 10 一致；KB domains 9 一致。SLO 计数矛盾（C-001）。

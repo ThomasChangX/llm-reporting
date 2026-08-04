@@ -1,6 +1,6 @@
 # Sub-Projects — Detailed Module Design
 
-> **Parent**: [`docs/03-architecture.md`](../03-architecture.md) (slimmed overview + §N anchor stubs)
+> **Parent**: [03-architecture.md](../03-architecture.md) — slimmed overview + §N anchor stubs
 > **Scope**: Per-module deep-dive design, migrated from the original monolithic `03-architecture.md` (6412 lines) into focused, maintainable files.
 
 This directory decomposes the llm-reporting platform into **seven sub-projects**, each a cohesive domain with its own deployment surface, team boundary, and module set. The decomposition follows three signals from the design itself:
@@ -66,7 +66,7 @@ This directory decomposes the llm-reporting platform into **seven sub-projects**
 
 ## How to Read
 
-**First-time readers**: Start with [`../01-facts.md`](../01-facts.md) → [`../02-requirement.md`](../02-requirement.md) → [`../03-architecture.md`](../03-architecture.md) §1–§2 (philosophy + panoramic overview), then dive into the sub-project README that matches your interest.
+**First-time readers**: Start with [01-facts.md](../01-facts.md) → [02-requirement.md](../02-requirement.md) → [03-architecture.md](../03-architecture.md) §1–§2 (philosophy + panoramic overview), then dive into the sub-project README that matches your interest.
 
 **Each sub-project README** provides:
 - **Positioning** — what this sub-project is and why it exists as a separate unit
