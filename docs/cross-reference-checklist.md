@@ -70,7 +70,18 @@ Section headers retained after extraction (to prevent `→ §N` inbound referenc
 - [x] `docs/03-architecture.md` Appendix Section Index → §15/§16/§18/§19 lines point to new file paths
 - [x] All other entries in Section Index remain unchanged
 
-## 6. Periodic Review
+## 6. Sub-Project Migration (2026-08-04)
+
+> **Scope**: `docs/03-architecture.md` decomposed from 6412 → 1276 lines. Detailed module design migrated to `docs/sub-projects/` (7 sub-projects, 41 files). The architecture doc retains §1, §2, §13, §14, §17 in full + stub headings for all migrated sections (preserving `§N` anchors).
+
+- [x] All migrated sections have stub headings preserving `§N` anchors (185 stubs)
+- [x] `check_adr_semantics.py` passes — all 57 validated `§N` tokens in ADRs + `01-facts.md` resolve
+- [x] ADR relative paths corrected: `../../../adr/` (3 levels up from `docs/sub-projects/X/`)
+- [x] Content conserved (migration, not summary) — every table, YAML, pseudocode, ASCII diagram preserved in sub-project docs
+- [x] Appendix Section Index updated with `→` migration pointers for §3–§12, §20–§25
+- [ ] ⚠️ Full re-verification of cross-references within new sub-project files (pending — the checker only validates ADRs + `01-facts.md` → `03-architecture.md`; intra-sub-project `§N` references are not machine-checked)
+
+## 7. Periodic Review
 
 | Review Item | Frequency | Responsible |
 |------------|-----------|-------------|
@@ -79,4 +90,4 @@ Section headers retained after extraction (to prevent `→ §N` inbound referenc
 | Glossary coverage | Quarterly | Domain Expert |
 | ADR status cleanup (Deprecated/Superseded) | Semi-annually | Architect |
 
-*This checklist last updated: 2026-08-04 (mechanical glossary-count fix per audit M-024; full re-verification still pending per spec I-008)*
+*This checklist last updated: 2026-08-04 (sub-project migration: 03-architecture.md 6412→1276 lines, 41 new files under docs/sub-projects/; full re-verification of intra-sub-project refs still pending)*

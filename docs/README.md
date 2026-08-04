@@ -8,13 +8,14 @@
 |------------------|----------|
 | `01-facts.md` | Project background, design philosophy, 25 ADRs (summary) |
 | `02-requirement.md` | Functional and non-functional requirements |
-| `03-architecture.md` | Full architecture design (~6200 lines): Unified Workflow Engine (Exploration/Freeze Pipeline/Production environments + Cross-Environment Read-Only Mode), Compute Spec (10 Job Types), KB, Agents, BRD/ADR, and more |
+| `03-architecture.md` | Architecture overview (~1300 lines): Core philosophy, panoramic architecture, deployment topology, and §N anchor stubs pointing to detailed module design in `sub-projects/` |
 | `04-timeline.md` | Development roadmap and resource estimation |
 | `05-cost.md` | Lifecycle cost analysis and pricing model |
 | [`glossary.md`](glossary.md) | 102 domain and technical terms |
 | [`cross-reference-checklist.md`](cross-reference-checklist.md) | Manual consistency verification checklist |
+| [`sub-projects/`](sub-projects/) | **7 sub-project directories** with detailed per-module design docs (comprehensive 9-section format): workflow-engine, agent-platform, knowledge-services, query-serving, data-health, brd-adr-lifecycle, platform-core |
 | [`security/`](security/) | Threat model (STRIDE + OWASP LLM Top 10) |
-| [`operations/`](operations/) | SLO/SLI definitions with error budgets |
+| [`operations/`](operations/) | SLO/SLI definitions with error budgets, backup/DR, GDPR compliance |
 | [`architecture/`](architecture/) | C4 Model diagrams, entity ERD |
 | [`diagrams/`](diagrams/) | Architecture diagram source files (Mermaid) |
 | [`api/`](api/) | API specification placeholder |

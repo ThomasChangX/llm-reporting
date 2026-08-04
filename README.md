@@ -18,7 +18,7 @@ AI assists in exploration and authoring. Once workflows pass through the Freeze 
 |---|----------|----------|
 | 01 | [docs/01-facts.md](docs/01-facts.md) | Project background, design philosophy, 25 Architecture Decision Records (summarized in facts doc) |
 | 02 | [docs/02-requirement.md](docs/02-requirement.md) | 46 functional requirement groups + 9 NFR groups (ISO 25010) |
-| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Full architecture design (~6400 lines): Unified Workflow Engine (Exploration/Freeze Pipeline/Production environments + Cross-Environment Read-Only Mode), Compute Spec (10 Job Types), KB, Agents, BRD/ADR, and more |
+| 03 | [docs/03-architecture.md](docs/03-architecture.md) | Architecture overview (~1300 lines): Core philosophy, panoramic architecture, deployment topology. Detailed module design migrated to [`docs/sub-projects/`](docs/sub-projects/) (7 sub-projects, 40+ comprehensive docs) |
 | 04 | [docs/04-timeline.md](docs/04-timeline.md) | Development roadmap with Token-Speed estimation methodology |
 | 05 | [docs/05-cost.md](docs/05-cost.md) | Full lifecycle cost analysis: development, infrastructure, LLM, pricing model |
 
