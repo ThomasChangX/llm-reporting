@@ -1,7 +1,7 @@
 # brd-adr-lifecycle — BRD & ADR as First-Class Entities
 
 > **Origin**: §23 of `docs/03-architecture.md` (1488 lines)
-> **Key ADRs**: [ADR-0010](../../adr/0010-brd-adr-first-class.md) (BRD/ADR First-Class), [ADR-0022](../../adr/0022-brd-generation-agent-pipeline.md) (Generation Pipeline Redesign)
+> **Key ADRs**: [ADR-0010](../../../adr/0010-brd-adr-first-class.md) (BRD/ADR First-Class), [ADR-0022](../../../adr/0022-brd-generation-agent-pipeline.md) (Generation Pipeline Redesign)
 
 ## Positioning
 
@@ -51,5 +51,5 @@ The **BRD & ADR Lifecycle** sub-project treats Business Requirements Documents a
 
 ## Related ADRs
 
-- [ADR-0010](../../adr/0010-brd-adr-first-class.md) — BRD/ADR as First-Class Entities
-- [ADR-0022](../../adr/0022-brd-generation-agent-pipeline.md) — BRD Generation Agent Pipeline Redesign
+- [ADR-0010](../../../adr/0010-brd-adr-first-class.md) — BRD/ADR as First-Class Entities
+- [ADR-0022](../../../adr/0022-brd-generation-agent-pipeline.md) — BRD Generation Agent Pipeline Redesign

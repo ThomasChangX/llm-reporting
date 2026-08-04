@@ -1,7 +1,7 @@
 # knowledge-services — Knowledge, Metadata & Change Intelligence
 
 > **Origin**: §2.1, §9, §10, §20 of `docs/03-architecture.md`
-> **Key ADRs**: [ADR-0013](../../adr/0013-kb-storage-strategy.md) (PG-First), [ADR-0023](../../adr/0023-kb-content-lifecycle-pipeline.md) (Content Lifecycle), [ADR-0024](../../adr/0024-kb-reasoning-support-playbooks-code.md) (Reasoning Support)
+> **Key ADRs**: [ADR-0013](../../../adr/0013-kb-storage-strategy.md) (PG-First), [ADR-0023](../../../adr/0023-kb-content-lifecycle-pipeline.md) (Content Lifecycle), [ADR-0024](../../../adr/0024-kb-reasoning-support-playbooks-code.md) (Reasoning Support)
 
 ## Positioning
 
@@ -46,6 +46,6 @@ Storage follows ADR-0013's **PG-First with Interface Abstraction** strategy: Pos
 
 ## Related ADRs
 
-- [ADR-0013](../../adr/0013-kb-storage-strategy.md) — KB Storage: PG-First with Interface Abstraction
-- [ADR-0023](../../adr/0023-kb-content-lifecycle-pipeline.md) — KB Content Lifecycle Pipeline (Processing, Linkage Weaving, Quality Flywheel)
-- [ADR-0024](../../adr/0024-kb-reasoning-support-playbooks-code.md) — KB Reasoning Support (Diagnostic Playbooks & Code Knowledge)
+- [ADR-0013](../../../adr/0013-kb-storage-strategy.md) — KB Storage: PG-First with Interface Abstraction
+- [ADR-0023](../../../adr/0023-kb-content-lifecycle-pipeline.md) — KB Content Lifecycle Pipeline (Processing, Linkage Weaving, Quality Flywheel)
+- [ADR-0024](../../../adr/0024-kb-reasoning-support-playbooks-code.md) — KB Reasoning Support (Diagnostic Playbooks & Code Knowledge)

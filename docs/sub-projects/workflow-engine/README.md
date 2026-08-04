@@ -1,7 +1,7 @@
 # workflow-engine — Unified Workflow Engine
 
 > **Origin**: §3, §4, §6, §7 of `docs/03-architecture.md`
-> **Key ADRs**: [ADR-0025](../../adr/0025-unified-workflow-engine.md) (Unified Engine), [ADR-0011](../../adr/0011-materialize-job-type.md) (Materialize Job Type)
+> **Key ADRs**: [ADR-0025](../../../adr/0025-unified-workflow-engine.md) (Unified Engine), [ADR-0011](../../../adr/0011-materialize-job-type.md) (Materialize Job Type)
 
 ## Positioning
 
@@ -45,7 +45,7 @@ This sub-project owns: the engine itself, its Compute Spec language, its executi
 
 ## Related ADRs
 
-- [ADR-0025](../../adr/0025-unified-workflow-engine.md) — Unified Workflow Engine (one engine, three environments)
-- [ADR-0011](../../adr/0011-materialize-job-type.md) — Materialize Job Type
-- [ADR-0005](../../adr/0005-four-layer-architecture.md) — Four-Layer Architecture (Zero AI Side Effects)
-- [ADR-0006](../../adr/0006-freeze-bridge-independence.md) — Freeze Bridge Independence
+- [ADR-0025](../../../adr/0025-unified-workflow-engine.md) — Unified Workflow Engine (one engine, three environments)
+- [ADR-0011](../../../adr/0011-materialize-job-type.md) — Materialize Job Type
+- [ADR-0005](../../../adr/0005-four-layer-architecture.md) — Four-Layer Architecture (Zero AI Side Effects)
+- [ADR-0006](../../../adr/0006-freeze-bridge-independence.md) — Freeze Bridge Independence

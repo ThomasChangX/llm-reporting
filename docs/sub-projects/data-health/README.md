@@ -1,7 +1,7 @@
 # data-health — Data Quality, Reconciliation & Remediation
 
 > **Origin**: §12.2 of `docs/03-architecture.md`
-> **Key ADRs**: [ADR-0014](../../adr/0014-data-health-check-framework.md) (Unified Framework), [ADR-0015](../../adr/0015-agent-triage-remediation-gateway.md) (Agent Triage & Remediation Gateway)
+> **Key ADRs**: [ADR-0014](../../../adr/0014-data-health-check-framework.md) (Unified Framework), [ADR-0015](../../../adr/0015-agent-triage-remediation-gateway.md) (Agent Triage & Remediation Gateway)
 
 ## Positioning
 
@@ -43,5 +43,5 @@ This sub-project is business-critical: reconciliation breaks and data anomalies 
 
 ## Related ADRs
 
-- [ADR-0014](../../adr/0014-data-health-check-framework.md) — Unified Data Health Check Framework
-- [ADR-0015](../../adr/0015-agent-triage-remediation-gateway.md) — Agent Triage & Layered Remediation Gateway
+- [ADR-0014](../../../adr/0014-data-health-check-framework.md) — Unified Data Health Check Framework
+- [ADR-0015](../../../adr/0015-agent-triage-remediation-gateway.md) — Agent Triage & Layered Remediation Gateway

@@ -1,7 +1,7 @@
 # query-serving — Query Service & Large-Scale Data Architecture
 
 > **Origin**: §5.1–§5.4 of `docs/03-architecture.md`
-> **Key ADRs**: [ADR-0007](../../adr/0007-query-service-component.md) (Query Service), [ADR-0008](../../adr/0008-large-scale-data-strategy.md) (Large-Scale Data Strategy)
+> **Key ADRs**: [ADR-0007](../../../adr/0007-query-service-component.md) (Query Service), [ADR-0008](../../../adr/0008-large-scale-data-strategy.md) (Large-Scale Data Strategy)
 
 ## Positioning
 
@@ -39,6 +39,6 @@ This is the most performance-sensitive sub-project: its SLO targets (NL→Previe
 
 ## Related ADRs
 
-- [ADR-0007](../../adr/0007-query-service-component.md) — Query Service Component
-- [ADR-0008](../../adr/0008-large-scale-data-strategy.md) — Large-Scale Data Strategy
-- [ADR-0011](../../adr/0011-materialize-job-type.md) — Materialize Job Type (pre-aggregation integration)
+- [ADR-0007](../../../adr/0007-query-service-component.md) — Query Service Component
+- [ADR-0008](../../../adr/0008-large-scale-data-strategy.md) — Large-Scale Data Strategy
+- [ADR-0011](../../../adr/0011-materialize-job-type.md) — Materialize Job Type (pre-aggregation integration)

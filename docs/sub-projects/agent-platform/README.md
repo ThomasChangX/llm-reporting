@@ -1,7 +1,7 @@
 # agent-platform — Agent Orchestration & AI Capabilities
 
 > **Origin**: §22A–§22M, §3.1–§3.5 of `docs/03-architecture.md`
-> **Key ADRs**: [ADR-0016](../../adr/0016-dual-mode-agent-orchestration.md) (Dual-Mode), [ADR-0017](../../adr/0017-verified-path-saga-semantics.md)–[ADR-0021](../../adr/0021-vp-promotion-concurrency.md), [ADR-0024](../../adr/0024-kb-reasoning-support-playbooks-code.md)
+> **Key ADRs**: [ADR-0016](../../../adr/0016-dual-mode-agent-orchestration.md) (Dual-Mode), [ADR-0017](../../../adr/0017-verified-path-saga-semantics.md)–[ADR-0021](../../../adr/0021-vp-promotion-concurrency.md), [ADR-0024](../../../adr/0024-kb-reasoning-support-playbooks-code.md)
 
 ## Positioning
 
@@ -55,10 +55,10 @@ This sub-project owns: the Agent SDK runtime, the Skill catalog (18 skills), the
 
 ## Related ADRs
 
-- [ADR-0016](../../adr/0016-dual-mode-agent-orchestration.md) — Dual-Mode Agent Orchestration
-- [ADR-0017](../../adr/0017-verified-path-saga-semantics.md) — Verified Path Saga Semantics & Durable Execution
-- [ADR-0018](../../adr/0018-agent-evaluation-framework.md) — Agent Evaluation Framework
-- [ADR-0019](../../adr/0019-agent-memory-architecture.md) — Agent Memory Architecture
-- [ADR-0020](../../adr/0020-agent-cost-governance.md) — Agent Cost Governance & Model Degradation Detection
-- [ADR-0021](../../adr/0021-vp-promotion-concurrency.md) — Verified Path Promotion & Multi-Agent Concurrency Control
-- [ADR-0024](../../adr/0024-kb-reasoning-support-playbooks-code.md) — KB Reasoning Support (Playbooks & Code Knowledge)
+- [ADR-0016](../../../adr/0016-dual-mode-agent-orchestration.md) — Dual-Mode Agent Orchestration
+- [ADR-0017](../../../adr/0017-verified-path-saga-semantics.md) — Verified Path Saga Semantics & Durable Execution
+- [ADR-0018](../../../adr/0018-agent-evaluation-framework.md) — Agent Evaluation Framework
+- [ADR-0019](../../../adr/0019-agent-memory-architecture.md) — Agent Memory Architecture
+- [ADR-0020](../../../adr/0020-agent-cost-governance.md) — Agent Cost Governance & Model Degradation Detection
+- [ADR-0021](../../../adr/0021-vp-promotion-concurrency.md) — Verified Path Promotion & Multi-Agent Concurrency Control
+- [ADR-0024](../../../adr/0024-kb-reasoning-support-playbooks-code.md) — KB Reasoning Support (Playbooks & Code Knowledge)
