@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This module groups the platform-level domain services that are not owned by any single plane: the **Email Ingestion Pipeline** (FR17, §12.1), **Backup & Disaster Recovery** (FR41, §12.3), the **Notification Service** (FR37, §12.4), the **Runtime Dependency Manager** (FR40, §12.5), and the end-to-end **Data Flow Panorama** (§12.7). These services ingest external content into the Knowledge Base, protect platform data across stores, deliver notifications across channels, manage cross-workflow dependencies, and describe how user intent flows through Design → Freeze → Runtime. They are shared infrastructure consumed by workflow-engine, knowledge-services, agent-platform, and query-serving.
+This module groups the platform-level domain services that are not owned by any single plane: the **Email Ingestion Pipeline** (FR17, §12.1), **Backup & Disaster Recovery** (FR41, §12.3), the **Notification Service** (FR37, §12.4), the **Runtime Dependency Manager** (FR40, §12.5), and the end-to-end **Data Flow Panorama** (§12.7). These services ingest external content into the Knowledge Base, protect platform data across stores, deliver notifications across channels, manage cross-workflow dependencies, and describe how user intent flows through Exploration → Freeze Pipeline → Production. They are shared infrastructure consumed by workflow-engine, knowledge-services, agent-platform, and query-serving.
 
 ## Boundaries
 
@@ -24,7 +24,7 @@ This module groups the platform-level domain services that are not owned by any 
 **Upstream/downstream neighbors:**
 - *Email ingestion*: External SMTP / user upload / paste → Ingestion Gateway → Parsing Engine → AI Fact Extraction → Human Confirmation Gate → KB Write Pipeline.
 - *Backup & DR*: all data stores (PostgreSQL, Elasticsearch, S3/MinIO, Neo4j, Milvus/pgvector, Git, Vault) → cross-region backups → recovery procedure.
-- *Notification*: Event Bus producers (Workflow Executor, Incident Manager, KB Governance, Scheduler, Freeze Bridge, Support/Ticket, User Actions, System) → Notification Engine → channels.
+- *Notification*: Event Bus producers (Workflow Executor, Incident Manager, KB Governance, Scheduler, Freeze Pipeline, Support/Ticket, User Actions, System) → Notification Engine → channels.
 - *Runtime Dependency*: Compute Spec YAMLs → Code Graph `WORKFLOW_DEPENDS_ON` edges → Scheduler and Change Intelligence.
 
 ## Interfaces
@@ -54,7 +54,7 @@ This module groups the platform-level domain services that are not owned by any 
 
 | Component | Behavior |
 | --- | --- |
-| Event Producers | Workflow Executor, Incident Manager, KB Governance, Scheduler, Freeze Bridge, Support/Ticket, User Actions, System (via Event Bus / Kafka) |
+| Event Producers | Workflow Executor, Incident Manager, KB Governance, Scheduler, Freeze Pipeline, Support/Ticket, User Actions, System (via Event Bus / Kafka) |
 | Priority Router | Critical → Instant; Warning → Digest; Info → Batch |
 | Template Engine | Variable substitution; i18n localization; Rich HTML + Text |
 | Suppression Engine | Deduplication (5min); Quiet hours per user; Rate limiting per channel |
@@ -185,7 +185,7 @@ External Email (SMTP)          User Upload (.eml/.msg)        Paste Body+Attachm
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                     EVENT PRODUCERS                                       │
 │  Workflow Executor │ Incident Manager │ KB Governance │ Scheduler │     │
-│  Freeze Bridge     │ Support/Ticket   │ User Actions   │ System    │     │
+│  Freeze Pipeline     │ Support/Ticket   │ User Actions   │ System    │     │
 └──────────────────────────┬──────────────────────────────────────────────┘
                            │ (Event Bus / Kafka)
                            ▼
@@ -257,17 +257,17 @@ Failure Escalation: Critical delivery fails → create Incident → try alt chan
 User Intent (Natural Language/Manual Operation)
          │
          ▼
-   Design Plane
+   Exploration Environment
    (AI Copilot + KB → Generate Compute Spec Draft)
          │
    User Review + Modify
          │
          ▼
-   Freeze Bridge
+   Freeze Pipeline
    (Refinement → Validation → Testing → Impact Report → Review)
          │
          ▼
-   Runtime Plane
+   Production Environment
    (Scheduler → Executor(Sandbox) → Heavy Engine → Output)
          │
          ├──→ Output Renderer → PDF/Excel/Dashboard/Email

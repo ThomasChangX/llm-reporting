@@ -117,7 +117,7 @@ Security incident response and breach handling are cross-referenced in [docs/sec
 | Aspect | Specification |
 | --- | --- |
 | **Artifacts Under VC** | Compute Specs (YAML), KB entries (Business Glossary, Data Catalog, Mapping Registry, Workflow Templates), Formats, Design Artifacts. All stored in Git (GitHub/GitLab). |
-| **Branch Strategy** | `main` = production; feature branches per Workbench session; `freeze/<artifact-id>` for Freeze Bridge reviews; `hotfix/` for emergency changes. |
+| **Branch Strategy** | `main` = production; feature branches per Workbench session; `freeze/<artifact-id>` for Freeze Pipeline reviews; `hotfix/` for emergency changes. |
 | **Commit Convention** | Structured commits: `type(scope): description [BRD-123] [JIRA-456]`. Types: `spec`, `kb`, `format`, `freeze`, `rollback`. |
 | **PR Workflow** | All changes via PR. Required: (a) CI passes (validation + test), (b) at least one peer review, (c) Business Approver for KB changes, (d) Data Owner for Data Catalog changes. |
 | **Immutable History** | Git history is append-only (no force-push to `main`). All merges are squash-merge to maintain a linear, auditable history. |

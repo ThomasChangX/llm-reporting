@@ -190,7 +190,7 @@ brd:
     linked_ADRs:
       - "ADR-0012: Select ECB as authoritative exchange rate source"
       - "ADR-0034: Use five-step method rather than percentage-of-completion for ASC606 performance obligation splitting"
-      - "ADR-0018: Use DuckDB for Design Plane currency conversion, Spark for Runtime currency conversion"
+      - "ADR-0018: Use DuckDB for Exploration Environment currency conversion, Spark for Runtime currency conversion"
     linked_compliance:
       - "SOX-302: Internal Control over Financial Reporting"
       - "SOX-404: Management Assessment of Internal Controls"

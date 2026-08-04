@@ -16,7 +16,7 @@ The Compute Spec defines the concept hierarchy (Workflow → Variables/Parameter
 - §6 Job Type Complete Enumeration (all 10 types: `source`, `transform`, `output`, `quality`, `workflow_ref`, `data_writer`, `decision`, `wait`, `materialize`, `llm_reasoning`).
 - §6.1 Dependency Trigger Rules (`all_success`, `all_failed`, `all_done`, `one_success`, `none_failed`) and the `trigger_rule` YAML field.
 - §6 Format System — global Format definitions decoupled from Jobs (report/excel/dashboard/data_export), including Dashboard interactivity blocks.
-- §6.2 Common Compute Subset — the portability-guarantee table mapping each operation to Light/Heavy Engine support, plus the Portability Rules (`engine: light_only`, Freeze Bridge incompatibility blocking).
+- §6.2 Common Compute Subset — the portability-guarantee table mapping each operation to Light/Heavy Engine support, plus the Portability Rules (`engine: light_only`, Freeze Pipeline incompatibility blocking).
 
 **Delegated / out-of-scope:**
 - Execution isolation, state-passing, Python constraints, and SQL-injection defense → [`execution-sandbox.md`](execution-sandbox.md) (§7).
@@ -26,7 +26,7 @@ The Compute Spec defines the concept hierarchy (Workflow → Variables/Parameter
 - KB retrieval used inside transforms, and Query pushdown for `output` Jobs → [`knowledge-services`](../knowledge-services/) and [`query-serving`](../query-serving/).
 
 **Upstream/downstream neighbors:**
-- *Authoring path*: Design Plane emits a Design Artifact (§3.3) → Freeze Bridge resolves fuzzy nodes (§4.3) → frozen Compute Spec is submitted to the Engine.
+- *Authoring path*: Exploration Environment emits a Design Artifact (§3.3) → Freeze Pipeline resolves fuzzy nodes (§4.3) → frozen Compute Spec is submitted to the Engine.
 - *Runtime path*: Scheduler → Executor builds the DAG from `depends_on` → per-Job Sandbox (§7) → Light/Heavy Engine execution → `output`/`data_writer` delivery.
 
 ## Interfaces
@@ -74,7 +74,7 @@ Global Format definitions, decoupled from Jobs. Supported types: `report` (PDF),
 
 ## Dependencies
 
-- **Workflow/Job/YAML parsing**: depends on the Compute Spec schema validator (run by the Freeze Bridge Validation Engine — see §4) before any Job is submitted.
+- **Workflow/Job/YAML parsing**: depends on the Compute Spec schema validator (run by the Freeze Pipeline Validation Engine — see §4) before any Job is submitted.
 - **`source` / `transform` (SQL)**: depend on the Data Connector Adapter (5 Levels) and the Dialect Adapter (ANSI SQL:2003 ↔ engine-specific dialects).
 - **`transform` (Python)**: depends on the Light Engine Python UDF runtime (DuckDB/Polars); on the Heavy Engine it requires prior transpilation to Java/Scala UDF or SQL expressions (see §6.2 Portability Rules and §7.2 Python Execution Constraints).
 - **`output`**: depends on the unified Format rendering engine (report/excel/dashboard/data_export).
@@ -83,7 +83,7 @@ Global Format definitions, decoupled from Jobs. Supported types: `report` (PDF),
 - **`wait`**: depends on the unified event-waiting logic (signal/webhook/time, max 72h timeout).
 - **`materialize`**: depends on the unified incremental/full-refresh interface; DuckDB handles <100GB materialization, Spark handles TB-scale (ADR-0011).
 - **`llm_reasoning`**: invokes LLMs **via MCP infrastructure (§22)** — orthogonal to the Light/Heavy Engine distinction. Capability enforcement is at the Engine submission level and NetworkPolicy level, not the compute layer. Routes to [`agent-platform`](../agent-platform/) MCP servers/Tools.
-- **Engine routing**: the Freeze Bridge detects incompatibility between the `engine` tag and the target deployment environment during validation and blocks deployment.
+- **Engine routing**: the Freeze Pipeline detects incompatibility between the `engine` tag and the target deployment environment during validation and blocks deployment.
 - Cross-sub-project: [`knowledge-services`](../knowledge-services/) (Data Catalog, Business Glossary for transform formulas), [`query-serving`](../query-serving/) (pushdown for `output`), [`platform-core`](../platform-core/) (audit, tenant isolation, auth on every Job submission).
 
 ## Data Model
@@ -92,7 +92,7 @@ Global Format definitions, decoupled from Jobs. Supported types: `report` (PDF),
 - **Job** — smallest execution unit. Fields: `type` (one of the 10 enumerated values), `depends_on: [job_id, ...]` (sole ordering declaration), and `trigger_rule` (defaults to `all_success`).
 - **Job Group** — logical grouping of Jobs; itself carries a `depends_on` to express stage-level dependency on another Group.
 - **Format** — global, decoupled from Jobs. Types: `report` (PDF), `excel`, `dashboard` (with optional `interactivity`: `drill_down_paths`, `cross_filter_dimensions`), `data_export` (Parquet/CSV).
-- **`engine` tag** — emitted by the Freeze Bridge based on Portability Rules:
+- **`engine` tag** — emitted by the Freeze Pipeline based on Portability Rules:
   - Workflows using only the Common Compute Subset → freely switchable between Light/Heavy.
   - Workflows containing Python transforms → `engine: light_only`, unless all Python blocks have been transpiled.
 - **`llm_reasoning` capability field** — one of `read_analyze`, `suggest_plan`, `generate_draft`, `modify_spec`, `kb_write`. The Engine rejects `generate_draft`/`modify_spec`/`kb_write` in Production; `read_analyze`/`suggest_plan` are configurable.
@@ -107,7 +107,7 @@ Global Format definitions, decoupled from Jobs. Supported types: `report` (PDF),
 | `wait` Job exceeds 72h timeout | Hung Workflow | Auto-transitions to `TIMED_OUT`; triggers an Incident (see [`platform-core`](../platform-core/) Incident Manager). |
 | `data_writer` vs `output` confusion (target misclassified) | Wrong delivery path (DB writeback vs file/notification) | Apply the decision rule: target is a Data-Catalog-registered `data_source` → `data_writer` (`writeback`); filesystem/messaging channel → `output`. Enforced at Spec validation. |
 | Python transform on Heavy Engine (not transpiled) | Execution error | Non-transpiled Python transforms error on Heavy Engine and **fall back to Light Engine** (per §6.2 Portability Rules). |
-| `engine` tag incompatible with target deployment | Blocked deployment | Freeze Bridge detects incompatibility during the validation phase and blocks deployment. |
+| `engine` tag incompatible with target deployment | Blocked deployment | Freeze Pipeline detects incompatibility during the validation phase and blocks deployment. |
 | `llm_reasoning` Job with forbidden capability in Production | Capability rejected at submission | `generate_draft`, `modify_spec`, `kb_write` are rejected at Engine level in Production; must be resolved during Freeze (§4.1b) to a deterministic replacement. |
 
 ## Non-Functional Requirements
@@ -135,7 +135,7 @@ Engine independence is not absolute. The system defines a **Common Compute Subse
 **Portability Rules**:
 - Workflows using only the Common Compute Subset can seamlessly switch between Light/Heavy Engines.
 - Workflows containing Python transforms are marked `engine: light_only`, unless all Python blocks have been transpiled.
-- The Freeze Bridge detects incompatibility between the `engine` tag and the target deployment environment during the validation phase and blocks deployment.
+- The Freeze Pipeline detects incompatibility between the `engine` tag and the target deployment environment during the validation phase and blocks deployment.
 
 ## Key Flows
 

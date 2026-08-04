@@ -122,13 +122,13 @@ Core Principles:
 
 ## Data Model
 
-The Exploration Environment's primary data product is the **Design Artifact (YAML)** — the handoff contract between the Design Plane and Freeze Bridge. It carries the intended specification plus the AI's uncertainty per element. The schema (including `fuzzy_nodes`, `confirmed_fields`, `confidence_summary`) is owned by [`workflow-engine` `design-artifact.md`](../workflow-engine/design-artifact.md) (§3.3); key fields recapitulated here for context:
+The Exploration Environment's primary data product is the **Design Artifact (YAML)** — the handoff contract between the Exploration Environment and Freeze Pipeline. It carries the intended specification plus the AI's uncertainty per element. The schema (including `fuzzy_nodes`, `confirmed_fields`, `confidence_summary`) is owned by [`workflow-engine` `design-artifact.md`](../workflow-engine/design-artifact.md) (§3.3); key fields recapitulated here for context:
 
 | Field                | Purpose                                                                                                                                                                                                 |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fuzzy_nodes`        | Nodes the AI could not deterministically resolve. Each carries a `marker` type, `confidence` score, and optional `proposed_resolution`. Freeze Bridge rejects any artifact with unresolved fuzzy nodes. |
-| `confirmed_fields`   | Nodes explicitly confirmed by a human user. Freeze Bridge treats these as authoritative, skipping AI re-evaluation.                                                                                     |
-| `confidence_summary` | Aggregate scores used by Freeze Bridge to decide required review depth. Artifacts with `overall < 0.8` mandate full peer review.                                                                        |
+| `fuzzy_nodes`        | Nodes the AI could not deterministically resolve. Each carries a `marker` type, `confidence` score, and optional `proposed_resolution`. Freeze Pipeline rejects any artifact with unresolved fuzzy nodes. |
+| `confirmed_fields`   | Nodes explicitly confirmed by a human user. Freeze Pipeline treats these as authoritative, skipping AI re-evaluation.                                                                                     |
+| `confidence_summary` | Aggregate scores used by Freeze Pipeline to decide required review depth. Artifacts with `overall < 0.8` mandate full peer review.                                                                        |
 
 Additional data structures owned or produced by this module:
 - **Intent Catalog** — 50+ predefined intents (see Interfaces §3.5) backing the Intent Parser.

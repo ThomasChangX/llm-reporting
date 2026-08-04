@@ -14,7 +14,7 @@ This sub-project is business-critical: reconciliation breaks and data anomalies 
 **In-scope:**
 - Data Health Check Framework (unified YAML config, three check types: `rule`, `anomaly`, `recon`)
 - Recon Execution Engine (cross-source reconciliation)
-- Break Analysis (AI-assisted, Intelligence Plane)
+- Break Analysis (AI-assisted, Cross-Environment Read-Only Mode)
 - Anomaly Detection (ML-driven: ratio_change, z_score, seasonal_decomp, distribution_shift, trend_change; includes Temporal Consistency as 7th DQ dimension)
 - Unified Output Pipeline (with Agent Triage Layer integration)
 - Layered Remediation Gateway (L0–L3 tiered approval)

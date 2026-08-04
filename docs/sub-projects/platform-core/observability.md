@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This module provides the platform's observability backbone: a three-layer log system (§8) aligned with the OpenTelemetry (CNCF graduated) standard for distributed tracing and metrics export, plus an AI-driven Observation Engine (§12.6) that detects recurring user-behavior patterns and suggests Workflow automations. Together they give every plane (Design, Freeze, Runtime) and every sub-project a uniform way to emit structured events, traces, metrics, and LLM-interaction records, and they feed AI-powered consumers (real-time anomaly detection, incident diagnosis assistant, cost tracking dashboard). This document is the detailed companion to the Observability pillar summarized in §11.4 of [cross-cutting-layer.md](cross-cutting-layer.md).
+This module provides the platform's observability backbone: a three-layer log system (§8) aligned with the OpenTelemetry (CNCF graduated) standard for distributed tracing and metrics export, plus an AI-driven Observation Engine (§12.6) that detects recurring user-behavior patterns and suggests Workflow automations. Together they give every plane (Exploration, Freeze Pipeline, Production) and every sub-project a uniform way to emit structured events, traces, metrics, and LLM-interaction records, and they feed AI-powered consumers (real-time anomaly detection, incident diagnosis assistant, cost tracking dashboard). This document is the detailed companion to the Observability pillar summarized in §11.4 of [cross-cutting-layer.md](cross-cutting-layer.md).
 
 ## Boundaries
 
@@ -21,7 +21,7 @@ This module provides the platform's observability backbone: a three-layer log sy
 - **Cost Tracking Dashboard** data sourcing → shared with [operational-architecture.md](operational-architecture.md) capacity planning.
 
 **Upstream/downstream neighbors:**
-- *Producers*: API Gateway, Design Plane, Freeze Bridge, Workflow Executor, Sandbox, DB queries, LLM calls, Workbench user actions, all sub-projects.
+- *Producers*: API Gateway, Exploration Environment, Freeze Pipeline, Workflow Executor, Sandbox, DB queries, LLM calls, Workbench user actions, all sub-projects.
 - *Consumers*: Elasticsearch/Kibana (logs), Prometheus/Grafana (metrics), Tempo/Jaeger (traces), S3/Glacier (cold LLM transcripts), the Observation Engine's Suggestion Engine, and AI-powered consumers.
 
 ## Interfaces
@@ -42,7 +42,7 @@ The system aligns with the **OpenTelemetry** (CNCF graduated project) standard f
 
 | OTel Component | Implementation | Details |
 | --- | --- | --- |
-| **Trace Context** | W3C Trace Context (`traceparent` header) | `trace_id UUID` propagates across audit_log, LLM Interaction Log, Workflow Executor spans; crosses service boundaries (API Gateway → Design Plane → Freeze Bridge → Runtime Plane) via gRPC metadata |
+| **Trace Context** | W3C Trace Context (`traceparent` header) | `trace_id UUID` propagates across audit_log, LLM Interaction Log, Workflow Executor spans; crosses service boundaries (API Gateway → Exploration Environment → Freeze Pipeline → Production Environment) via gRPC metadata |
 | **Span Semantics** | OTel Semantic Conventions v1.27 | `service.name`, `span.kind` (CLIENT/SERVER/INTERNAL), `http.method`, `db.system`, `gen_ai.request.model` (LLM GenAI conventions) |
 | **Metrics Export** | OTLP (gRPC) → Prometheus | Histogram metrics (p95 latency, duration) follow OTel Metrics Data Model; Exemplar supports trace-metric correlation |
 | **Log Correlation** | `trace_id` + `span_id` in structured logs | Each log entry in ES carries trace context; Kibana one-click jump to corresponding trace |
@@ -113,7 +113,7 @@ Hot (ES, 7d, structured events + LLM metadata) → Warm (S3+Parquet, 90d, execut
 
 ### §8.1 Cross-service trace propagation
 
-`trace_id` (UUID) propagates across audit_log → LLM Interaction Log → Workflow Executor spans, crossing service boundaries (API Gateway → Design Plane → Freeze Bridge → Runtime Plane) via gRPC metadata (W3C `traceparent`). Metrics use OTel Exemplars to correlate back to traces.
+`trace_id` (UUID) propagates across audit_log → LLM Interaction Log → Workflow Executor spans, crossing service boundaries (API Gateway → Exploration Environment → Freeze Pipeline → Production Environment) via gRPC metadata (W3C `traceparent`). Metrics use OTel Exemplars to correlate back to traces.
 
 ### §12.6 Pattern Detection Pipeline (FR3)
 

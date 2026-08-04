@@ -17,7 +17,7 @@ Participants:
   USER        = Analyst/Developer in Workbench UI
   WB          = Workbench (React SPA)
   API         = API Gateway (Kong)
-  FB          = Freeze Bridge Service
+  FB          = Freeze Pipeline Service
   SRA         = Spec Refinement Assistant
   VE          = Validation Engine
   TR          = Test Runner (Sandbox)
@@ -75,7 +75,7 @@ Flow:
   26. FB       →  NOTIF    :  Kafka: events.freeze.pr_created { pr_url, reviewer_ids }
   27. NOTIF    →  REVIEWER :  Slack/Email: "Freeze PR ready for review"
   28. REVIEWER →  GIT      :  HTTPS: Review diff, approve PR (or request changes)
-  29. [IF CHANGES REQUESTED] → loop back to Design Plane (user edits → step 1)
+  29. [IF CHANGES REQUESTED] → loop back to Exploration Environment (user edits → step 1)
   30. GIT      →  FB       :  Webhook: PR approved + CI checks passed
   31. FB       →  RM       :  gRPC: StartCanary(workflow_id, version)
   32. RM       →  RM       :  Stage: CANARY_1% — §4.2 Canary Gating
@@ -110,7 +110,7 @@ Flow:
 ```
 Participants:
   SCHED     = Scheduler
-  EXEC      = Workflow Executor (Runtime Plane)
+  EXEC      = Workflow Executor (Production Environment)
   SANDBOX   = Sandbox Pool Manager
   DS        = Data Source (external, e.g., Snowflake)
   REWRITER  = Query Rewriter
@@ -223,7 +223,7 @@ Flow:
 ```
 Participants:
   USER      = Any authenticated user
-  CONV      = Conversation Interface (Design Plane)
+  CONV      = Conversation Interface (Exploration Environment)
   AGENT     = AI Knowledge Agent (LLM SDK + Skill + MCP)
   AUTH      = Auth Service
   CG        = Code Graph Service (Neo4j, GraphQL)

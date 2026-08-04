@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This module covers the **Execution Sandbox** — the isolated runtime container in which every Job executes. Per §7, each Job executes in an independent Sandbox that provides resource isolation, a security boundary, a warm pool for sub-100ms acquisition, multi-tenant isolation tiers, and a lightweight Design-Plane variant for sampled-data execution.
+This module covers the **Execution Sandbox** — the isolated runtime container in which every Job executes. Per §7, each Job executes in an independent Sandbox that provides resource isolation, a security boundary, a warm pool for sub-100ms acquisition, multi-tenant isolation tiers, and a lightweight Exploration-Environment variant for sampled-data execution.
 
 The Sandbox owns three core mechanisms that the rest of the engine depends on:
 - **§7.1 State-Passing Mechanism** — reference-based / shared-volume passing between Jobs (no data copying).
@@ -14,7 +14,7 @@ The Sandbox owns three core mechanisms that the rest of the engine depends on:
 ## Boundaries
 
 **In-scope:**
-- §7 Sandbox dimensions: Resource Isolation (CPU/Memory/Disk/Network), Security Boundary (FS layout `/workspace/` `/input/` `/output/` `/secrets/`, network whitelist, seccomp), Warm Pool (<100ms acquisition), Multi-Tenant Isolation (L1/L2/L3), Design Plane lightweight Sandbox.
+- §7 Sandbox dimensions: Resource Isolation (CPU/Memory/Disk/Network), Security Boundary (FS layout `/workspace/` `/input/` `/output/` `/secrets/`, network whitelist, seccomp), Warm Pool (<100ms acquisition), Multi-Tenant Isolation (L1/L2/L3), Exploration Environment lightweight Sandbox.
 - §7.1 State-Passing Mechanism — same-group symlink passing, cross-group Object Store (S3/MinIO) mediation, >1GB auto-degrade, immutability (`chmod 555`), cleanup.
 - §7.2 Python Execution Constraints — Import Whitelist, AST Static Analysis (commit-time), Mandatory Code Review, Sandbox Enforcement (seccomp), Timeout (30min Design / 4h Runtime).
 - §7.3 SQL Injection Defense — Parameterized Queries, SQL AST Validation, Variable Injection Sanitization, Sandbox Enforcement, Audit.
@@ -28,7 +28,7 @@ The Sandbox owns three core mechanisms that the rest of the engine depends on:
 **Upstream/downstream neighbors:**
 - *Provisioning*: Warm Pool pre-creates Sandboxes; Executor acquires one per Job (<100ms).
 - *Data flow*: upstream Job writes to `/output/<job_id>/` → downstream reads via `/input/<upstream_job_id>/` symlink (same group) or via Object Store presigned URL/IAM role (cross-group / >1GB).
-- *Enforcement*: AST scans run at commit time (Freeze Bridge); seccomp + DB-user permissions run at execution time (Sandbox runtime).
+- *Enforcement*: AST scans run at commit time (Freeze Pipeline); seccomp + DB-user permissions run at execution time (Sandbox runtime).
 
 ## Interfaces
 
@@ -42,7 +42,7 @@ Each Job executes in an independent Sandbox.
 | **Security Boundary**  | FS (`/workspace/` `/input/` `/output/` `/secrets/`), Network whitelist, seccomp |
 | **Warm Pool**          | Pre-created Sandboxes, <100ms acquisition                            |
 | **Multi-Tenant Isolation** | L1: Process isolation (SaaS) → L2: Node isolation → L3: Cluster isolation (Finance/Government) |
-| **Design Plane** | Lightweight Sandbox (DuckDB/Polars), sampled data                           |
+| **Exploration Environment** | Lightweight Sandbox (DuckDB/Polars), sampled data                           |
 
 ### §7.1 State-Passing Mechanism
 
@@ -73,7 +73,7 @@ Job A (transform)                Job B (transform, depends_on: A)
 - **Filesystem layout**: per-Job `/workspace/`, `/input/`, `/output/`, `/secrets/` directories; `/output/<job_id>/` is the canonical write location for same-group handoff.
 - **Object Store (S3/MinIO)**: used for cross-group handoff and for >1GB payloads (auto-degrade). Presigned URLs or IAM roles grant downstream read access.
 - **seccomp profile**: runtime enforcement layer that blocks network egress (except whitelisted endpoints), filesystem writes (except allowed directories), and process creation — even when static analysis passed.
-- **AST analyzer (commit-time)**: parses Python and SQL at commit time; rejecting code cannot enter the Freeze Bridge (see [`freeze-pipeline.md`](freeze-pipeline.md) §4).
+- **AST analyzer (commit-time)**: parses Python and SQL at commit time; rejecting code cannot enter the Freeze Pipeline (see [`freeze-pipeline.md`](freeze-pipeline.md) §4).
 - **Database user permissions**: defense-in-depth for SQL — SELECT-only on source schemas, limited INSERT/UPDATE on designated output schemas.
 - **Audit Trail** ([`platform-core`](../platform-core/)): receives every Python code-review approval record and every SQL block (original + rewritten) with execution trace.
 - **Incident Manager** ([`platform-core`](../platform-core/)): receives timeout-triggered incidents (Python Job SIGKILL, `wait` 72h timeout).
@@ -93,7 +93,7 @@ Job A (transform)                Job B (transform, depends_on: A)
 | --- | --- | --- |
 | Same-group ephemeral volume overflow (payload >1GB) | Volume full, write fails | Auto-degrade to Object Store passing (S3/MinIO) — upstream writes to Object Store, downstream reads via presigned URL/IAM role. |
 | Downstream attempts to write upstream `/output/` | Data corruption risk | Prevented by immutability — upstream `/output/` is `chmod 555` before downstream begins reading. |
-| Python code with forbidden import / `eval`/`exec`/`compile`/`__import__` / FS write outside `/output/` / network access | Code rejected | AST Static Analysis at commit time rejects the code; it cannot enter the Freeze Bridge. |
+| Python code with forbidden import / `eval`/`exec`/`compile`/`__import__` / FS write outside `/output/` / network access | Code rejected | AST Static Analysis at commit time rejects the code; it cannot enter the Freeze Pipeline. |
 | Python code with non-standard imports (no approval) | Blocked | Mandatory Code Review by Data Engineering Lead; approval record linked to Audit Trail before execution. |
 | Python code passes static analysis but violates at runtime | Sandbox escape attempt | seccomp profile blocks network egress (except whitelist), FS writes (except allowed dirs), and process creation at runtime. |
 | Python Job exceeds 30min (Design) / 4h (Runtime) | Hung Job | Timeout → SIGKILL → Incident created. |
@@ -110,10 +110,10 @@ Python transforms executing in the Sandbox are subject to the following mandator
 | Constraint                | Mechanism                                                                                                                                                                                                                                                                                          |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Import Whitelist**      | Only pre-vetted modules allowed: `polars`, `pandas`, `numpy`, `scipy`, `scikit-learn` (prediction/inference only, training forbidden), `statsmodels`, `datetime`, `python-dateutil`, `pytz`, `json`, `math`, `re`, `collections`, `itertools`, `functools`, `typing`. Tenant Data Owners may apply for additional modules via whitelist extension (requires audit approval) |
-| **AST Static Analysis**   | All Python code is parsed via AST at commit time: detects (a) forbidden imports, (b) `eval`/`exec`/`compile`/`__import__` calls, (c) filesystem writes (outside `/output/`), (d) network access (`socket`, `requests`, `urllib`). Violating code is rejected and cannot enter the Freeze Bridge. |
+| **AST Static Analysis**   | All Python code is parsed via AST at commit time: detects (a) forbidden imports, (b) `eval`/`exec`/`compile`/`__import__` calls, (c) filesystem writes (outside `/output/`), (d) network access (`socket`, `requests`, `urllib`). Violating code is rejected and cannot enter the Freeze Pipeline. |
 | **Mandatory Code Review** | Any Python code block containing non-standard imports requires manual approval by the Data Engineering Lead. Approval records are linked to the Audit Trail. |
 | **Sandbox Enforcement**   | Even if code passes static analysis, the Sandbox runtime blocks via seccomp profile: network egress (except whitelisted endpoints), filesystem writes (except allowed directories), and process creation. |
-| **Timeout**               | Python Job maximum execution time = 30min (Design Plane) / 4h (Runtime Plane). Timeout → SIGKILL → Incident. |
+| **Timeout**               | Python Job maximum execution time = 30min (Exploration Environment) / 4h (Production Environment). Timeout → SIGKILL → Incident. |
 
 ### §7.3 SQL Injection Defense
 
@@ -131,7 +131,7 @@ SQL transform blocks in Compute Spec YAML are a potential injection vector. All 
 
 - Warm Pool acquisition: **<100ms**.
 - Multi-tenant isolation tiers: **L1** Process (SaaS) → **L2** Node → **L3** Cluster (Finance/Government).
-- Python Job timeout: **30min** (Design Plane) / **4h** (Runtime Plane); timeout → SIGKILL → Incident.
+- Python Job timeout: **30min** (Exploration Environment) / **4h** (Production Environment); timeout → SIGKILL → Incident.
 - Large-payload auto-degrade threshold: **>1GB** → Object Store.
 - Network policy: **egress-only** (whitelist enforced by seccomp).
 
@@ -183,7 +183,7 @@ Python / SQL code block (in Compute Spec YAML)
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│ COMMIT-TIME (Freeze Bridge, §4)              │
+│ COMMIT-TIME (Freeze Pipeline, §4)              │
 │  • Python AST Static Analysis                │
 │    – forbidden imports?                      │
 │    – eval/exec/compile/__import__?           │
@@ -194,7 +194,7 @@ Python / SQL code block (in Compute Spec YAML)
 │    – parameterized ($1/:param_name)?         │
 │  • Mandatory Code Review (non-standard       │
 │    imports → Data Eng Lead approval → Audit) │
-│  REJECTED code cannot enter Freeze Bridge    │
+│  REJECTED code cannot enter Freeze Pipeline    │
 └──────────────────────┬──────────────────────┘
                        │ passes
                        ▼

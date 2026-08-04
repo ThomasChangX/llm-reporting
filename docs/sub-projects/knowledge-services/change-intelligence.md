@@ -33,8 +33,8 @@ The layer reasons over the Code Graph (impact/lineage) and the Knowledge Base (p
 | --- | --- | --- |
 | `change_intelligence.pre_change_report(freeze_or_pr) → report` | Freeze Pipeline, Reviewers | Auto-generated impact report (What & Why, Impact Graph, Data Impact Preview, Test Results + Approval Requirements) |
 | `change_intelligence.post_change_verification(merge) → report` | CI/CD, Reviewers | Auto-generated verification (Design vs Actual, updated DAG, Change Log + Related Resources, Cost & Performance Profile) |
-| `triage.run(health_check_results) → triaged_summary` | Intelligence Plane (automatic) | Read-only: dedup, merge, false-positive prediction, severity-routed proactive push |
-| `agent.query(nl_question, session_context) → answer` | Conversation Interface (Design Plane) | Read-only cross-environment query; RBAC-filtered; output is a "disposable consumable" |
+| `triage.run(health_check_results) → triaged_summary` | Cross-Environment Read-Only Mode (automatic) | Read-only: dedup, merge, false-positive prediction, severity-routed proactive push |
+| `agent.query(nl_question, session_context) → answer` | Conversation Interface (Exploration Environment) | Read-only cross-environment query; RBAC-filtered; output is a "disposable consumable" |
 
 ## Dependencies
 
@@ -82,7 +82,7 @@ severity=info    → Log only (no proactive push)
 
 ### §9.0 Agent Triage Layer (Alert Triage & Proactive Push)
 
-Located in the Intelligence Plane; runs automatically **after** Data Health Check results are produced and **before** users see them.
+Located in the Cross-Environment Read-Only Mode; runs automatically **after** Data Health Check results are produced and **before** users see them.
 
 **Core Responsibilities**: automatic triage, false-positive prediction, deduplication & merging, proactive summary push. All operations are read-only — configuration changes must go through the Remediation Gateway (L0–L3 tiered approval, see §12.2).
 

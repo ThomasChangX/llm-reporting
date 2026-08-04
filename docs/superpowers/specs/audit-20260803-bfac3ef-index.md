@@ -55,7 +55,7 @@
 | audit-20260803-bfac3ef-I-015-agent-loop-tool-hallucination.md | I-015 | open |
 | audit-20260803-bfac3ef-I-016-tco-completeness.md | I-016 | open |
 | audit-20260803-bfac3ef-I-017-iam-extra-permissions-keys.md | I-017 | open |
-| audit-2026083-bfac3ef-I-018-cost-circuit-breaker-modeling.md | I-018 | open |
+| audit-20260803-bfac3ef-I-018-cost-circuit-breaker-modeling.md | I-018 | open |
 | audit-20260803-bfac3ef-I-019-01facts-header-version.md | I-019 | open |
 | audit-20260803-bfac3ef-M-020-doc-hygiene-minor.md | M-020, M-021 | open |
 | audit-20260803-bfac3ef-M-022-cost-arithmetic.md | M-022 | open |

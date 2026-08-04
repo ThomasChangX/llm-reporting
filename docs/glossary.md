@@ -13,8 +13,8 @@
 | Production Environment | The deterministic, zero AI side-effect production execution environment of the unified Workflow Engine. LLM API egress is physically blocked at NetworkPolicy level; `llm_reasoning` capabilities beyond `read_analyze`/`suggest_plan` are rejected at Engine submission time. Includes Workflow Executor, Data Connectors, Output Renderer, Scheduler, Query Rewriter, and Incident Manager. Formerly called "Runtime Plane." |
 | Cross-Environment Read-Only Mode | The same Workflow Engine operating with write operations intercepted at Engine level. Queries read-replicas of both Exploration and Production environments; write attempts are rejected. Core constraint: AI outputs are temporary consumables — returned directly to the user, never persisted unless the user explicitly confirms through the Exploration Environment → Freeze Pipeline flow. Formerly called "Intelligence Plane." |
 | Compute Spec | Unified YAML-based computation definition covering Reporting/ETL/Adjustment/Reconciliation. 10 Job Types: source, transform, output, quality, workflow_ref, data_writer, decision, wait, materialize, llm_reasoning. |
-| Light Engine | Lightweight compute engine for the Design Plane: DuckDB (zero-config, sub-second startup) + Polars (high-performance DataFrames). Used for sample data and development/debugging. |
-| Heavy Engine | Production compute engine for the Runtime Plane: **Spark** (Post-MVP). Trino and Ray deferred to Phase 7+. |
+| Light Engine | Lightweight compute engine for the Exploration Environment: DuckDB (zero-config, sub-second startup) + Polars (high-performance DataFrames). Used for sample data and development/debugging. |
+| Heavy Engine | Production compute engine for the Production Environment: **Spark** (Post-MVP). Trino and Ray deferred to Phase 7+. |
 | Common Compute Subset | The minimal set of operations guaranteed to be portable between Light Engine and Heavy Engine. Workflows using only this subset can switch between engines seamlessly. |
 
 ## Knowledge Base

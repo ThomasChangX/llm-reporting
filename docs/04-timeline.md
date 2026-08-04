@@ -213,7 +213,7 @@ Probability of merge conflicts requiring Reviewer rework, by number of workers m
 
 ---
 
-### Phase 4: Freeze Bridge (Weeks 19–23)
+### Phase 4: Freeze Pipeline (Weeks 19–23)
 
 > **Status**: Structure defined; detailed task breakdown pending Phase 3 Design Artifact schema finalization.
 
@@ -255,13 +255,13 @@ Probability of merge conflicts requiring Reviewer rework, by number of workers m
 
 ### Phase 5: Runtime Plane (Weeks 24–28)
 
-> **Status**: Structure defined; detailed task breakdown pending Phase 4 Freeze Bridge stabilization.
+> **Status**: Structure defined; detailed task breakdown pending Phase 4 Freeze Pipeline stabilization.
 
 **Phase Objective**: Build the deterministic, zero-AI-side-effect production execution layer — Workflow Executor, Scheduler, Data Connectors, Output Renderer, Incident Manager, and Heavy Engine integration (Spark, post-MVP).
 
 | Milestone | Target Week | Deliverables | Dependencies |
 |-----------|-------------|-------------|--------------|
-| M5.1: Workflow Executor Core | W25 | DAG execution engine, Job Sandbox isolation (per FR26), State machine with retry/rollback, Immutable inter-job state passing | Phase 4: Freeze Bridge produces validated Specs to execute |
+| M5.1: Workflow Executor Core | W25 | DAG execution engine, Job Sandbox isolation (per FR26), State machine with retry/rollback, Immutable inter-job state passing | Phase 4: Freeze Pipeline produces validated Specs to execute |
 | M5.2: Scheduler | W25 | Cron/Event/Manual/API/Webhook triggers, Timezone-aware scheduling, Concurrency control (three-tier), Missed-execution compensation | M5.1 (executor is the target) |
 | M5.3: Data Connector Adapters (L1-L3) | W26 | File connectors (S3/SFTP/HDFS), DB connectors (JDBC/ODBC PG/MySQL/Oracle), API connectors (REST/GraphQL), Unified DataSource Interface | Phase 1: Integration Framework interface (FR15), ADR-0007 (Query Service) |
 | M5.4: Output Renderer | W26 | PDF/Excel/CSV/JSON/Parquet renderers, Email/Slack/Webhook delivery channels, Format System binding (FR24) | M5.1 (executor triggers output) |

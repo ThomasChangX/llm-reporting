@@ -48,7 +48,7 @@ Nodes represent system artifacts (Workflow, Job, DataSource, Format, KB Entry, B
 | Aspect | Specification |
 | --- | --- |
 | **Query Protocol** | GraphQL read interface; Cypher/Gremlin for deep graph traversals. All queries are parameterized and logged. |
-| **Write Triggers** | Event-sourced: Freeze Bridge `merge` → node/edge upsert; Runtime `execute` → status edges; KB `confirm` → cross-graph bridge edges. **No direct user writes** — all mutations flow through domain events. |
+| **Write Triggers** | Event-sourced: Freeze Pipeline `merge` → node/edge upsert; Runtime `execute` → status edges; KB `confirm` → cross-graph bridge edges. **No direct user writes** — all mutations flow through domain events. |
 | **RBAC Filtering** | Queries are transparently filtered by caller's entitlement context: **row-level** (tenant), **column-level** (PII fields), and **edge-level** (cross-tenant relationships denied). The graph never returns data the caller cannot see. |
 | **Cache Strategy** | Hot subgraph (active Workflows, recent KB) in Redis; full graph in Graph DB; read replicas for analytical queries. |
 | **Consistency** | Eventually consistent with the Relational DB (source of truth). Max staleness: **5 seconds for status edges**, **30 seconds for structural edges**. |
@@ -72,7 +72,7 @@ RBAC filtering is then applied inside the graph layer: row-level `WHERE tenant_i
 ## Dependencies
 
 - **PostgreSQL (source of truth)** — the Relational DB holds authoritative artifact metadata; the Code Graph is an eventually-consistent projection of it. During MVP, the graph itself is materialized via PG recursive CTE (see [ADR-0013](../../../adr/0013-kb-storage-strategy.md)).
-- **Event bus** — Freeze Bridge `merge`, Runtime `execute`, and KB `confirm` events are the only write triggers. The graph cannot be mutated outside the event-sourced path.
+- **Event bus** — Freeze Pipeline `merge`, Runtime `execute`, and KB `confirm` events are the only write triggers. The graph cannot be mutated outside the event-sourced path.
 - **Redis** — hot-subgraph cache for active Workflows and recent KB entries.
 - **KB Linkage Weaving Layer** — produces the cross-graph bridge edges (`DEFINED_IN`, `IS`, `MENTIONS_ENTITY`, `DERIVED_FROM`) that connect KB nodes to Code Graph nodes (see §10.3 in [`knowledge-base.md`](knowledge-base.md)).
 - **Auth Service** — supplies the caller's entitlement context that drives RBAC filtering.
@@ -128,7 +128,7 @@ Natural-language queries over the graph are served by the AI Knowledge Agent (S0
 ## Key Flows
 
 1. **Read (impact analysis / lineage).** Caller issues a GraphQL or Cypher query → Auth Service attaches the entitlement context → graph layer applies row/column/edge RBAC filters → hot-subgraph cache is checked, then full Graph DB, then read replicas for analytical traversals → filtered subgraph returned. See the shared sequence diagram §21.3 AI Agent Query with Permission Gating at [`../_shared/sequence-diagrams.md`](../_shared/sequence-diagrams.md) for the full participant flow (`AGENT → CG` with RBAC filtering at steps 7–9).
-2. **Write (event-sourced).** A domain event fires — Freeze Bridge `merge` upserts structural nodes/edges, Runtime `execute` writes status edges, KB `confirm` writes cross-graph bridge edges → the graph applies the upsert → cache is invalidated → readers converge within the 5 s/30 s staleness bounds.
+2. **Write (event-sourced).** A domain event fires — Freeze Pipeline `merge` upserts structural nodes/edges, Runtime `execute` writes status edges, KB `confirm` writes cross-graph bridge edges → the graph applies the upsert → cache is invalidated → readers converge within the 5 s/30 s staleness bounds.
 3. **Bridge-edge creation.** KB ingestion produces bridge edges (`KB.GlossaryEntry —DEFINED_IN→ CodeGraph.Job`, `KB.DataAsset —IS→ CodeGraph.DataSource`, `KB.Chunk —MENTIONS_ENTITY→ KB.GlossaryEntry`, `KB.Chunk —DERIVED_FROM→ CodeGraph.Spec`). These are L2-confirmed where they assert audit-impacting lineage (see §10.3 in [`knowledge-base.md`](knowledge-base.md)).
 4. **Change Intelligence consumption.** Pre-Change Impact Reports and Post-Change Verification traverse the graph to compute upstream/downstream/indirect impact scope (see [`change-intelligence.md`](change-intelligence.md)).
 
@@ -138,7 +138,7 @@ Natural-language queries over the graph are served by the AI Knowledge Agent (S0
 - **§2 panoramic diagram** — [`docs/03-architecture.md`](../../03-architecture.md) (lines 92–97): Code Graph's position atop the KB storage layer.
 - **§23.6.2 Code Graph Relation Edge Catalog** — [`docs/03-architecture.md`](../../03-architecture.md): the full 15+ edge-type catalog.
 - **§23.6.3 Natural Language Query Examples** — [`docs/03-architecture.md`](../../03-architecture.md): NL-to-Cypher translation patterns.
-- **ADR-012** — Code Graph as Single Source of Traceability Truth (referenced from §23.6.2).
+- **§23 inline decision (unnumbered)** — Code Graph as Single Source of Traceability Truth (referenced from §23.6.2 in the original architecture doc). This is not an `adr/NNNN-*.md` file; it's a design principle stated within §23.
 - [ADR-0013](../../../adr/0013-kb-storage-strategy.md) — KB Storage: PG-First with Interface Abstraction (GraphStore MVP = PG recursive CTE).
 - Shared sequence diagram §21.3 — [`../_shared/sequence-diagrams.md`](../_shared/sequence-diagrams.md): AI Agent Query with Permission Gating.
 - Cross-references: [`knowledge-base.md`](knowledge-base.md) (KB domains and bridge edges), [`change-intelligence.md`](change-intelligence.md) (graph-driven impact analysis).

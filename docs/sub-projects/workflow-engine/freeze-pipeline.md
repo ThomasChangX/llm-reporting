@@ -32,7 +32,7 @@ This module owns:
 - Notification, Audit Trail, Incident Manager, Release Manager → [`platform-core`](../platform-core/).
 
 **Upstream/downstream neighbors:**
-- *Input*: Design Artifact (YAML) from the Design Plane, carrying `fuzzy_nodes` and `llm_reasoning` Jobs.
+- *Input*: Design Artifact (YAML) from the Exploration Environment, carrying `fuzzy_nodes` and `llm_reasoning` Jobs.
 - *Output*: frozen Workflow Definition, deployed through staged canary rollout to Production.
 
 ## Interfaces
@@ -120,7 +120,7 @@ Staged rollout is governed by explicit canary gating criteria. The system automa
 
 | Failure | Impact | Recovery |
 | --- | --- | --- |
-| Artifact with unresolved `fuzzy_nodes` | Cannot freeze | Freeze Bridge rejects any artifact with unresolved fuzzy nodes (see [`design-artifact.md`](design-artifact.md) §3.3). All fuzzy nodes must be resolved before proceeding (Step 4 — Mandatory). |
+| Artifact with unresolved `fuzzy_nodes` | Cannot freeze | Freeze Pipeline rejects any artifact with unresolved fuzzy nodes (see [`design-artifact.md`](design-artifact.md) §3.3). All fuzzy nodes must be resolved before proceeding (Step 4 — Mandatory). |
 | Artifact with `overall` confidence `< 0.8` | Insufficient review depth | Mandates full peer review (per §3.3 `confidence_summary` semantics). |
 | Validation failure (schema / DQ / logic / cycle / type / timeout / Python AST / SQL AST / engine compat) | Spec invalid | `ValidationReport` returned; loop back to user resolution (step 9 of §21.1). |
 | Test Runner failure (snapshot diff / regression) | Spec behavior wrong | Render test failure with diff; loop back to user resolution. |
@@ -150,7 +150,7 @@ Staged rollout is governed by explicit canary gating criteria. The system automa
 
 ### §4.3 Fuzzy Node Detection & Resolution Algorithm
 
-> The core algorithm of Freeze Bridge — how to transform AI-generated fuzzy design drafts into deterministic scripts.
+> The core algorithm of Freeze Pipeline — how to transform AI-generated fuzzy design drafts into deterministic scripts.
 
 #### §4.3.1 Fuzzy Node Types (Fuzzy Node Classification)
 

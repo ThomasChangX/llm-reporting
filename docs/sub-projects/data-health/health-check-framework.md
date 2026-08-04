@@ -13,7 +13,7 @@ The framework is responsible for:
 - Declaring data-quality, anomaly, and reconciliation checks via one common configuration schema.
 - Executing those checks on a shared scheduling substrate (`auto` / `cron` / `manual` / `on_recon_complete`).
 - Producing a unified output: annotated reports, alert routing, and incident creation.
-- Powering an Intelligence-Plane Agent Triage Layer that performs read-only diagnosis, dedup/merge, confidence prediction, and remediation guidance.
+- Powering an Cross-Environment-Read-Only-Mode Agent Triage Layer that performs read-only diagnosis, dedup/merge, confidence prediction, and remediation guidance.
 - Routing any user- or agent-initiated *modification* operation through a tiered (L0–L3) Remediation Gateway so that financial and production-affecting changes always require human approval.
 - Providing a cold-start path (Agent Onboarding) that bootstraps a tenant's DQ rules and anomaly checks from its own schema — strictly tenant-isolated.
 
@@ -24,7 +24,7 @@ The framework is responsible for:
 - Definition, scheduling, execution, and output of `rule`, `anomaly`, and `recon` checks.
 - The unified configuration schema (`data_health` YAML profile) and its shared/common config items.
 - The Recon Execution Engine (LOAD → HASH → JOIN → COMPARE → CLASSIFY) for `type: recon`.
-- AI-assisted Break Analysis for unmatched/partial recon results (Intelligence Plane, read-only suggestions).
+- AI-assisted Break Analysis for unmatched/partial recon results (Cross-Environment Read-Only Mode, read-only suggestions).
 - The Agent Triage Layer that post-processes execution results by severity (`error` / `warning` / `info`).
 - The Layered Remediation Gateway (L0–L3) that gates any modification operation on health-check outputs.
 - The DQ Gate blocking points for `rule`/`anomaly` types across the pipeline lifecycle.
@@ -35,7 +35,7 @@ The framework is responsible for:
 **Out of scope**
 
 - The underlying Report publication pipeline itself (health checks *annotate* published reports but do not own publication).
-- The Compute Spec / Freeze Bridge change-management process (referenced as a downstream consumer for L3 operations — see §9).
+- The Compute Spec / Freeze Pipeline change-management process (referenced as a downstream consumer for L3 operations — see §9).
 - Tenant identity, auth, and RBAC (consumed; not redefined here).
 - Cross-tenant model learning or any global baseline — **explicitly forbidden** by the isolation constraint.
 
@@ -126,9 +126,9 @@ All check types emit through the **Unified Output Pipeline** (see Key Flows), wh
 ## Dependencies
 
 - **Connectors / Data Engines** — `recon` checks depend on the Light/Heavy Engine to LOAD Source A and Source B (see §3.4).
-- **Compute Spec & Freeze Bridge** — L3 remediation operations that change Workflows/Specs enter the Freeze Bridge (see §9). L0–L2 operations do not.
+- **Compute Spec & Freeze Pipeline** — L3 remediation operations that change Workflows/Specs enter the Freeze Pipeline (see §9). L0–L2 operations do not.
 - **Incident Manager & Alert Manager** — consumers of the unified output.
-- **Intelligence Plane / Agents** — S07 IncidentDiagnostician is auto-triggered on `severity=error`. The Agent Triage Layer depends on the agent runtime described in §22A / §22B.
+- **Cross-Environment Read-Only Mode / Agents** — S07 IncidentDiagnostician is auto-triggered on `severity=error`. The Agent Triage Layer depends on the agent runtime described in §22A / §22B.
 - **Business Glossary / KB** — Break Analysis may surface KB / Mapping Registry update requests.
 - **Permission → Validation → Approval pipeline** — required for any Break Analysis follow-up that modifies financial data (Adjustment Form path).
 - **Tenant Schema & Data Dictionary** — input to Agent Onboarding inference and to Day-0 rule auto-inference.
@@ -185,9 +185,9 @@ Phase 5: CLASSIFY → Three-way triage:
                                           └──────────────────────┘
 ```
 
-### Break Analysis (AI-Assisted, Intelligence Plane)
+### Break Analysis (AI-Assisted, Cross-Environment Read-Only Mode)
 
-For UNMATCHED / PARTIAL classification discrepancies, the Intelligence Plane infers causes and suggests resolution paths.
+For UNMATCHED / PARTIAL classification discrepancies, the Cross-Environment Read-Only Mode infers causes and suggests resolution paths.
 
 **Core Principle**: Any operation modifying financial data, regardless of amount, must go through the Permission → Validation → Approval process. **There is no Auto-write-off.**
 
@@ -204,13 +204,13 @@ For UNMATCHED / PARTIAL classification discrepancies, the Intelligence Plane inf
 Checks of `type: rule` and `type: anomaly` can be inserted at multiple execution points along the pipeline:
 
 ```
-Source Register → Transform Step → Freeze Bridge Validation →
+Source Register → Transform Step → Freeze Pipeline Validation →
 Runtime Pre-Exec → Runtime Post-Exec → Periodic Patrol
 ```
 
 | Execution Point | Trigger | Behavior when severity=error |
 |---|---|---|
-| Freeze Bridge Validation | Every Freeze PR | Block deployment (must fix and resubmit) |
+| Freeze Pipeline Validation | Every Freeze PR | Block deployment (must fix and resubmit) |
 | Runtime Pre-Exec | Before Workflow execution | Block execution (prevent bad data entering downstream) |
 | Runtime Post-Exec | After Workflow execution / Report output | Do not block publishing, but create Incident + annotate Report |
 | Periodic Patrol | Cron scheduled | Create Incident (does not affect published Reports) |
@@ -236,13 +236,13 @@ Anomaly baselines are built using **only the tenant's own data**. There is no cr
 
 ### 1. Unified Output Pipeline (with Agent Triage Layer)
 
-Every check execution — regardless of type — feeds into a single pipeline that first passes through the Agent Triage Layer (Intelligence Plane, read-only), then fans out by severity.
+Every check execution — regardless of type — feeds into a single pipeline that first passes through the Agent Triage Layer (Cross-Environment Read-Only Mode, read-only), then fans out by severity.
 
 ```
 Data Health Check Execution (any type)
     │
     ▼
-Agent Triage Layer (Intelligence Plane — read-only analysis)
+Agent Triage Layer (Cross-Environment Read-Only Mode — read-only analysis)
     │
     ├── severity=error
     │    └── Auto-trigger S07 IncidentDiagnostician
@@ -289,7 +289,7 @@ Any modification operations by users (or proposed by the Agent) on Health Check 
 | **L2 — Medium Risk** | Affects detection logic | Modify DQ Rule threshold, KB entry update, materialization strategy adjustment | Single Approver + DQ Gate auto-validation | Full audit trail |
 | **L3 — High Risk** | Affects data/financials | Adjustment (modify financial data), production Workflow changes, KB definition changes | Dual approval + complete Impact Report + Canary gradual rollout | SOX/HIPAA-grade audit |
 
-**L3 & Freeze Bridge Relationship**: After L3 operations pass Remediation Gateway approval → enter Freeze Bridge (if Workflow/Spec change) or execute directly (if one-time data modification). L0–L2 operations do not pass through Freeze Bridge — they are not within Compute Spec change scope.
+**L3 & Freeze Pipeline Relationship**: After L3 operations pass Remediation Gateway approval → enter Freeze Pipeline (if Workflow/Spec change) or execute directly (if one-time data modification). L0–L2 operations do not pass through Freeze Pipeline — they are not within Compute Spec change scope.
 
 **Agent Triage Constraint**: All Triage operations are read-only analysis — push summaries, suggest actions, predict confidence. Any operation modifying configuration or data must pass through human confirmation via the Remediation Gateway.
 
@@ -327,7 +327,7 @@ On a new tenant's first login → auto-trigger the Agent Onboarding Interview (s
 
 - **Source**: §12.2 of [`docs/03-architecture.md`](../../03-architecture.md) — Data Health Check Framework (FR18, FR19).
 - [ADR-0014 — Unified Data Health Check Framework](../../../adr/0014-data-health-check-framework.md): establishes the unified `rule` / `anomaly` / `recon` configuration schema and shared scheduling → output → alerting pipeline.
-- [ADR-0015 — Agent Triage & Layered Remediation Gateway](../../../adr/0015-agent-triage-remediation-gateway.md): establishes the Intelligence-Plane Agent Triage Layer (read-only) and the L0–L3 tiered approval gateway that gates all modification operations.
-- **Cross-references in source**: §9 (Compute Spec / Freeze Bridge), §3.4 (Light/Heavy Engine), §22A / §22B (Intelligence Plane / Agents), §22E Scenario 7 (Agent Onboarding Interview).
+- [ADR-0015 — Agent Triage & Layered Remediation Gateway](../../../adr/0015-agent-triage-remediation-gateway.md): establishes the Cross-Environment-Read-Only-Mode Agent Triage Layer (read-only) and the L0–L3 tiered approval gateway that gates all modification operations.
+- **Cross-references in source**: §9 (Compute Spec / Freeze Pipeline), §3.4 (Light/Heavy Engine), §22A / §22B (Cross-Environment Read-Only Mode / Agents), §22E Scenario 7 (Agent Onboarding Interview).
 - [`docs/glossary.md`](../../glossary.md): terminology for DQ dimensions, Incident, Profile, Recon, Break Analysis classifications.
 - Sub-project entry point: [`data-health/README.md`](README.md).

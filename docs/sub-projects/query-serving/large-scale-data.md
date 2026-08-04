@@ -93,7 +93,7 @@ This module does not expose new external endpoints; it configures and tunes the 
 | Full re-scan of TB-scale table (no incremental) | Unacceptable runtime / resource blowout | §5.4.3 incremental modes — watermark/CDC/partition incremental avoid full scans; Watermark State Store is rollback-safe (failed run does not advance watermark). |
 | Late-arriving data past watermark | Missing rows in incremental result | `lookback_window` (e.g. 3 days) + `late_arrival_policy` (upsert/skip/alert). |
 | Stale table statistics → wrong JOIN strategy | Suboptimal / pathological query plan | §5.4.5 staleness detection: `last_analyzed > 24h AND row_count_delta > 20%` → trigger re-collection (ANALYZE/pg_stats/Iceberg manifest). |
-| Query plan guardrail breach | Unbounded scan / Cartesian product | §5.4.5 protection thresholds: >100M rows WARN, >10GB WARN, >5-table JOIN WARN, >30min REJECT (Design Plane), no equi-JOIN REJECT. |
+| Query plan guardrail breach | Unbounded scan / Cartesian product | §5.4.5 protection thresholds: >100M rows WARN, >10GB WARN, >5-table JOIN WARN, >30min REJECT (Exploration Environment), no equi-JOIN REJECT. |
 | Cross-source federated query exceeds 10GB | Light Engine overload | Federated decision tree: ≤10GB → DuckDB; >10GB → Spark; high-frequency → build materialized view. |
 | Partition bloat (traditional RDBMS) | Pruning effectiveness degrades | `pg_partman` auto-management; Metadata Manager monitors partition bloat (§5.4.2). |
 | Pushdown guardrail breach | Unbounded transfer | Inherits `pushdown_policy` from [`query-service.md`](query-service.md) §5.3.3 (`max_rows_transferred` / `max_bytes_transferred`). |
@@ -105,7 +105,7 @@ This module does not expose new external endpoints; it configures and tunes the 
 - **Incremental freshness**: Watermark Incremental T+run; CDC Incremental near-real-time via Debezium+Kafka; Partition Incremental on new-partition arrival.
 - **Materialization freshness** (§5.4.4 strategy table): Full Refresh T+1; Incremental Refresh T+10min; Real-Time MV T+1min; Lazy Materialization slow-first-then-instant.
 - **CBO statistics cadence**: Row Count every 6h or >10% data change; Column NDV / NULL Ratio every 24h; Column Histogram weekly; File-Level Stats auto on write.
-- **Query plan protection thresholds**: scan >100M rows WARN; scan >10GB WARN; JOIN depth >5 WARN; estimated time >30min REJECT (Design Plane); Cartesian product REJECT.
+- **Query plan protection thresholds**: scan >100M rows WARN; scan >10GB WARN; JOIN depth >5 WARN; estimated time >30min REJECT (Exploration Environment); Cartesian product REJECT.
 - **Cost model default constants** (tunable per deployment): `cpu_tuple_cost=0.01ms`, `seq_page_cost=0.001ms` (8KB page), `random_page_cost=0.004ms`, `network_transfer_cost=0.0001ms/KB` (intra-region), `cross_region_penalty=5.0×`, `complexity_factor` 1.0/2.0/3.0/5.0 for filter/aggregate/window/UDF.
 - **Federated transfer budget**: ≤10GB → DuckDB (Light Engine); >10GB → Spark (Heavy Engine); subject to `max_rows_transferred` (see [`query-service.md`](query-service.md) §5.3.3).
 
@@ -312,7 +312,7 @@ Query Generator:
 | **Estimated Scan Rows**        | > 100M rows            | [WARN] + suggest adding filter conditions or using materialized view |
 | **Estimated Scan Data Volume** | > 10GB                 | [WARN] + suggest using sampling or incremental processing          |
 | **JOIN Depth**                 | > 5 tables             | [WARN] + suggest splitting into multiple steps or using materialized intermediate tables |
-| **Estimated Execution Time**   | > 30min                | [REJECT] Design Plane preview execution (only allow Runtime Plane execution) |
+| **Estimated Execution Time**   | > 30min                | [REJECT] Exploration Environment preview execution (only allow Production Environment execution) |
 | **Cartesian Product Detection**| No equi-JOIN condition | [REJECT] execution (almost certainly a query error or missing Schema relationship) |
 
 **Cost Model Formula** (referencing PostgreSQL Cost Model + Spark CBO):

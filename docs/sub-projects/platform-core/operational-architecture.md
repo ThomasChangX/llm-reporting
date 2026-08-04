@@ -78,9 +78,9 @@ The Operational Architecture defines how the platform is run: backup and recover
 
 | Strategy | Scope | Rollback Trigger |
 | --- | --- | --- |
-| **Blue-Green Deployment** | Stateless services (Design Plane, Freeze Bridge, Query Service) | Error rate > baseline + 5% OR p95 latency > baseline × 2 |
+| **Blue-Green Deployment** | Stateless services (Exploration Environment, Freeze Pipeline, Query Service) | Error rate > baseline + 5% OR p95 latency > baseline × 2 |
 | **Rolling Update** | Stateful services (KB API, Code Graph API) | Health check failure on >10% of new pods |
-| **Canary (10%→50%→100%)** | Runtime Plane Executor, Query Rewriter (critical path) | DQ score decrease >1% OR workflow failure rate increase >0.1% |
+| **Canary (10%→50%→100%)** | Production Environment Executor, Query Rewriter (critical path) | DQ score decrease >1% OR workflow failure rate increase >0.1% |
 | **Recreate** | Database schema changes, Kafka topic changes | Migration dry-run passed in CI (precondition) |
 
 ### §24.7 Capacity Planning Model
@@ -90,7 +90,7 @@ The Operational Architecture defines how the platform is run: backup and recover
 | **Tenant Growth** | Tenants/month | Linear regression on pipeline + step-function for enterprise deals |
 | **Data Volume Growth** | GB/month | Per-tenant avg × tenant count + per-enterprise-tenant bump (50GB) |
 | **Query Throughput** | Queries/sec | NL queries ∝ active users; scheduled workflows ∝ tenant count |
-| **LLM Token Consumption** | Tokens/month | Design Plane active hours × tokens/hr + Agent queries × tokens/query |
+| **LLM Token Consumption** | Tokens/month | Exploration Environment active hours × tokens/hr + Agent queries × tokens/query |
 | **Storage Growth** | TB/month | Data Volume + Backup retention (30d × daily snapshots) + Log retention |
 
 **Scaling Triggers**: Compute >70% node utilization → add 1 node; Storage >80% → add 1TB; LLM quota >80% → alert + budget review.

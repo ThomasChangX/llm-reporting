@@ -30,7 +30,7 @@ Every scenario below is preserved verbatim from the source so the original step 
 - The 7-layer security defense applied at every tool boundary → [`agent-security.md`](agent-security.md) (§22D).
 - The dual-mode Planner-Executor-Responder pipeline, Evidence Packet, and Permission Gate mechanics → [`dual-mode-orchestration.md`](dual-mode-orchestration.md) (§22A).
 - The Verified Path definitions (VP-001 through VP-006), Saga compensation, state machine, and the Exploration fallback table → [`verified-path-and-governance.md`](verified-path-and-governance.md) (§22H).
-- Freeze Bridge full flow (referenced by Scenario 1) → [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md) (§4).
+- Freeze Pipeline full flow (referenced by Scenario 1) → [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md) (§4).
 - The Recon Workflow deterministic runtime (referenced by Scenario 5) → [`../workflow-engine/compute-spec.md`](../workflow-engine/compute-spec.md) (§6) and [`../data-health/health-check-framework.md`](../data-health/health-check-framework.md).
 - KB storage / Business Glossary / Mapping Registry → [`../knowledge-services/knowledge-base.md`](../knowledge-services/knowledge-base.md).
 - Code Graph lineage queries referenced throughout → [`../knowledge-services/code-graph.md`](../knowledge-services/code-graph.md).
@@ -58,7 +58,7 @@ Each scenario is entered through the Agent SDK's Planner-Executor-Responder pipe
 - **MCP server catalog (§22C)** — Scenarios invoke MCP-04 (pg-query), MCP-05 (log-search), MCP-06 (git-diff), MCP-07 (template search), MCP-09 (incident lookup), MCP-13 (static-analysis + data-profile), MCP-17 (external-ticketing). See [`mcp-catalog.md`](mcp-catalog.md).
 - **Code Graph (§2.1)** — S03 CodeGraphQuery drives lineage/impact in Scenarios 2, 3, 4, 6. See [`../knowledge-services/code-graph.md`](../knowledge-services/code-graph.md).
 - **Knowledge Base** — S02 KBRetriever supplies business definitions, historical patterns, and Mapping Registry in Scenarios 1, 3, 5, 6, 7. See [`../knowledge-services/knowledge-base.md`](../knowledge-services/knowledge-base.md).
-- **Unified Workflow Engine (§6, ADR-0025)** — Scenario 5 triggers the deterministic Recon Workflow runtime; Scenario 1 hands the frozen Spec to the Freeze Bridge. See [`../workflow-engine/compute-spec.md`](../workflow-engine/compute-spec.md) and [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md).
+- **Unified Workflow Engine (§6, ADR-0025)** — Scenario 5 triggers the deterministic Recon Workflow runtime; Scenario 1 hands the frozen Spec to the Freeze Pipeline. See [`../workflow-engine/compute-spec.md`](../workflow-engine/compute-spec.md) and [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md).
 - **Data Health Check Framework (§13, ADR-0014)** — Scenario 7's auto-inferred DQ Rules and anomaly detection are authored here. See [`../data-health/health-check-framework.md`](../data-health/health-check-framework.md).
 - **External ticketing (MCP-17)** — Scenario 6 pushes the BRD to Jira. See [`mcp-catalog.md`](mcp-catalog.md).
 - **Tenant isolation (§22F)** — Scenario 7 explicitly relies on strict per-tenant isolation; all inference uses only the tenant's own Schema. See [`verified-path-and-governance.md`](verified-path-and-governance.md).
@@ -83,7 +83,7 @@ The scenarios are illustrative flows rather than persistent entities, but they p
 
 | Failure | Impact | Recovery |
 | --- | --- | --- |
-| **Fuzzy node unresolved (Scenario 1)** | Spec cannot be frozen; ambiguous authoritative source | SpecGenerator marks `fuzzy_nodes`; user review round resolves each (Scenario 1 confirms `erp_finance.monthly_sales`). Freeze Bridge rejects any Spec with unresolved fuzzy nodes — see [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md) §4. |
+| **Fuzzy node unresolved (Scenario 1)** | Spec cannot be frozen; ambiguous authoritative source | SpecGenerator marks `fuzzy_nodes`; user review round resolves each (Scenario 1 confirms `erp_finance.monthly_sales`). Freeze Pipeline rejects any Spec with unresolved fuzzy nodes — see [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md) §4. |
 | **Diagnosis needs more context (Scenario 2)** | Round 1 evidence insufficient to confirm root cause | ReAct loop: the Agent observes the gap and launches Round 2 (upstream dependency query) before synthesizing in Round 3. Bounded by the Loop Detection circuit breaker in [`verified-path-and-governance.md`](verified-path-and-governance.md) §22K.3. |
 | **Code review blocking finding (Scenario 4)** | PR cannot deploy (e.g. `statistics` import not in allowlist) | CodeReviewer emits `🔴 BLOCKING` + `REQUEST_CHANGES` with concrete remediation (replace with allowlisted `numpy`, add `PARTITION BY`, add unit tests). Deploy is gated until resolved. |
 | **Recon UNKNOWN classification (Scenario 5)** | 1 item cannot be auto-classified | Escalated to Data Owner; a BRD may be created to track the unknown issue (Scenario 5 follow-up menu). All financial operations follow `Permission → Validation → Approval → Trigger ETL` — no auto-write-off. |
@@ -150,8 +150,8 @@ User: "Help me create a monthly revenue report, broken down by region and produc
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ User: [Freeze] → Freeze Bridge takes over                         │
-│     See Section 4 for full Freeze Bridge flow                   │
+│ User: [Freeze] → Freeze Pipeline takes over                         │
+│     See Section 4 for full Freeze Pipeline flow                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -352,7 +352,7 @@ User: "Help me reconcile March ERP General Ledger against the bank statement"
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ S09: ReconBreakAnalyzer (Intelligence Plane, parallel)              │
+│ S09: ReconBreakAnalyzer (Cross-Environment Read-Only Mode, parallel)              │
 │                                                                 │
 │  ┌───────────────────────────────────────────────────────┐     │
 │  │ S02 (KBRetriever): Historical Recon records + common break patterns      │     │
@@ -422,7 +422,7 @@ User sees annotation in Report: ⚠️ Line 3 MoM +31.2% (threshold: 15%)
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ Parallel Queries (Intelligence Plane)                                    │
+│ Parallel Queries (Cross-Environment Read-Only Mode)                                    │
 │                                                                 │
 │  ┌───────────────────────────────────────────────────────┐     │
 │  │ S03 (CodeGraphQuery): Full data lineage of Line 3           │     │
@@ -628,7 +628,7 @@ Tenant first login → auto-trigger Onboarding Agent
 - **Original section**: §22E (Agent Workflow Composition — Skill Chaining) of [`docs/03-architecture.md`](../../03-architecture.md) (lines 3627–4149). All seven scenarios and the Anomaly Detection Learning Period state machine are preserved verbatim above.
 - **agent-platform docs**: [`dual-mode-orchestration.md`](dual-mode-orchestration.md) (§22A — Planner-Executor-Responder pipeline, Evidence Packet, Permission Gate), [`skill-catalog.md`](skill-catalog.md) (§22B — Skills S01–S18), [`mcp-catalog.md`](mcp-catalog.md) (§22C — MCP servers), [`agent-security.md`](agent-security.md) (§22D — 7-layer defense), [`verified-path-and-governance.md`](verified-path-and-governance.md) (§22F–§22H, §22K–§22M — VP catalog, tenant isolation, cost governance, concurrency, capability discovery).
 - **Shared sequence diagram**: [`../_shared/sequence-diagrams.md`](../_shared/sequence-diagrams.md) §21.3 AI Agent Query with Permission Gating — the canonical participant flow underpinning every scenario's tool invocations.
-- **Cross-sub-project references**: [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md) (§4 — Freeze Bridge, referenced by Scenario 1), [`../workflow-engine/compute-spec.md`](../workflow-engine/compute-spec.md) (§6 — Recon Workflow runtime, referenced by Scenario 5), [`../data-health/health-check-framework.md`](../data-health/health-check-framework.md) (§13 — DQ Rules + anomaly detection authored in Scenario 7), [`../knowledge-services/code-graph.md`](../knowledge-services/code-graph.md) (§2.1 — lineage queries in Scenarios 2, 3, 4, 6), [`../knowledge-services/knowledge-base.md`](../knowledge-services/knowledge-base.md) (Business Glossary, Mapping Registry, Data Catalog).
+- **Cross-sub-project references**: [`../workflow-engine/freeze-pipeline.md`](../workflow-engine/freeze-pipeline.md) (§4 — Freeze Pipeline, referenced by Scenario 1), [`../workflow-engine/compute-spec.md`](../workflow-engine/compute-spec.md) (§6 — Recon Workflow runtime, referenced by Scenario 5), [`../data-health/health-check-framework.md`](../data-health/health-check-framework.md) (§13 — DQ Rules + anomaly detection authored in Scenario 7), [`../knowledge-services/code-graph.md`](../knowledge-services/code-graph.md) (§2.1 — lineage queries in Scenarios 2, 3, 4, 6), [`../knowledge-services/knowledge-base.md`](../knowledge-services/knowledge-base.md) (Business Glossary, Mapping Registry, Data Catalog).
 - **ADRs** ([index](../../adr-index.md)): [ADR-0016](../../../adr/0016-dual-mode-agent-orchestration.md) (Dual-Mode — Exploration vs Verified Path), [ADR-0014](../../../adr/0014-data-health-check-framework.md) (Data Health Check Framework — Scenario 7 auto-inference and learning period), [ADR-0025](../../../adr/0025-unified-workflow-engine.md) (Unified Workflow Engine — Recon runtime).
 - **Glossary** ([../../glossary.md](../../glossary.md)): Dual-Mode Orchestration, Verified Path, Learning Period, Skill, MCP, Evidence Packet.
-- **Cross-references retained from source**: §4 (Freeze Bridge full flow, Scenario 1), §3.3 (Design Artifact + fuzzy nodes, Scenario 1), §13 (Data Health Check Framework, Scenario 7).
+- **Cross-references retained from source**: §4 (Freeze Pipeline full flow, Scenario 1), §3.3 (Design Artifact + fuzzy nodes, Scenario 1), §13 (Data Health Check Framework, Scenario 7).

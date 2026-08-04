@@ -258,7 +258,7 @@ This module owns:
 | **Orchestration missing prerequisite** | Skill called before its prerequisite | `prerequisites` metadata checked by the runtime; execution rejected if missing (§22B metadata) | Reject execution; surface missing prerequisite to caller |
 | **Skill `fallback` triggered** | Skill or model fails mid-step | `fallback` metadata declares degradation strategy | Auto-switch per the Skill's `fallback` policy |
 | **S02 returns irrelevant KB context** | Low-quality suggestions | S02 `source_confidence` / `score` below threshold; S05 `confidence_summary.overall < 0.8` | Re-rank / re-query; prompt deep review (S05) |
-| **S05 produces unresolved `fuzzy_nodes`** | Non-deterministic Spec | `confidence_summary.unresolved > 0` | Freeze Bridge rejects; mandatory human resolution before freeze (see `workflow-engine` `freeze-pipeline.md`) |
+| **S05 produces unresolved `fuzzy_nodes`** | Non-deterministic Spec | `confidence_summary.unresolved > 0` | Freeze Pipeline rejects; mandatory human resolution before freeze (see `workflow-engine` `freeze-pipeline.md`) |
 | **S07 root-cause confidence low** | Misdiagnosis | `diagnosis.confidence` below threshold; related-incidents similarity low | Mark low-confidence; surface contributing factors + suggested_fix.requires_approval |
 | **S08 DQ rule high false-positive rate** | Noisy alerts | ≥3 false-positive flags / 7 days | Suggest severity downgrade / threshold adjust / exclusion rule → L1 confirmation |
 | **S10 extracted fact conflicts with existing KB** | KB inconsistency | `conflicts_with_existing_kb` non-empty | Flag for human review; draft only (takes effect after confirm) |
